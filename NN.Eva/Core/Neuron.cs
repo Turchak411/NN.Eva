@@ -130,15 +130,15 @@ namespace NN.Eva.Core
             fileManager.SaveMemory(layerNumber, neuronNumber, _weights, memoryPath);
         }
 
-        public void SaveMemoryToDB(Guid layerId, int number, DBInserter dbInserter)
+        public void SaveMemoryToDB(Guid layerId, Guid userId, int number, DBInserter dbInserter)
         {
             // Saving networks info:
-            dbInserter.InsertNeuron(Id, layerId, number);
+            dbInserter.InsertNeuron(Id, userId, layerId, number);
 
             // Saving weights info:
             for (int i = 0; i < _weights.Length; i++)
             {
-                dbInserter.InsertWeight(Id, i, _weights[i]);
+                dbInserter.InsertWeight(Id, userId, i, _weights[i]);
             }
         }
 

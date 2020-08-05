@@ -133,15 +133,15 @@ namespace NN.Eva.Core
             }
         }
 
-        public void SaveMemoryToDB(Guid networkId, int number, DBInserter dbInserter)
+        public void SaveMemoryToDB(Guid networkId, Guid userId, int number, DBInserter dbInserter)
         {
             // Saving layer info:
-            dbInserter.InsertLayer(Id, networkId, number);
+            dbInserter.InsertLayer(Id, userId, networkId, number);
 
             // Saving neurons info:
             for (int i = 0; i < _neuronList.Count; i++)
             {
-                _neuronList[i].SaveMemoryToDB(Id, i, dbInserter);
+                _neuronList[i].SaveMemoryToDB(Id, userId, i, dbInserter);
             }
         }
 
