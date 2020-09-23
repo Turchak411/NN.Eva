@@ -34,7 +34,9 @@ namespace NN.Eva
 
         public void Train(TrainConfiguration trainConfiguration, int iterationToPause = 100)
         {
-            if (_networkTeacher.CheckMemory(trainConfiguration.MemoryFolder))
+            string memoryFolder = (trainConfiguration.MemoryFolder == "") ? "Memory" : trainConfiguration.MemoryFolder;
+
+            if (_networkTeacher.CheckMemory(memoryFolder))
             {
                 _networkTeacher.TrainNets(trainConfiguration, iterationToPause);
 

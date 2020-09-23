@@ -209,7 +209,7 @@ namespace NN.Eva.Core
                                                                                                                            (double)testPassed * 100 / (testPassed + testFailed));
         }
 
-        public bool CheckMemory(string memoryFolder = "")
+        public bool CheckMemory(string memoryFolder = "Memory")
         {
             bool isValid = true;
 
