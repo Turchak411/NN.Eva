@@ -31,7 +31,7 @@ namespace NN.Eva.Core
         /// </summary>
         public List<TrainObject> TestVectors { get; set; }
 
-        public NetworksTeacher(NetworkStructure netStructure, int netsCount, FileManager fileManager, string memoryFolderName)
+        public NetworksTeacher(NetworkStructure netStructure, int netsCount, FileManager fileManager, string memoryFolderName = "Memory")
         {
             _netsList = new List<NeuralNetwork>();
 
