@@ -491,5 +491,36 @@ namespace NN.Eva.Core
                 Console.WriteLine($" {DateTime.Now } DB Memory backup aborting error!\n {ex}");
             }
         }
+
+        public double[] HandleAsAssembly(double[] data)
+        {
+            try
+            {
+                double[] resultVector = new double[_netsList.Count];
+
+                for (int i = 0; i < _netsList.Count; i++)
+                {
+                    resultVector[i] = _netsList[i].Handle(data)[0];
+                }
+
+                return resultVector;
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
+        public double[] Handle(double[] data)
+        {
+            try
+            {
+                return _netsList[0].Handle(data);
+            }
+            catch
+            {
+                return null;
+            }
+        }
     }
 }

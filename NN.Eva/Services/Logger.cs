@@ -81,15 +81,6 @@ namespace NN.Eva.Services
                 case ErrorType.DBDeleteError:
                     errorText = "Database deleting error!";
                     break;
-                case ErrorType.RabbitMqError:
-                    errorText = "RabbitMQ connection error!";
-                    break;
-                case ErrorType.UserParseError:
-                    errorText = "User profile parsing error!";
-                    break;
-                case ErrorType.SaveToLocalFolderError:
-                    errorText = "Save to local folder error!";
-                    break;
                 default:
                     errorText = "";
                     break;
