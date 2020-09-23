@@ -69,12 +69,26 @@ namespace NN.Eva
 
         public double[] HandleAsAssembly(double[] data)
         {
-            return _networkTeacher.HandleAsAssembly(data);
+            try
+            {
+                return _networkTeacher.HandleAsAssembly(data);
+            }
+            catch
+            {
+                return null;
+            }
         }
 
         public double[] Handle(double[] data)
         {
-            return _networkTeacher.Handle(data);
+            try
+            {
+                return _networkTeacher.Handle(data);
+            }
+            catch
+            {
+                return null;
+            }
         }
 
         public void DBMemoryAbort(MySqlConnection dbConnection)
