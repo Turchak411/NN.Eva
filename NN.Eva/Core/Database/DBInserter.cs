@@ -1,6 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
+using MySql.Data.MySqlClient;
+using NN.Eva.Models;
+using NN.Eva.Services;
 
 namespace NN.Eva.Core.Database
 {
@@ -37,11 +38,11 @@ namespace NN.Eva.Core.Database
             }
         }
 
-        public void InsertLayer(Guid id, Guid networkId, int number)
+        public void InsertLayer(Guid id, Guid userId, Guid networkId, int number)
         {
             try
             {
-                string query = $"INSERT INTO memorynn.layers VALUES(\'{id}\',\'{networkId}\','{number}');";
+                string query = $"INSERT INTO memorynn.layers VALUES(\'{id}\',\'{userId}\',\'{networkId}\','{number}');";
 
                 var command = new MySqlCommand(query, _connection);
                 command.ExecuteNonQuery();
@@ -53,11 +54,11 @@ namespace NN.Eva.Core.Database
             }
         }
 
-        public void InsertNeuron(Guid id, Guid layerId, int number)
+        public void InsertNeuron(Guid id, Guid userId, Guid layerId, int number)
         {
             try
             {
-                string query = $"INSERT INTO memorynn.neurons VALUES(\'{id}\',\'{layerId}\','{number}');";
+                string query = $"INSERT INTO memorynn.neurons VALUES(\'{id}\',\'{userId}\',\'{layerId}\','{number}');";
 
                 var command = new MySqlCommand(query, _connection);
                 command.ExecuteNonQuery();
@@ -69,11 +70,11 @@ namespace NN.Eva.Core.Database
             }
         }
 
-        public void InsertWeight(Guid neuronId, int number, double value)
+        public void InsertWeight(Guid neuronId, Guid userId, int number, double value)
         {
             try
             {
-                string query = $"INSERT INTO memorynn.weights VALUES(\'{Guid.NewGuid()}\',\'{neuronId}\',\'{number}\',\'{value.ToString().Replace(',', '.')}\');";
+                string query = $"INSERT INTO memorynn.weights VALUES(\'{Guid.NewGuid()}\',\'{userId}\',\'{neuronId}\',\'{number}\',\'{value.ToString().Replace(',', '.')}\');";
 
                 var command = new MySqlCommand(query, _connection);
                 command.ExecuteNonQuery();

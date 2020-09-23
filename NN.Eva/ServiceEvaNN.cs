@@ -1,4 +1,8 @@
 ﻿using System;
+using MySql.Data.MySqlClient;
+using NN.Eva.Core;
+using NN.Eva.Models;
+using NN.Eva.Services;
 
 namespace NN.Eva
 {

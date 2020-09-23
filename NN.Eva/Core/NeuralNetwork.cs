@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
+using NN.Eva.Core.Database;
+using NN.Eva.Services;
 
 namespace NN.Eva.Core
 {

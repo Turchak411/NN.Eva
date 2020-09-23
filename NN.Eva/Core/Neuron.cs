@@ -1,6 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using NN.Eva.Core.Database;
+using NN.Eva.Models;
+using NN.Eva.Services;
 
 namespace NN.Eva.Core
 {
@@ -55,11 +58,11 @@ namespace NN.Eva.Core
         {
             switch (_actFunc)
             {
-                case Model.ActivationFunction.Th:
+                case Models.ActivationFunction.Th:
                     return (Math.Exp(2 * x) - 1) / (Math.Exp(2 * x) + 1);
-                case Model.ActivationFunction.SoftPlus:
+                case Models.ActivationFunction.SoftPlus:
                     return Math.Log(1 + Math.Exp(x));
-                case Model.ActivationFunction.Sigmoid:
+                case Models.ActivationFunction.Sigmoid:
                 default:
                     return 1 / (1 + Math.Exp(-x));
             }
