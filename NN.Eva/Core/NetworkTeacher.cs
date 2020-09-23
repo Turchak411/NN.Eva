@@ -33,6 +33,12 @@ namespace NN.Eva.Core
 
         public NetworksTeacher(NetworkStructure netStructure, int netsCount, FileManager fileManager, string memoryFolderName = "Memory")
         {
+            // Check for existing memory folder:
+            if (!Directory.Exists(memoryFolderName))
+            {
+                Directory.CreateDirectory(memoryFolderName);
+            }
+
             _netsList = new List<NeuralNetwork>();
 
             _fileManager = fileManager;
