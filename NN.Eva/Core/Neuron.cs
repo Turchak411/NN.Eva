@@ -1,6 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using NN.Eva.Core.Database;
+using NN.Eva.Models;
+using NN.Eva.Services;
 
 namespace NN.Eva.Core
 {
@@ -55,11 +58,11 @@ namespace NN.Eva.Core
         {
             switch (_actFunc)
             {
-                case Model.ActivationFunction.Th:
+                case Models.ActivationFunction.Th:
                     return (Math.Exp(2 * x) - 1) / (Math.Exp(2 * x) + 1);
-                case Model.ActivationFunction.SoftPlus:
+                case Models.ActivationFunction.SoftPlus:
                     return Math.Log(1 + Math.Exp(x));
-                case Model.ActivationFunction.Sigmoid:
+                case Models.ActivationFunction.Sigmoid:
                 default:
                     return 1 / (1 + Math.Exp(-x));
             }
@@ -130,15 +133,15 @@ namespace NN.Eva.Core
             fileManager.SaveMemory(layerNumber, neuronNumber, _weights, memoryPath);
         }
 
-        public void SaveMemoryToDB(Guid layerId, int number, DBInserter dbInserter)
+        public void SaveMemoryToDB(Guid layerId, Guid userId, int number, DBInserter dbInserter)
         {
             // Saving networks info:
-            dbInserter.InsertNeuron(Id, layerId, number);
+            dbInserter.InsertNeuron(Id, userId, layerId, number);
 
             // Saving weights info:
             for (int i = 0; i < _weights.Length; i++)
             {
-                dbInserter.InsertWeight(Id, i, _weights[i]);
+                dbInserter.InsertWeight(Id, userId, i, _weights[i]);
             }
         }
 

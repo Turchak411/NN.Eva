@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using System.Threading;
+using NN.Eva.Core.Database;
 
 namespace NN.Eva.Core
 {
@@ -45,6 +46,7 @@ namespace NN.Eva.Core
                     _netsList.Add(new NeuralNetwork(netStructure.InputVectorLength,
                         netStructure.NeuronsByLayers,
                         fileManager, memoryFolderName + "//memory_" + i + ".txt"));
+                    // TODO: Сделать загрузку готовой памяти из базы данных (реализация DBSelector'а)
                 }
             }
             catch (Exception ex)
@@ -487,6 +489,37 @@ namespace NN.Eva.Core
             {
                 logger.LogError(ErrorType.DBInsertError, "DB Memory backup aborting error!\n" + ex);
                 Console.WriteLine($" {DateTime.Now } DB Memory backup aborting error!\n {ex}");
+            }
+        }
+
+        public double[] HandleAsAssembly(double[] data)
+        {
+            try
+            {
+                double[] resultVector = new double[_netsList.Count];
+
+                for (int i = 0; i < _netsList.Count; i++)
+                {
+                    resultVector[i] = _netsList[i].Handle(data)[0];
+                }
+
+                return resultVector;
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
+        public double[] Handle(double[] data)
+        {
+            try
+            {
+                return _netsList[0].Handle(data);
+            }
+            catch
+            {
+                return null;
             }
         }
     }

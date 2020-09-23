@@ -63,6 +63,9 @@ namespace NN.Eva.Services
                 case ErrorType.MemoryInitializeError:
                     errorText = "Memory initialize error! Check compliance the network structure and the memory-file!";
                     break;
+                case ErrorType.MemoryGenerateError:
+                    errorText = "Memory generate error!";
+                    break;
                 case ErrorType.SetMissing:
                     errorText = "One or more train set is missing!";
                     break;

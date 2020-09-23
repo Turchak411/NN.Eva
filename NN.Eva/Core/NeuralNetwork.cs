@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
+using NN.Eva.Core.Database;
+using NN.Eva.Services;
 
 namespace NN.Eva.Core
 {
@@ -115,7 +116,7 @@ namespace NN.Eva.Core
             // Saving layers info:
             for (int i = 0; i < _layerList.Count; i++)
             {
-                _layerList[i].SaveMemoryToDB(Id, i, dbInserter);
+                _layerList[i].SaveMemoryToDB(Id, userId, i, dbInserter);
             }
         }
 

@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
+using NN.Eva.Models;
+using NN.Eva.Services.WeightsGenerator;
 
 namespace NN.Eva.Services
 {

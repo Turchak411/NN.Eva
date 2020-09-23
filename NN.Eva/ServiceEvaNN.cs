@@ -1,4 +1,8 @@
 ﻿using System;
+using MySql.Data.MySqlClient;
+using NN.Eva.Core;
+using NN.Eva.Models;
+using NN.Eva.Services;
 
 namespace NN.Eva
 {
@@ -60,6 +64,30 @@ namespace NN.Eva
             catch
             {
                 return false;
+            }
+        }
+
+        public double[] HandleAsAssembly(double[] data)
+        {
+            try
+            {
+                return _networkTeacher.HandleAsAssembly(data);
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
+        public double[] Handle(double[] data)
+        {
+            try
+            {
+                return _networkTeacher.Handle(data);
+            }
+            catch
+            {
+                return null;
             }
         }
 

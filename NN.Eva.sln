@@ -5,8 +5,6 @@ VisualStudioVersion = 16.0.29728.190
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NN.Eva", "NN.Eva\NN.Eva.csproj", "{16256A69-49A3-4490-AAA8-DB26EB9AA98C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WeightsGenerator", "WeightsGenerator\WeightsGenerator.csproj", "{C55D1B62-803E-4127-8CC6-8752646F06B7}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -17,10 +15,6 @@ Global
 		{16256A69-49A3-4490-AAA8-DB26EB9AA98C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{16256A69-49A3-4490-AAA8-DB26EB9AA98C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{16256A69-49A3-4490-AAA8-DB26EB9AA98C}.Release|Any CPU.Build.0 = Release|Any CPU
-		{C55D1B62-803E-4127-8CC6-8752646F06B7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{C55D1B62-803E-4127-8CC6-8752646F06B7}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{C55D1B62-803E-4127-8CC6-8752646F06B7}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{C55D1B62-803E-4127-8CC6-8752646F06B7}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

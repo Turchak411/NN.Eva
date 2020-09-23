@@ -5,6 +5,7 @@ namespace NN.Eva.Models
     {
         MemoryMissing,
         MemoryInitializeError,
+        MemoryGenerateError,
         SetMissing,
         TrainError,
         DBConnectionError,
