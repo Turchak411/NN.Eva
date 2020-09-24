@@ -31,7 +31,7 @@ namespace NN.Eva.Core
         /// </summary>
         public List<TrainObject> TestVectors { get; set; }
 
-        public NetworksTeacher(NetworkStructure netStructure, int netsCount, FileManager fileManager, string memoryFolderName)
+        public NetworksTeacher(NetworkStructure netStructure, int netsCount, FileManager fileManager, string memoryFolderName = "Memory")
         {
             _netsList = new List<NeuralNetwork>();
 
@@ -134,7 +134,7 @@ namespace NN.Eva.Core
             return ConsoleColor.Gray;
         }
 
-        public void PrintLearnStatistic(TrainConfiguration trainConfig, bool withLogging = false)
+        public void PrintLearnStatistic(TrainingConfiguration trainingConfig, bool withLogging = false)
         {
             Console.WriteLine("Start calculating statistic...");
 
@@ -149,8 +149,8 @@ namespace NN.Eva.Core
 
             try
             {
-                inputDataSets = _fileManager.LoadSingleDataset(trainConfig.InputDatasetFilename);
-                outputDataSets = _fileManager.LoadSingleDataset(trainConfig.OutputDatasetFilename);
+                inputDataSets = _fileManager.LoadTrainingDataset(trainingConfig.InputDatasetFilename);
+                outputDataSets = _fileManager.LoadTrainingDataset(trainingConfig.OutputDatasetFilename);
             }
             catch (Exception ex)
             {
@@ -203,7 +203,7 @@ namespace NN.Eva.Core
                                                                                                                            (double)testPassed * 100 / (testPassed + testFailed));
         }
 
-        public bool CheckMemory(string memoryFolder = "")
+        public bool CheckMemory(string memoryFolder = "Memory")
         {
             bool isValid = true;
 
@@ -213,7 +213,7 @@ namespace NN.Eva.Core
 
             for (int i = 0; i < _netsList.Count; i++)
             {
-                if (_memoryChecker.IsValid(memoryFolder + "//" + "memory_" + i + ".txt"))
+                if (_memoryChecker.IsValid(memoryFolder + "//memory_" + i + ".txt"))
                 {
                     Console.ForegroundColor = ConsoleColor.Green;
                     Console.WriteLine("memory_" + i + " - is valid.");
@@ -299,9 +299,9 @@ namespace NN.Eva.Core
         /// </summary>
         /// <param name="startIteration"></param>
         /// <param name="withSort"></param>
-        public void TrainNets(TrainConfiguration trainConfig, int iterationsToPause)
+        public void TrainNets(TrainingConfiguration trainingConfig, int iterationsToPause)
         {
-            Iteration = trainConfig.EndIteration;
+            Iteration = trainingConfig.EndIteration;
 
             #region Load data from file
 
@@ -310,8 +310,8 @@ namespace NN.Eva.Core
 
             try
             {
-                inputDataSets = _fileManager.LoadSingleDataset(trainConfig.InputDatasetFilename);
-                outputDataSets = _fileManager.LoadSingleDataset(trainConfig.OutputDatasetFilename);
+                inputDataSets = _fileManager.LoadTrainingDataset(trainingConfig.InputDatasetFilename);
+                outputDataSets = _fileManager.LoadTrainingDataset(trainingConfig.OutputDatasetFilename);
             }
             catch (Exception ex)
             {
@@ -326,7 +326,7 @@ namespace NN.Eva.Core
             {
                 SingleNetworkTeacher[] netTeachers = new SingleNetworkTeacher[_netsList.Count];
 
-                List<TrainConfiguration> trainConfigs = InitializeTrainConfigs(trainConfig, iterationsToPause);
+                List<TrainingConfiguration> trainingConfigs = InitializeTrainingSubConfigs(trainingConfig, iterationsToPause);
 
                 // Initialize teachers:
                 for (int i = 0; i < netTeachers.Length; i++)
@@ -335,7 +335,7 @@ namespace NN.Eva.Core
                     {
                         Id = i,
                         Network = _netsList[i],
-                        TrainConfiguration = trainConfig,
+                        TrainingConfiguration = trainingConfig,
                         InputDatasets = inputDataSets,
                         OutputDatasets = outputDataSets,
                         Logger = _logger
@@ -345,7 +345,7 @@ namespace NN.Eva.Core
                 List<Thread> threadList;
 
                 // Iteration multithreading train:
-                for (int j = 0; j < trainConfigs.Count; j++)
+                for (int j = 0; j < trainingConfigs.Count; j++)
                 {
                     threadList = new List<Thread>();
 
@@ -357,13 +357,13 @@ namespace NN.Eva.Core
 
                     Wait(threadList);
 
-                    if (j != trainConfigs.Count - 1)
+                    if (j != trainingConfigs.Count - 1)
                     {
                         Console.WriteLine("Iterations already finished: " + iterationsToPause * (j + 1));
                     }
                     else
                     {
-                        Console.WriteLine("Iterations already finished: " + trainConfig.EndIteration);
+                        Console.WriteLine("Iterations already finished: " + trainingConfig.EndIteration);
                     }
 
                     CommonTestColorized();
@@ -377,46 +377,46 @@ namespace NN.Eva.Core
             }
         }
 
-        private List<TrainConfiguration> InitializeTrainConfigs(TrainConfiguration trainConfig, int iterationsToPause)
+        private List<TrainingConfiguration> InitializeTrainingSubConfigs(TrainingConfiguration trainingConfig, int iterationsToPause)
         {
-            List<TrainConfiguration> trainConfigs = new List<TrainConfiguration>();
+            List<TrainingConfiguration> trainingConfigs = new List<TrainingConfiguration>();
 
-            int currentIterPosition = trainConfig.StartIteration;
+            int currentIterPosition = trainingConfig.StartIteration;
             while (true)
             {
-                if (trainConfig.EndIteration - currentIterPosition - 1 >= iterationsToPause)
+                if (trainingConfig.EndIteration - currentIterPosition - 1 >= iterationsToPause)
                 {
-                    var trainConfigItem = new TrainConfiguration()
+                    var trainingConfigItem = new TrainingConfiguration
                     {
                         StartIteration = currentIterPosition,
                         EndIteration = currentIterPosition + iterationsToPause,
-                        InputDatasetFilename = trainConfig.InputDatasetFilename,
-                        OutputDatasetFilename = trainConfig.OutputDatasetFilename
+                        InputDatasetFilename = trainingConfig.InputDatasetFilename,
+                        OutputDatasetFilename = trainingConfig.OutputDatasetFilename
                     };
 
-                    trainConfigs.Add(trainConfigItem);
+                    trainingConfigs.Add(trainingConfigItem);
 
                     currentIterPosition += iterationsToPause;
                 }
                 else
                 {
-                    var trainConfigItem = new TrainConfiguration()
+                    var trainingConfigItem = new TrainingConfiguration
                     {
                         StartIteration = currentIterPosition,
-                        EndIteration = trainConfig.EndIteration,
-                        InputDatasetFilename = trainConfig.InputDatasetFilename,
-                        OutputDatasetFilename = trainConfig.OutputDatasetFilename
+                        EndIteration = trainingConfig.EndIteration,
+                        InputDatasetFilename = trainingConfig.InputDatasetFilename,
+                        OutputDatasetFilename = trainingConfig.OutputDatasetFilename
                     };
 
-                    trainConfigs.Add(trainConfigItem);
+                    trainingConfigs.Add(trainingConfigItem);
 
                     break;
                 }
             }
 
-            Console.WriteLine("Train configuration object created!");
+            Console.WriteLine("Train sub-configuration objects created!");
 
-            return trainConfigs;
+            return trainingConfigs;
         }
 
         private void Wait(List<Thread> threadList)

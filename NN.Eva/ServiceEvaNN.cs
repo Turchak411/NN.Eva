@@ -13,7 +13,7 @@ namespace NN.Eva
 
         public void CreateNetwork(string memoryFolderName, NetworkStructure networkStructure,
                                   int netsCountInAssembly = 1,
-                                  string testDatasetsPath = null)
+                                  string testDatasetPath = null)
         {
             //#region Set process settings
 
@@ -22,23 +22,28 @@ namespace NN.Eva
 
             //#endregion
 
-            _fileManager = new FileManager(networkStructure);
+            _fileManager = new FileManager(networkStructure, memoryFolderName);
 
             _networkTeacher = new NetworksTeacher(networkStructure, netsCountInAssembly, _fileManager, memoryFolderName);
 
-            if (testDatasetsPath != null)
+            if (testDatasetPath != null)
             {
-                _networkTeacher.TestVectors = _fileManager.LoadDatasets(testDatasetsPath);
+                _networkTeacher.TestVectors = _fileManager.LoadTestDataset(testDatasetPath);
             }
         }
 
-        public void Train(TrainConfiguration trainConfiguration, int iterationToPause = 100)
+        public void Train(TrainingConfiguration trainingConfiguration, int iterationToPause = 100, bool printLearnStatistic = false)
         {
-            if (_networkTeacher.CheckMemory(trainConfiguration.MemoryFolder))
-            {
-                _networkTeacher.TrainNets(trainConfiguration, iterationToPause);
+            trainingConfiguration.MemoryFolder = trainingConfiguration.MemoryFolder == "" ? "Memory" : trainingConfiguration.MemoryFolder;
 
-                //_networkTeacher.PrintLearnStatistic(trainConfiguration, true);
+            if (_networkTeacher.CheckMemory(trainingConfiguration.MemoryFolder))
+            {
+                _networkTeacher.TrainNets(trainingConfiguration, iterationToPause);
+
+                if (printLearnStatistic)
+                {
+                    _networkTeacher.PrintLearnStatistic(trainingConfiguration, true);
+                }
             }
             else
             {

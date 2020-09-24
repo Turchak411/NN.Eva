@@ -9,33 +9,50 @@ namespace NN.Eva.Services
 {
     public class FileManager
     {
-        public string DataPath;
+        /// <summary>
+        /// Path of default memory
+        /// </summary>
+        public string DefaultMemoryFilePath;
+
+        /// <summary>
+        /// Path of a memory folder
+        /// </summary>
+        public string MemoryFolderPath;
 
         private Logger _logger;
 
         private FileManager() { }
 
-        public FileManager(NetworkStructure netStructure = null, string dataPath = "memory.txt")
+        public FileManager(NetworkStructure netStructure = null, string memoryFolderPath = "Memory", string defaultMemoryFilePath = "memory.txt")
         {
             _logger = new Logger();
 
-            DataPath = dataPath;
+            DefaultMemoryFilePath = defaultMemoryFilePath;
+            MemoryFolderPath = memoryFolderPath;
+
+            // Check for existing memory folder:
+            if (!Directory.Exists(MemoryFolderPath))
+            {
+                Directory.CreateDirectory(MemoryFolderPath);
+            }
 
             // Запуск процесса генерации памяти в случае ее отсутствия:
-            if (!File.Exists(dataPath))
+            if (!File.Exists(MemoryFolderPath + "//.clear//" + DefaultMemoryFilePath))
             {
                 _logger.LogError(ErrorType.MemoryMissing);
+
+                Directory.CreateDirectory(MemoryFolderPath + "//.clear");
 
                 Console.WriteLine("Start generating process...");
                 ServiceWeightsGenerator weightsGenerator = new ServiceWeightsGenerator();
 
                 if (netStructure != null)
                 {
-                    weightsGenerator.GenerateMemory(DataPath, netStructure.InputVectorLength, netStructure.NeuronsByLayers);
+                    weightsGenerator.GenerateMemory(MemoryFolderPath + "//.clear//" + DefaultMemoryFilePath, netStructure.InputVectorLength, netStructure.NeuronsByLayers);
                 }
                 else
                 {
-                    weightsGenerator.GenerateMemory(DataPath);
+                    weightsGenerator.GenerateMemory(MemoryFolderPath + "//.clear//" + DefaultMemoryFilePath);
                 }
             }
         }
@@ -44,7 +61,7 @@ namespace NN.Eva.Services
         {
             double[] memory = new double[0];
 
-            using (StreamReader fileReader = new StreamReader(DataPath))
+            using (StreamReader fileReader = new StreamReader(MemoryFolderPath + "//" + DefaultMemoryFilePath))
             {
                 while (!fileReader.EndOfStream)
                 {
@@ -64,12 +81,13 @@ namespace NN.Eva.Services
         {
             double[] memory = new double[0];
 
-            if (!File.Exists(memoryPath))
+            // Создание памяти для отдельного класса в случае отсутствия таковой:
+            if (!File.Exists(MemoryFolderPath + "//" + memoryPath))
             {
-                // Создание памяти для отдельного класса в случае отсутствия таковой
-                File.Copy(DataPath, memoryPath);
+                File.Copy(MemoryFolderPath + "//.clear//" + DefaultMemoryFilePath, MemoryFolderPath + "//" + memoryPath);
             }
 
+            // Загрузка весов нейрона:
             using (StreamReader fileReader = new StreamReader(memoryPath))
             {
                 while (!fileReader.EndOfStream)
@@ -98,29 +116,9 @@ namespace NN.Eva.Services
             return weights;
         }
 
-        public void PrepareToSaveMemory()
-        {
-            File.Delete(DataPath);
-        }
-
         public void PrepareToSaveMemory(string path)
         {
             File.Delete(path);
-        }
-
-        public void SaveMemory(int layerNumber, int neuronNumber, double[] weights)
-        {
-            using (StreamWriter fileWriter = new StreamWriter(DataPath, true))
-            {
-                fileWriter.Write("layer_{0} neuron_{1}", layerNumber, neuronNumber);
-
-                for (int i = 0; i < weights.Length; i++)
-                {
-                    fileWriter.Write(" " + weights[i]);
-                }
-
-                fileWriter.WriteLine("");
-            }
         }
 
         public void SaveMemory(int layerNumber, int neuronNumber, double[] weights, string path)
@@ -138,7 +136,7 @@ namespace NN.Eva.Services
             }
         }
 
-        public List<TrainObject> LoadDatasets(string filePath)
+        public List<TrainObject> LoadTestDataset(string filePath)
         {
             if (!File.Exists(filePath))
             {
@@ -151,7 +149,7 @@ namespace NN.Eva.Services
             {
                 while (!fileReader.EndOfStream)
                 {
-                    var readedData = fileReader.ReadLine().Split(' ');
+                    string[] readedData = fileReader.ReadLine().Split(' ');
 
                     // Check for space in the last position:
                     int additionalSpaceIndex = readedData[readedData.Length - 1] == "" ? 1 : 0;
@@ -170,7 +168,7 @@ namespace NN.Eva.Services
             return vectors;
         }
 
-        public List<double[]> LoadSingleDataset(string path)
+        public List<double[]> LoadTrainingDataset(string path)
         {
             List<double[]> sets = new List<double[]>();
 

@@ -11,7 +11,7 @@ namespace NN.Eva.Core
 
         public NeuralNetwork Network { get; set; }
 
-        public TrainConfiguration TrainConfiguration { get; set; }
+        public TrainingConfiguration TrainingConfiguration { get; set; }
 
         public List<double[]> InputDatasets { get; set; }
 
@@ -24,15 +24,15 @@ namespace NN.Eva.Core
         public void Train()
         {
             if (Network == null) return;
-            if (TrainConfiguration == null) return;
+            if (TrainingConfiguration == null) return;
 
-            Iteration = TrainConfiguration.EndIteration;
-            if (Iteration == 0 || TrainConfiguration.EndIteration - TrainConfiguration.StartIteration <= 0) return;
+            Iteration = TrainingConfiguration.EndIteration;
+            if (Iteration == 0 || TrainingConfiguration.EndIteration - TrainingConfiguration.StartIteration <= 0) return;
 
             if (InputDatasets == null) return;
             if (OutputDatasets == null) return;
 
-            for (int iteration = TrainConfiguration.StartIteration; iteration < Iteration; iteration++)
+            for (int iteration = TrainingConfiguration.StartIteration; iteration < Iteration; iteration++)
             {
                 // Calculating learn-speed rate:
                 var learningSpeed = 0.01 * Math.Pow(0.1, iteration / 150000);
@@ -56,7 +56,7 @@ namespace NN.Eva.Core
                 }
             }
 
-            Network.SaveMemory(TrainConfiguration.MemoryFolder + "//" + "memory_" + Id + ".txt");
+            Network.SaveMemory(TrainingConfiguration.MemoryFolder + "//memory_" + Id + ".txt");
         }
     }
 }

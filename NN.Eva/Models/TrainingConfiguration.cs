@@ -1,7 +1,7 @@
 ﻿
 namespace NN.Eva.Models
 {
-    public class TrainConfiguration
+    public class TrainingConfiguration
     {
         public int StartIteration { get; set; }
 
