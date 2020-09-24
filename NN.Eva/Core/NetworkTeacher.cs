@@ -248,7 +248,7 @@ namespace NN.Eva.Core
             return maxIndex;
         }
 
-        public void BackupMemory(string memoryFolder = "", string backupsDirectoryName = ".memory_backups",
+        public void BackupMemory(string memoryFolder = "Memory", string backupsDirectoryName = ".memory_backups",
                                  MySqlConnection dbConnection = null, string networkStructure = "no information")
         {
             // Check for existing main backups-directory:
@@ -258,15 +258,15 @@ namespace NN.Eva.Core
             }
 
             // Check for already-existing sub-directory (trainCount-named):
-            if (!Directory.Exists(memoryFolder + "//" + backupsDirectoryName + "/ " + Iteration))
+            if (!Directory.Exists(memoryFolder + "//" + backupsDirectoryName + "//" + Iteration))
             {
-                Directory.CreateDirectory(memoryFolder + "//" + backupsDirectoryName + "/" + Iteration);
+                Directory.CreateDirectory(memoryFolder + "//" + backupsDirectoryName + "//" + Iteration);
             }
 
             // Saving memory:
             for (int i = 0; i < _netsList.Count; i++)
             {
-                _netsList[i].SaveMemory(memoryFolder + "//" + backupsDirectoryName + "/" + Iteration + "/memory_" + i + ".txt");
+                _netsList[i].SaveMemory(memoryFolder + "//" + backupsDirectoryName + "//" + Iteration + "//memory_" + i + ".txt");
             }
 
             // Parsing userID:
