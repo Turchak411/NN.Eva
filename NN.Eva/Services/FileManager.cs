@@ -84,7 +84,7 @@ namespace NN.Eva.Services
             // Создание памяти для отдельного класса в случае отсутствия таковой:
             if (!File.Exists(MemoryFolderPath + "//" + memoryPath))
             {
-                File.Copy(MemoryFolderPath + "//.clear//" + DefaultMemoryFilePath, memoryPath);
+                File.Copy(MemoryFolderPath + "//.clear//" + DefaultMemoryFilePath, MemoryFolderPath + "//" + memoryPath);
             }
 
             // Загрузка весов нейрона:
