@@ -1,4 +1,5 @@
-﻿using NN.Eva.Models;
+﻿using System;
+using NN.Eva.Models;
 
 namespace NN.Eva.Test
 {
@@ -10,8 +11,8 @@ namespace NN.Eva.Test
 
             NetworkStructure netStructure = new NetworkStructure
             {
-                InputVectorLength = 75,
-                NeuronsByLayers = new[] { 75, 85, 90, 1 }
+                InputVectorLength = 15,
+                NeuronsByLayers = new[] { 235, 120, 110, 1 }
             };
 
             TrainingConfiguration trainConfig = new TrainingConfiguration
@@ -26,6 +27,8 @@ namespace NN.Eva.Test
             serviceEvaNN.CreateNetwork(trainConfig.MemoryFolder, netStructure, 2);
 
             serviceEvaNN.Train(trainConfig, 34000);
+
+            Console.ReadKey();
         }
     }
 }
