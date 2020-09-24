@@ -84,18 +84,6 @@ namespace NN.Eva.Core
             }
         }
 
-        public void SaveMemory()
-        {
-            // Deleting old memory file:
-            _fileManager.PrepareToSaveMemory();
-
-            // Saving
-            for (int i = 0; i < _layerList.Count; i++)
-            {
-                _layerList[i].SaveMemory(_fileManager, i);
-            }
-        }
-
         public void SaveMemory(string path)
         {
             // Deleting old memory file:

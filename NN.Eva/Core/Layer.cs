@@ -119,14 +119,6 @@ namespace NN.Eva.Core
 
         // SAVE MEMORY:
 
-        public void SaveMemory(FileManager fileManager, int layerNumber)
-        {
-            for (int i = 0; i < _neuronList.Count; i++)
-            {
-                _neuronList[i].SaveMemory(fileManager, layerNumber, i);
-            }
-        }
-
         public void SaveMemory(FileManager fileManager, int layerNumber, string path)
         {
             for (int i = 0; i < _neuronList.Count; i++)
