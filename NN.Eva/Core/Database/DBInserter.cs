@@ -7,14 +7,21 @@ namespace NN.Eva.Core.Database
 {
     public class DBInserter
     {
+        /// <summary>
+        /// Name of the database for memory
+        /// </summary>
+        public string DatabaseName { get; set; }
+
         private MySqlConnection _connection;
 
         private Logger _logger;
 
-        public DBInserter(MySqlConnection connection, Logger logger)
+        public DBInserter(MySqlConnection connection, Logger logger, string databaseName = "memorynn")
         {
             _connection = connection;
             _logger = logger;
+
+            DatabaseName = databaseName;
         }
 
         public void InsertNetwork(Guid id, Guid userId, int iterations, string networkStructure)
@@ -25,7 +32,7 @@ namespace NN.Eva.Core.Database
                                    +DateTime.Now.Hour + ":" + DateTime.Now.Minute + ":" + DateTime.Now.Second;
 
                 string query =
-                    $"INSERT INTO memorynn.networks VALUES(\'{id}\',\'{userId}\',\'{savingDate}\'," +
+                    $"INSERT INTO {DatabaseName}.networks VALUES(\'{id}\',\'{userId}\',\'{savingDate}\'," +
                     $"\'{networkStructure}\',\'{iterations}\');";
 
                 var command = new MySqlCommand(query, _connection);
@@ -42,7 +49,7 @@ namespace NN.Eva.Core.Database
         {
             try
             {
-                string query = $"INSERT INTO memorynn.layers VALUES(\'{id}\',\'{userId}\',\'{networkId}\','{number}');";
+                string query = $"INSERT INTO {DatabaseName}.layers VALUES(\'{id}\',\'{userId}\',\'{networkId}\','{number}');";
 
                 var command = new MySqlCommand(query, _connection);
                 command.ExecuteNonQuery();
@@ -58,7 +65,7 @@ namespace NN.Eva.Core.Database
         {
             try
             {
-                string query = $"INSERT INTO memorynn.neurons VALUES(\'{id}\',\'{userId}\',\'{layerId}\','{number}');";
+                string query = $"INSERT INTO {DatabaseName}.neurons VALUES(\'{id}\',\'{userId}\',\'{layerId}\','{number}');";
 
                 var command = new MySqlCommand(query, _connection);
                 command.ExecuteNonQuery();
@@ -74,7 +81,7 @@ namespace NN.Eva.Core.Database
         {
             try
             {
-                string query = $"INSERT INTO memorynn.weights VALUES(\'{Guid.NewGuid()}\',\'{userId}\',\'{neuronId}\',\'{number}\',\'{value.ToString().Replace(',', '.')}\');";
+                string query = $"INSERT INTO {DatabaseName}.weights VALUES(\'{Guid.NewGuid()}\',\'{userId}\',\'{neuronId}\',\'{number}\',\'{value.ToString().Replace(',', '.')}\');";
 
                 var command = new MySqlCommand(query, _connection);
                 command.ExecuteNonQuery();
