@@ -26,8 +26,9 @@ namespace NN.Eva.Test
 
             serviceEvaNN.CreateNetwork(trainConfig.MemoryFolder, netStructure, 2);
 
-            serviceEvaNN.Train(trainConfig, 1000);
+            //serviceEvaNN.Train(trainConfig, 1000);
 
+            Console.WriteLine("Done");
             Console.ReadKey();
         }
     }

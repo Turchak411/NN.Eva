@@ -45,7 +45,7 @@ namespace NN.Eva.Core
                 {
                     _netsList.Add(new NeuralNetwork(netStructure.InputVectorLength,
                         netStructure.NeuronsByLayers,
-                        fileManager, "//memory_" + i + ".txt"));
+                        fileManager, "memory_" + i + ".txt"));
                     // TODO: Сделать загрузку готовой памяти из базы данных (реализация DBSelector'а)
                 }
             }
