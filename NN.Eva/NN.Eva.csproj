@@ -3,7 +3,7 @@
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <Version>1.0.1.3</Version>
+    <Version>1.0.1.4</Version>
     <Description>Library of FF-NN named Eva</Description>
     <Authors>Turchak Alexander</Authors>
     <PackageProjectUrl>https://github.com/Turchak411/NN.Eva</PackageProjectUrl>
