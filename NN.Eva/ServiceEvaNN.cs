@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using MySql.Data.MySqlClient;
 using NN.Eva.Core;
 using NN.Eva.Models;
@@ -15,16 +16,9 @@ namespace NN.Eva
                                   int netsCountInAssembly = 1,
                                   string testDatasetPath = null)
         {
-            //#region Set process settings
-
-            //Process thisProc = Process.GetCurrentProcess();
-            //thisProc.PriorityClass = ProcessPriorityClass.AboveNormal;
-
-            //#endregion
-
             _fileManager = new FileManager(networkStructure, memoryFolderName);
 
-            _networkTeacher = new NetworksTeacher(networkStructure, netsCountInAssembly, _fileManager, memoryFolderName);
+            _networkTeacher = new NetworksTeacher(networkStructure, netsCountInAssembly, _fileManager);
 
             if (testDatasetPath != null)
             {
@@ -32,9 +26,13 @@ namespace NN.Eva
             }
         }
 
-        public void Train(TrainingConfiguration trainingConfiguration, int iterationToPause = 100, bool printLearnStatistic = false)
+        public void Train(TrainingConfiguration trainingConfiguration, int iterationToPause = 100, bool printLearnStatistic = false, ProcessPriorityClass processPriorityClass = ProcessPriorityClass.Normal)
         {
             trainingConfiguration.MemoryFolder = trainingConfiguration.MemoryFolder == "" ? "Memory" : trainingConfiguration.MemoryFolder;
+
+            // Set the process priority class:
+            Process thisProc = Process.GetCurrentProcess();
+            thisProc.PriorityClass = ProcessPriorityClass.AboveNormal;
 
             if (_networkTeacher.CheckMemory(trainingConfiguration.MemoryFolder))
             {
