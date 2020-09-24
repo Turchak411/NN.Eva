@@ -31,7 +31,7 @@ namespace NN.Eva.Core
         /// </summary>
         public List<TrainObject> TestVectors { get; set; }
 
-        public NetworksTeacher(NetworkStructure netStructure, int netsCount, FileManager fileManager, string memoryFolderName = "Memory")
+        public NetworksTeacher(NetworkStructure netStructure, int netsCount, FileManager fileManager)
         {
             _netsList = new List<NeuralNetwork>();
 
@@ -45,7 +45,7 @@ namespace NN.Eva.Core
                 {
                     _netsList.Add(new NeuralNetwork(netStructure.InputVectorLength,
                         netStructure.NeuronsByLayers,
-                        fileManager, memoryFolderName + "//memory_" + i + ".txt"));
+                        fileManager, "//memory_" + i + ".txt"));
                     // TODO: Сделать загрузку готовой памяти из базы данных (реализация DBSelector'а)
                 }
             }

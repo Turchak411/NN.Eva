@@ -61,7 +61,7 @@ namespace NN.Eva.Services
         {
             double[] memory = new double[0];
 
-            using (StreamReader fileReader = new StreamReader(MemoryFolderPath + "//" + DefaultMemoryFilePath))
+            using (StreamReader fileReader = new StreamReader(MemoryFolderPath + "//.clear//" + DefaultMemoryFilePath))
             {
                 while (!fileReader.EndOfStream)
                 {
@@ -88,7 +88,7 @@ namespace NN.Eva.Services
             }
 
             // Загрузка весов нейрона:
-            using (StreamReader fileReader = new StreamReader(memoryPath))
+            using (StreamReader fileReader = new StreamReader(MemoryFolderPath + "//" + memoryPath))
             {
                 while (!fileReader.EndOfStream)
                 {
