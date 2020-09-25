@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using NN.Eva.Core.Database;
+using NN.Eva.Models;
 using NN.Eva.Services;
 
 namespace NN.Eva.Core
@@ -118,6 +119,28 @@ namespace NN.Eva.Core
 
             // Aborting saving of network:
             dbDeleter.DeleteFromTableNetworks(Id);
+        }
+
+        // MEMORY CHECK:
+
+        public bool IsMemoryEquals(NetworkStructure netStructure)
+        {
+            // Check for equals count of layers:
+            if (_layerList.Count != netStructure.NeuronsByLayers.Length)
+            {
+                return false;
+            }
+
+            // Check for equals count of neurons on each layer:
+            for (int i = 0; i < _layerList.Count; i++)
+            {
+                if (!_layerList[i].IsMemoryEquals(netStructure, i))
+                {
+                    return false;
+                }
+            }
+
+            return true;
         }
     }
 }

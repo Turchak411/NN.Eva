@@ -22,8 +22,43 @@ namespace NN.Eva.Services
 
         private Logger _logger;
 
-        private FileManager() { }
+        /// <summary>
+        /// Uses only for checking memory validity
+        /// </summary>
+        /// <param name="memoryFolderPath"></param>
+        public FileManager(string memoryFolderPath = "Memory", string defaultMemoryFilePath = "memory.txt")
+        {
+            _logger = new Logger();
 
+            DefaultMemoryFilePath = defaultMemoryFilePath;
+            MemoryFolderPath = memoryFolderPath;
+
+            // Check for existing memory folder:
+            if (!Directory.Exists(MemoryFolderPath))
+            {
+                Directory.CreateDirectory(MemoryFolderPath);
+            }
+
+            // Запуск процесса генерации памяти в случае ее отсутствия:
+            if (!File.Exists(MemoryFolderPath + "//.clear//" + DefaultMemoryFilePath))
+            {
+                _logger.LogError(ErrorType.MemoryMissing);
+
+                Directory.CreateDirectory(MemoryFolderPath + "//.clear");
+
+                Console.WriteLine("Start generating process...");
+                ServiceWeightsGenerator weightsGenerator = new ServiceWeightsGenerator();
+
+                weightsGenerator.GenerateMemory(MemoryFolderPath + "//.clear//" + DefaultMemoryFilePath);
+            }
+        }
+
+        /// <summary>
+        /// Main use
+        /// </summary>
+        /// <param name="netStructure"></param>
+        /// <param name="memoryFolderPath"></param>
+        /// <param name="defaultMemoryFilePath"></param>
         public FileManager(NetworkStructure netStructure = null, string memoryFolderPath = "Memory", string defaultMemoryFilePath = "memory.txt")
         {
             _logger = new Logger();
@@ -54,6 +89,16 @@ namespace NN.Eva.Services
                 else
                 {
                     weightsGenerator.GenerateMemory(MemoryFolderPath + "//.clear//" + DefaultMemoryFilePath);
+                }
+            }
+            else
+            {
+                // Дополнительная проверка, если файл памяти существует, но не подходит по структуре
+                MemoryChecker memoryChecker = new MemoryChecker();
+                
+                if (!memoryChecker.IsValid(MemoryFolderPath + "//.clear//" + DefaultMemoryFilePath, netStructure))
+                {
+                    _logger.LogError(ErrorType.MemoryInitializeError);
                 }
             }
         }

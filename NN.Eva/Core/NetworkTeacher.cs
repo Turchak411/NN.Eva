@@ -203,7 +203,7 @@ namespace NN.Eva.Core
                                                                                                                            (double)testPassed * 100 / (testPassed + testFailed));
         }
 
-        public bool CheckMemory(string memoryFolder = "Memory")
+        public bool CheckMemory(string memoryFolder = "Memory", NetworkStructure netStructure = null)
         {
             bool isValid = true;
 
@@ -213,7 +213,11 @@ namespace NN.Eva.Core
 
             for (int i = 0; i < _netsList.Count; i++)
             {
-                if (_memoryChecker.IsValid(memoryFolder + "//memory_" + i + ".txt"))
+                bool isCurrentNetMemoryValid = netStructure == null
+                    ? _memoryChecker.IsValidQuickCheck(memoryFolder + "//memory_" + i + ".txt")
+                    : _memoryChecker.IsValid(memoryFolder + "//memory_" + i + ".txt", netStructure);
+
+                if (isCurrentNetMemoryValid)
                 {
                     Console.ForegroundColor = ConsoleColor.Green;
                     Console.WriteLine("memory_" + i + " - is valid.");
