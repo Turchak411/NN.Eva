@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Text;
 using NN.Eva.Models;
@@ -110,7 +111,7 @@ namespace NN.Eva.Services
 
             for (int i = 0; i < weights.Length; i++)
             {
-                weights[i] = double.Parse(readedLine[i + 2]);
+                weights[i] = double.Parse(readedLine[i + 2], CultureInfo.InvariantCulture);
             }
 
             return weights;
