@@ -19,17 +19,27 @@ namespace NN.Eva
         /// <param name="networkStructure"></param>
         /// <param name="netsCountInAssembly"></param>
         /// <param name="testDatasetPath"></param>
-        public void CreateNetwork(string memoryFolderName, NetworkStructure networkStructure,
+        /// <returns>Returns success result of network creating</returns>
+        public bool CreateNetwork(string memoryFolderName, NetworkStructure networkStructure,
                                   int netsCountInAssembly = 1,
                                   string testDatasetPath = null)
         {
             _fileManager = new FileManager(networkStructure, memoryFolderName);
 
-            _networkTeacher = new NetworksTeacher(networkStructure, netsCountInAssembly, _fileManager);
-
-            if (testDatasetPath != null)
+            if(_fileManager.IsMemoryLoadCorrect)
             {
-                _networkTeacher.TestVectors = _fileManager.LoadTestDataset(testDatasetPath);
+                _networkTeacher = new NetworksTeacher(networkStructure, netsCountInAssembly, _fileManager);
+
+                if (testDatasetPath != null)
+                {
+                    _networkTeacher.TestVectors = _fileManager.LoadTestDataset(testDatasetPath);
+                }
+
+                return true;
+            }
+            else
+            {
+                return false;
             }
         }
 

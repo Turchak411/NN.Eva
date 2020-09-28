@@ -20,6 +20,8 @@ namespace NN.Eva.Services
         /// </summary>
         public string MemoryFolderPath;
 
+        public bool IsMemoryLoadCorrect;
+
         private Logger _logger;
 
         /// <summary>
@@ -28,6 +30,8 @@ namespace NN.Eva.Services
         /// <param name="memoryFolderPath"></param>
         public FileManager(string memoryFolderPath = "Memory", string defaultMemoryFilePath = "memory.txt")
         {
+            IsMemoryLoadCorrect = true;
+
             _logger = new Logger();
 
             DefaultMemoryFilePath = defaultMemoryFilePath;
@@ -61,6 +65,8 @@ namespace NN.Eva.Services
         /// <param name="defaultMemoryFilePath"></param>
         public FileManager(NetworkStructure netStructure = null, string memoryFolderPath = "Memory", string defaultMemoryFilePath = "memory.txt")
         {
+            IsMemoryLoadCorrect = true;
+
             _logger = new Logger();
 
             DefaultMemoryFilePath = defaultMemoryFilePath;
@@ -98,6 +104,7 @@ namespace NN.Eva.Services
                 
                 if (!memoryChecker.IsValid(MemoryFolderPath + "//.clear//" + DefaultMemoryFilePath, netStructure))
                 {
+                    IsMemoryLoadCorrect = false;
                     _logger.LogError(ErrorType.MemoryInitializeError);
                 }
             }

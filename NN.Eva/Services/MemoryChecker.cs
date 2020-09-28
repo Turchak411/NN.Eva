@@ -56,7 +56,7 @@ namespace NN.Eva.Services
 
                 NeuralNetwork testNet = new NeuralNetwork(netStructure.InputVectorLength,
                                                           netStructure.NeuronsByLayers,
-                                                          fileManager, memoryFileName);
+                                                          fileManager);
 
                 if(!testNet.IsMemoryEquals(netStructure))
                 {
