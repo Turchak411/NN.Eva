@@ -11,7 +11,7 @@ namespace NN.Eva.Test
 
             NetworkStructure netStructure = new NetworkStructure
             {
-                InputVectorLength = 10,
+                InputVectorLength = 2,
                 NeuronsByLayers = new[] { 220, 110, 1 }
             };
 

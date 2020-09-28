@@ -17,6 +17,17 @@ namespace NN.Eva.Services.WeightsGenerator
 
                 using (StreamWriter fileWriter = new StreamWriter(filePath))
                 {
+                    // Writing metadata of network:
+                    fileWriter.Write(inputVectorLength);
+
+                    for (int i = 0; i < netScheme.Length; i++)
+                    {
+                        fileWriter.Write(" " + netScheme[i]);
+                    }
+
+                    fileWriter.WriteLine();
+
+                    // Writing memory:
                     for (int i = 0; i < netScheme.Length; i++)
                     {
                         for (int k = 0; k < netScheme[i]; k++)

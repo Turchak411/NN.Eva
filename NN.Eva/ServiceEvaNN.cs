@@ -50,7 +50,7 @@ namespace NN.Eva
         /// <param name="iterationToPause"></param>
         /// <param name="printLearnStatistic"></param>
         /// <param name="processPriorityClass"></param>
-        public void Train(TrainingConfiguration trainingConfiguration, int iterationToPause = 100, bool printLearnStatistic = false, NetworkStructure netStructure = null, ProcessPriorityClass processPriorityClass = ProcessPriorityClass.Normal)
+        public void Train(TrainingConfiguration trainingConfiguration, int iterationToPause = 100, bool printLearnStatistic = false, ProcessPriorityClass processPriorityClass = ProcessPriorityClass.Normal)
         {
             trainingConfiguration.MemoryFolder = trainingConfiguration.MemoryFolder == "" ? "Memory" : trainingConfiguration.MemoryFolder;
 
@@ -58,7 +58,7 @@ namespace NN.Eva
             Process thisProc = Process.GetCurrentProcess();
             thisProc.PriorityClass = ProcessPriorityClass.AboveNormal;
 
-            if (_networkTeacher.CheckMemory(trainingConfiguration.MemoryFolder, netStructure))
+            if (_networkTeacher.CheckMemory(trainingConfiguration.MemoryFolder))
             {
                 _networkTeacher.TrainNets(trainingConfiguration, iterationToPause);
 
@@ -114,13 +114,13 @@ namespace NN.Eva
         /// <param name="dbConnection"></param>
         /// <param name="networkStructure"></param>
         /// <returns>State of operation success</returns>
-        public bool BackupMemory(string memoryFolder, MySqlConnection dbConnection, string networkStructure = "no information")
+        public bool BackupMemory(string memoryFolder, MySqlConnection dbConnection, string networkStructureInfo = "no information")
         {
             try
             {
                 if (_networkTeacher.CheckMemory(memoryFolder))
                 {
-                    _networkTeacher.BackupMemory(memoryFolder, ".memory_backups", dbConnection, networkStructure);
+                    _networkTeacher.BackupMemory(memoryFolder, ".memory_backups", dbConnection);
                 }
                 else
                 {

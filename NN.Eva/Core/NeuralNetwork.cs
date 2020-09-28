@@ -85,10 +85,10 @@ namespace NN.Eva.Core
             }
         }
 
-        public void SaveMemory(string path)
+        public void SaveMemory(string path, NetworkStructure networkStructure)
         {
             // Deleting old memory file:
-            _fileManager.PrepareToSaveMemory(path);
+            _fileManager.PrepareToSaveMemory(path, networkStructure);
 
             // Saving
             for (int i = 0; i < _layerList.Count; i++)

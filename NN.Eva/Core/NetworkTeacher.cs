@@ -14,6 +14,8 @@ namespace NN.Eva.Core
     {
         private List<NeuralNetwork> _netsList;
 
+        private NetworkStructure _netStructure;
+
         /// <summary>
         /// Services
         /// </summary>
@@ -33,6 +35,8 @@ namespace NN.Eva.Core
 
         public NetworksTeacher(NetworkStructure netStructure, int netsCount, FileManager fileManager)
         {
+            _netStructure = netStructure;
+
             _netsList = new List<NeuralNetwork>();
 
             _fileManager = fileManager;
@@ -203,7 +207,7 @@ namespace NN.Eva.Core
                                                                                                                            (double)testPassed * 100 / (testPassed + testFailed));
         }
 
-        public bool CheckMemory(string memoryFolder = "Memory", NetworkStructure netStructure = null)
+        public bool CheckMemory(string memoryFolder = "Memory")
         {
             bool isValid = true;
 
@@ -213,9 +217,9 @@ namespace NN.Eva.Core
 
             for (int i = 0; i < _netsList.Count; i++)
             {
-                bool isCurrentNetMemoryValid = netStructure == null
+                bool isCurrentNetMemoryValid = _netStructure == null
                     ? _memoryChecker.IsValidQuickCheck(memoryFolder + "//memory_" + i + ".txt")
-                    : _memoryChecker.IsValid(memoryFolder + "//memory_" + i + ".txt", netStructure);
+                    : _memoryChecker.IsValid(memoryFolder + "//memory_" + i + ".txt", _netStructure);
 
                 if (isCurrentNetMemoryValid)
                 {
@@ -253,7 +257,7 @@ namespace NN.Eva.Core
         }
 
         public void BackupMemory(string memoryFolder = "Memory", string backupsDirectoryName = ".memory_backups",
-                                 MySqlConnection dbConnection = null, string networkStructure = "no information")
+                                 MySqlConnection dbConnection = null, string networkStructureInfo = "no information")
         {
             // Check for existing main backups-directory:
             if (!Directory.Exists(memoryFolder + "//" + backupsDirectoryName))
@@ -270,7 +274,7 @@ namespace NN.Eva.Core
             // Saving memory:
             for (int i = 0; i < _netsList.Count; i++)
             {
-                _netsList[i].SaveMemory(memoryFolder + "//" + backupsDirectoryName + "//" + Iteration + "//memory_" + i + ".txt");
+                _netsList[i].SaveMemory(memoryFolder + "//" + backupsDirectoryName + "//" + Iteration + "//memory_" + i + ".txt", _netStructure);
             }
 
             // Parsing userID:
@@ -292,7 +296,7 @@ namespace NN.Eva.Core
             {
                 Console.WriteLine("Backuping memory to database...");
 
-                SavingMemoryToDB(dbConnection, networkStructure, userId);
+                SavingMemoryToDB(dbConnection, networkStructureInfo, userId);
             }
 
             Console.WriteLine("Memory backuped!");
@@ -339,6 +343,7 @@ namespace NN.Eva.Core
                     {
                         Id = i,
                         Network = _netsList[i],
+                        NetworkStructure = _netStructure,
                         TrainingConfiguration = trainingConfig,
                         InputDatasets = inputDataSets,
                         OutputDatasets = outputDataSets,
