@@ -45,7 +45,6 @@ namespace NN.Eva.Services
         /// <returns></returns>
         public bool IsValid(string memoryPath, NetworkStructure netStructure)
         {
-            // TODO:
             string[] splittedPath = memoryPath.Split(new string[] {"//"}, StringSplitOptions.RemoveEmptyEntries);
             string memoryFolderPath = splittedPath[0];
             string memoryFileName = splittedPath[splittedPath.Length - 1];
