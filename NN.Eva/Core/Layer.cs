@@ -150,5 +150,41 @@ namespace NN.Eva.Core
             // Aborting saving of layer:
             dbDeleter.DeleteFromTableLayers(networkId);
         }
+
+        // MEMORY CHECK:
+
+        public bool IsMemoryEquals(NetworkStructure netStructure, int currentLayerNumber)
+        {
+            // Check for equals count of neurons:
+            if (_neuronList.Count != netStructure.NeuronsByLayers[currentLayerNumber])
+            {
+                return false;
+            }
+
+            // Check for correct count of weights on each neuron:
+            // *If this is first layer check equals with input vector:
+            if (currentLayerNumber == 0)
+            {
+                for (int i = 0; i < _neuronList.Count; i++)
+                {
+                    if (!_neuronList[i].IsMemoryEquals(netStructure.InputVectorLength))
+                    {
+                        return false;
+                    }
+                }
+            }
+            else
+            {
+                for (int i = 0; i < _neuronList.Count; i++)
+                {
+                    if (!_neuronList[i].IsMemoryEquals(netStructure.NeuronsByLayers[currentLayerNumber - 1]))
+                    {
+                        return false;
+                    }
+                }
+            }
+
+            return true;
+        }
     }
 }

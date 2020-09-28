@@ -151,5 +151,12 @@ namespace NN.Eva.Core
             // Aborting saving of layer:
             dbDeleter.DeleteFromTableNeurons(layerId);
         }
+
+        // MEMORY:
+
+        public bool IsMemoryEquals(int weightsCount)
+        {
+            return _weights.Length == weightsCount;
+        }
     }
 }

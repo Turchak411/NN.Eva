@@ -11,23 +11,24 @@ namespace NN.Eva.Test
 
             NetworkStructure netStructure = new NetworkStructure
             {
-                InputVectorLength = 15,
-                NeuronsByLayers = new[] { 235, 120, 110, 1 }
+                InputVectorLength = 10,
+                NeuronsByLayers = new[] { 120, 110, 1 }
             };
 
             TrainingConfiguration trainConfig = new TrainingConfiguration
             {
                 StartIteration = 0,
-                EndIteration = 1000,
+                EndIteration = 10000,
                 InputDatasetFilename = "TrainingSets//inputSets.txt",
                 OutputDatasetFilename = "TrainingSets//outputSets.txt",
                 MemoryFolder = "Memory"
             };
 
-            serviceEvaNN.CreateNetwork(trainConfig.MemoryFolder, netStructure, 2);
+            serviceEvaNN.CreateNetwork(trainConfig.MemoryFolder, netStructure);
 
-            serviceEvaNN.Train(trainConfig, 1000);
+            serviceEvaNN.Train(trainConfig, 10000);
 
+            Console.WriteLine("Done");
             Console.ReadKey();
         }
     }

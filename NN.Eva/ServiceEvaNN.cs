@@ -12,6 +12,13 @@ namespace NN.Eva
         private FileManager _fileManager;
         private NetworksTeacher _networkTeacher;
 
+        /// <summary>
+        /// Creating FFNN
+        /// </summary>
+        /// <param name="memoryFolderName"></param>
+        /// <param name="networkStructure"></param>
+        /// <param name="netsCountInAssembly"></param>
+        /// <param name="testDatasetPath"></param>
         public void CreateNetwork(string memoryFolderName, NetworkStructure networkStructure,
                                   int netsCountInAssembly = 1,
                                   string testDatasetPath = null)
@@ -26,7 +33,14 @@ namespace NN.Eva
             }
         }
 
-        public void Train(TrainingConfiguration trainingConfiguration, int iterationToPause = 100, bool printLearnStatistic = false, ProcessPriorityClass processPriorityClass = ProcessPriorityClass.Normal)
+        /// <summary>
+        /// Training FFNN
+        /// </summary>
+        /// <param name="trainingConfiguration"></param>
+        /// <param name="iterationToPause"></param>
+        /// <param name="printLearnStatistic"></param>
+        /// <param name="processPriorityClass"></param>
+        public void Train(TrainingConfiguration trainingConfiguration, int iterationToPause = 100, bool printLearnStatistic = false, NetworkStructure netStructure = null, ProcessPriorityClass processPriorityClass = ProcessPriorityClass.Normal)
         {
             trainingConfiguration.MemoryFolder = trainingConfiguration.MemoryFolder == "" ? "Memory" : trainingConfiguration.MemoryFolder;
 
@@ -34,7 +48,7 @@ namespace NN.Eva
             Process thisProc = Process.GetCurrentProcess();
             thisProc.PriorityClass = ProcessPriorityClass.AboveNormal;
 
-            if (_networkTeacher.CheckMemory(trainingConfiguration.MemoryFolder))
+            if (_networkTeacher.CheckMemory(trainingConfiguration.MemoryFolder, netStructure))
             {
                 _networkTeacher.TrainNets(trainingConfiguration, iterationToPause);
 
@@ -49,6 +63,47 @@ namespace NN.Eva
             }
         }
 
+        /// <summary>
+        /// Handling double-vector data as nets assembly
+        /// </summary>
+        /// <param name="data"></param>
+        /// <returns>Vector-classes</returns>
+        public double[] HandleAsAssembly(double[] data)
+        {
+            try
+            {
+                return _networkTeacher.HandleAsAssembly(data);
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
+        /// <summary>
+        /// Handling double-vector data
+        /// </summary>
+        /// <param name="data"></param>
+        /// <returns>Vector-classes</returns>
+        public double[] Handle(double[] data)
+        {
+            try
+            {
+                return _networkTeacher.Handle(data);
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
+        /// <summary>
+        /// Backuping memory to db or local folder or to both ones
+        /// </summary>
+        /// <param name="memoryFolder"></param>
+        /// <param name="dbConnection"></param>
+        /// <param name="networkStructure"></param>
+        /// <returns>State of operation success</returns>
         public bool BackupMemory(string memoryFolder, MySqlConnection dbConnection, string networkStructure = "no information")
         {
             try
@@ -70,33 +125,23 @@ namespace NN.Eva
             }
         }
 
-        public double[] HandleAsAssembly(double[] data)
+        /// <summary>
+        /// Aborting memory of current neural network
+        /// </summary>
+        /// <param name="dbConnection"></param>
+        /// <returns>State of operation success</returns>
+        public bool DBMemoryAbort(MySqlConnection dbConnection)
         {
             try
             {
-                return _networkTeacher.HandleAsAssembly(data);
+                _networkTeacher.DBMemoryAbort(dbConnection);
+
+                return true;
             }
             catch
             {
-                return null;
+                return false;
             }
-        }
-
-        public double[] Handle(double[] data)
-        {
-            try
-            {
-                return _networkTeacher.Handle(data);
-            }
-            catch
-            {
-                return null;
-            }
-        }
-
-        public void DBMemoryAbort(MySqlConnection dbConnection)
-        {
-            _networkTeacher.DBMemoryAbort(dbConnection);
         }
     }
 }
