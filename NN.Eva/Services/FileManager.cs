@@ -110,6 +110,15 @@ namespace NN.Eva.Services
             }
         }
 
+        public bool IsMemoryEqualsDefault(string memoryPathToCheck)
+        {
+            FileInfo fileDefaultMemory = new FileInfo(MemoryFolderPath + "//.clear//" + DefaultMemoryFilePath);
+            FileInfo fileToCheck = new FileInfo(MemoryFolderPath + "//" + memoryPathToCheck);
+
+            // Возвращает false, если вес проверяемого файла памяти отличается от файла с чистой памятью больше чем на 50%
+            return Math.Abs(fileDefaultMemory.Length - fileToCheck.Length) < fileDefaultMemory.Length * 0.5;
+        }
+
         public double[] LoadMemory(int layerNumber, int neuronNumber)
         {
             double[] memory = new double[0];
@@ -288,10 +297,10 @@ namespace NN.Eva.Services
             {
                 while (!fileReader.EndOfStream)
                 {
-                    string[] readedLine = fileReader.ReadLine().Split(' ');
+                    string[] readedLine = fileReader.ReadLine().Trim().Split(' ');
                     double[] set = new double[readedLine.Length];
 
-                    for (int i = 0; i < readedLine.Length - 1; i++)
+                    for (int i = 0; i < readedLine.Length; i++)
                     {
                         set[i] = double.Parse(readedLine[i]);
                     }

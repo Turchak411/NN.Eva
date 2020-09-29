@@ -176,6 +176,77 @@ namespace NN.Eva.Core
                     netResults.Add(_netsList[k].Handle(inputDataSets[i])[0]);
                 }
 
+
+
+                // Поиск максимально активирующейся сети (класса) с заданным порогом активации:
+                int maxIndex = FindMaxIndex(netResults, 0.8);
+
+                if (maxIndex == -1)
+                {
+                    testFailed++;
+                    testFailed_lowActivationCause++;
+                }
+                else
+                {
+                    if (outputDataSets[i][maxIndex] != 1)
+                    {
+                        testFailed++;
+                    }
+                    else
+                    {
+                        testPassed++;
+                    }
+                }
+            }
+
+            // Logging (optional):
+            if (withLogging)
+            {
+                _logger.LogTrainResults(testPassed, testFailed, testFailed_lowActivationCause, Iteration);
+            }
+
+            Console.WriteLine("Test passed: {0}\nTest failed: {1}\n     - Low activation causes: {2}\nPercent learned: {3:f2}", testPassed,
+                                                                                                                           testFailed,
+                                                                                                                           testFailed_lowActivationCause,
+                                                                                                                           (double)testPassed * 100 / (testPassed + testFailed));
+        }
+
+        public void PrintLearnStatisticAsAssembly(TrainingConfiguration trainingConfig, bool withLogging = false)
+        {
+            Console.WriteLine("Start calculating statistic (as assembly)...");
+
+            int testPassed = 0;
+            int testFailed = 0;
+            int testFailed_lowActivationCause = 0;
+
+            #region Load data from file
+
+            List<double[]> inputDataSets;
+            List<double[]> outputDataSets;
+
+            try
+            {
+                inputDataSets = _fileManager.LoadTrainingDataset(trainingConfig.InputDatasetFilename);
+                outputDataSets = _fileManager.LoadTrainingDataset(trainingConfig.OutputDatasetFilename);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ErrorType.SetMissing, ex);
+                return;
+            }
+
+            #endregion
+
+            for (int i = 0; i < inputDataSets.Count; i++)
+            {
+                List<double> netResults = new List<double>();
+
+                for (int k = 0; k < _netsList.Count; k++)
+                {
+                    // Получение ответа:
+                    netResults.Add(_netsList[k].Handle(inputDataSets[i])[0]);
+                }
+
                 // Поиск максимально активирующейся сети (класса) с заданным порогом активации:
                 int maxIndex = FindMaxIndex(netResults, 0.8);
 
@@ -240,7 +311,8 @@ namespace NN.Eva.Core
             {
                 bool isCurrentNetMemoryValid = _netStructure == null
                     ? _memoryChecker.IsValidQuickCheck(memoryFolder + "//memory_" + i + ".txt")
-                    : _memoryChecker.IsValid(memoryFolder + "//memory_" + i + ".txt", _netStructure);
+                    : _memoryChecker.IsValid(memoryFolder + "//memory_" + i + ".txt", _netStructure) && 
+                      _fileManager.IsMemoryEqualsDefault("memory_" + i + ".txt");
 
                 if (isCurrentNetMemoryValid)
                 {
