@@ -51,7 +51,6 @@ namespace NN.Eva.Core
                     _netsList.Add(new NeuralNetwork(netStructure.InputVectorLength,
                         netStructure.NeuronsByLayers,
                         fileManager, "memory_" + i + ".txt"));
-                    // TODO: Сделать загрузку готовой памяти из базы данных (реализация DBSelector'а)
                 }
             }
             catch (Exception ex)
@@ -59,6 +58,8 @@ namespace NN.Eva.Core
                 _logger.LogError(ErrorType.MemoryInitializeError, ex);
             }
         }
+
+        #region Trained testing
 
         public void CommonTest()
         {
@@ -208,6 +209,25 @@ namespace NN.Eva.Core
                                                                                                                            (double)testPassed * 100 / (testPassed + testFailed));
         }
 
+        private int FindMaxIndex(List<double> netResults, double threshold = 0.8)
+        {
+            int maxIndex = -1;
+            double maxValue = -1;
+
+            for (int i = 0; i < netResults.Count; i++)
+            {
+                if (maxValue < netResults[i] && netResults[i] >= threshold)
+                {
+                    maxIndex = i;
+                    maxValue = netResults[i];
+                }
+            }
+
+            return maxIndex;
+        }
+
+        #endregion
+
         public bool CheckMemory(string memoryFolder = "Memory")
         {
             bool isValid = true;
@@ -238,23 +258,6 @@ namespace NN.Eva.Core
             Console.ForegroundColor = ConsoleColor.Gray;
 
             return isValid;
-        }
-
-        private int FindMaxIndex(List<double> netResults, double threshold = 0.8)
-        {
-            int maxIndex = -1;
-            double maxValue = -1;
-
-            for (int i = 0; i < netResults.Count; i++)
-            {
-                if (maxValue < netResults[i] && netResults[i] >= threshold)
-                {
-                    maxIndex = i;
-                    maxValue = netResults[i];
-                }
-            }
-
-            return maxIndex;
         }
 
         public void BackupMemory(string memoryFolder = "Memory", string backupsDirectoryName = ".memory_backups",
@@ -302,6 +305,8 @@ namespace NN.Eva.Core
 
             Console.WriteLine("Memory backuped!");
         }
+
+        #region Training
 
         /// <summary>
         /// Обучение сети
@@ -444,6 +449,10 @@ namespace NN.Eva.Core
             }
         }
 
+        #endregion
+
+        #region Database
+
         private void SavingMemoryToDB(DatabaseConfig dbConfig, string networkStructure, Guid userId)
         {
             Logger logger = new Logger();
@@ -545,6 +554,10 @@ namespace NN.Eva.Core
             }
         }
 
+        #endregion
+
+        #region Handling
+
         public double[] HandleAsAssembly(double[] data)
         {
             try
@@ -575,5 +588,7 @@ namespace NN.Eva.Core
                 return null;
             }
         }
+
+        #endregion
     }
 }
