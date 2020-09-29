@@ -163,7 +163,7 @@ namespace NN.Eva.Services
 
             for (int i = 0; i < weights.Length; i++)
             {
-                weights[i] = double.Parse(readedLine[i + 2].Replace('.', ','));
+                weights[i] = double.Parse(readedLine[i + 2], CultureInfo.GetCultureInfo("ru-RU"));
             }
 
             return weights;
@@ -218,7 +218,7 @@ namespace NN.Eva.Services
 
                 for (int i = 0; i < weights.Length; i++)
                 {
-                    fileWriter.Write(" " + weights[i]);
+                    fileWriter.Write(" " + weights[i].ToString().Replace('.',','));
                 }
 
                 fileWriter.WriteLine("");

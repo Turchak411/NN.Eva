@@ -115,13 +115,13 @@ namespace NN.Eva
         /// <param name="dbConnection"></param>
         /// <param name="networkStructure"></param>
         /// <returns>State of operation success</returns>
-        public bool BackupMemory(string memoryFolder, DatabaseConfig dbConfig, string networkStructureInfo = "no information")
+        public bool BackupMemory(string memoryFolder, DatabaseConfig dbConfig = null, string networkStructureInfo = "no information")
         {
             try
             {
                 if (_networkTeacher.CheckMemory(memoryFolder))
                 {
-                    _networkTeacher.BackupMemory(memoryFolder, ".memory_backups", dbConfig);
+                    _networkTeacher.BackupMemory(memoryFolder, ".memory_backups", dbConfig);  
                 }
                 else
                 {
