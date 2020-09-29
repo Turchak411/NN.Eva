@@ -146,7 +146,6 @@ namespace NN.Eva.Core
 
             int testPassed = 0;
             int testFailed = 0;
-            int testFailed_lowActivationCause = 0;
 
             #region Load data from file
 
@@ -176,39 +175,45 @@ namespace NN.Eva.Core
                     netResults.Add(_netsList[k].Handle(inputDataSets[i])[0]);
                 }
 
-
-
-                // Поиск максимально активирующейся сети (класса) с заданным порогом активации:
-                int maxIndex = FindMaxIndex(netResults, 0.8);
-
-                if (maxIndex == -1)
+                if (IsVectorsRoughlyEquals(outputDataSets[i], netResults.ToArray(), 0.3))
                 {
-                    testFailed++;
-                    testFailed_lowActivationCause++;
+                    testPassed++;
                 }
                 else
                 {
-                    if (outputDataSets[i][maxIndex] != 1)
-                    {
-                        testFailed++;
-                    }
-                    else
-                    {
-                        testPassed++;
-                    }
+                    testFailed++;
                 }
             }
 
             // Logging (optional):
             if (withLogging)
             {
-                _logger.LogTrainResults(testPassed, testFailed, testFailed_lowActivationCause, Iteration);
+                _logger.LogTrainResults(testPassed, testFailed, Iteration);
             }
 
-            Console.WriteLine("Test passed: {0}\nTest failed: {1}\n     - Low activation causes: {2}\nPercent learned: {3:f2}", testPassed,
-                                                                                                                           testFailed,
-                                                                                                                           testFailed_lowActivationCause,
-                                                                                                                           (double)testPassed * 100 / (testPassed + testFailed));
+            Console.WriteLine("Test passed: {0}\nTest failed: {1}\nPercent learned: {2:f2}", testPassed,
+                                                                                             testFailed,
+                                                                                             (double)testPassed * 100 / (testPassed + testFailed));
+        }
+
+        private bool IsVectorsRoughlyEquals(double[] sourceVector0, double[] controlVector1, double equalsPercent)
+        {
+            // Возвращение неравенства, если длины векторов не совпадают
+            if(sourceVector0.Length != controlVector1.Length)
+            {
+                return false;
+            }
+
+            for(int i = 0; i < sourceVector0.Length; i++)
+            {
+                // TODO: Протестировать
+                if(controlVector1[i] / sourceVector0[i] - (1 - equalsPercent) > equalsPercent)
+                {
+                    return false;
+                }
+            }
+
+            return true;
         }
 
         public void PrintLearnStatisticAsAssembly(TrainingConfiguration trainingConfig, bool withLogging = false)
