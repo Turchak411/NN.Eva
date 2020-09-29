@@ -7,6 +7,7 @@ using System.IO;
 using System.Text;
 using System.Threading;
 using NN.Eva.Core.Database;
+using NN.Eva.Models.Database;
 
 namespace NN.Eva.Core
 {
@@ -257,7 +258,7 @@ namespace NN.Eva.Core
         }
 
         public void BackupMemory(string memoryFolder = "Memory", string backupsDirectoryName = ".memory_backups",
-                                 MySqlConnection dbConnection = null, string networkStructureInfo = "no information")
+                                 DatabaseConfig dbConfig = null, string networkStructureInfo = "no information")
         {
             // Check for existing main backups-directory:
             if (!Directory.Exists(memoryFolder + "//" + backupsDirectoryName))
@@ -292,11 +293,11 @@ namespace NN.Eva.Core
             }
 
             // Saving memory to database:
-            if (dbConnection != null)
+            if (dbConfig != null)
             {
                 Console.WriteLine("Backuping memory to database...");
 
-                SavingMemoryToDB(dbConnection, networkStructureInfo, userId);
+                SavingMemoryToDB(dbConfig, networkStructureInfo, userId);
             }
 
             Console.WriteLine("Memory backuped!");
@@ -443,55 +444,41 @@ namespace NN.Eva.Core
             }
         }
 
-        private void SavingMemoryToDB(MySqlConnection dbConnection, string networkStructure, Guid userId)
+        private void SavingMemoryToDB(DatabaseConfig dbConfig, string networkStructure, Guid userId)
         {
             Logger logger = new Logger();
 
             try
             {
-                using (dbConnection)
+                DBInserter dbInserter = new DBInserter(logger, dbConfig);
+
+                // Saving networks info:
+                for (int i = 0; i < _netsList.Count; i++)
                 {
-                    dbConnection.Open();
-
-                    DBInserter dbInserter = new DBInserter(dbConnection, logger);
-
-                    // Saving networks info:
-                    for (int i = 0; i < _netsList.Count; i++)
-                    {
-                        _netsList[i].SaveMemoryToDB(Iteration, networkStructure, userId, dbInserter);
-                        Console.WriteLine("Network #{0} backuped successfully!", i);
-                    }
-
-                    dbConnection.Close();
+                    _netsList[i].SaveMemoryToDB(Iteration, networkStructure, userId, dbInserter);
+                    Console.WriteLine("Network #{0} backuped successfully!", i);
                 }
             }
             catch (Exception ex)
             {
                 logger.LogError(ErrorType.DBInsertError, "Save memory to database error!\n" + ex);
-                Console.WriteLine($" {DateTime.Now } Save memory to database error!\n {ex}");
+                Console.WriteLine($" {DateTime.Now} Save memory to database error!\n {ex}");
             }
         }
 
-        public void DBMemoryAbort(MySqlConnection dbConnection)
+        public void DBMemoryAbort(DatabaseConfig dbConfig)
         {
             Logger logger = new Logger();
 
             try
             {
-                using (dbConnection)
+                DBDeleter dbDeleter = new DBDeleter(logger, dbConfig);
+
+                // Aborting saving network's info:
+                for (int i = 0; i < _netsList.Count; i++)
                 {
-                    dbConnection.Open();
-
-                    DBDeleter dbDeleter = new DBDeleter(dbConnection, logger);
-
-                    // Aborting saving network's info:
-                    for (int i = 0; i < _netsList.Count; i++)
-                    {
-                        _netsList[i].DBMemoryAbort(dbDeleter);
-                        Console.WriteLine("Another network's memory backup aborted successfully!");
-                    }
-
-                    dbConnection.Close();
+                    _netsList[i].DBMemoryAbort(dbDeleter);
+                    Console.WriteLine("Another network's memory backup aborted successfully!");
                 }
             }
             catch (Exception ex)
