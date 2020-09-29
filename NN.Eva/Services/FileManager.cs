@@ -120,6 +120,7 @@ namespace NN.Eva.Services
                 {
                     string[] readedLine = fileReader.ReadLine().Split(' ');
 
+                    // TODO: Зарефакторить. Кинуть break, когда память загрузилась
                     if ((readedLine[0] == "layer_" + layerNumber) && (readedLine[1] == "neuron_" + neuronNumber))
                     {
                         memory = GetWeights(readedLine);
@@ -210,6 +211,13 @@ namespace NN.Eva.Services
             }
         }
 
+        /// <summary>
+        /// Main method of saving memory
+        /// </summary>
+        /// <param name="layerNumber"></param>
+        /// <param name="neuronNumber"></param>
+        /// <param name="weights"></param>
+        /// <param name="path"></param>
         public void SaveMemory(int layerNumber, int neuronNumber, double[] weights, string path)
         {
             using (StreamWriter fileWriter = new StreamWriter(path, true))
@@ -222,6 +230,21 @@ namespace NN.Eva.Services
                 }
 
                 fileWriter.WriteLine("");
+            }
+        }
+
+        /// <summary>
+        /// Saving memory from textList memory-model
+        /// </summary>
+        /// <param name="memoryInTextList"></param>
+        public void SaveMemoryFromModel(List<string> memoryInTextList, string destinationMemoryFilePath)
+        {
+            using(StreamWriter fileWriter = new StreamWriter(destinationMemoryFilePath))
+            {
+                for (int i = 0; i < memoryInTextList.Count; i++)
+                {
+                    fileWriter.WriteLine(memoryInTextList[i]);
+                }
             }
         }
 

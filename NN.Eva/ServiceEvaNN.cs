@@ -154,5 +154,19 @@ namespace NN.Eva
                 return false;
             }
         }
+
+        public bool DBMemoryLoad(DatabaseConfig dbConfig, Guid networkID, string destinationMemoryFilePath)
+        {
+            try
+            {
+                _networkTeacher.DBMemoryLoad(dbConfig, networkID, destinationMemoryFilePath);
+
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
+        }
     }
 }

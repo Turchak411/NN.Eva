@@ -10,6 +10,7 @@ namespace NN.Eva.Models
         TrainError,
         DBConnectionError,
         DBInsertError,
-        DBDeleteError
+        DBDeleteError,
+        DBMemoryLoadError
     }
 }

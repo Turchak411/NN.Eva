@@ -483,8 +483,65 @@ namespace NN.Eva.Core
             }
             catch (Exception ex)
             {
-                logger.LogError(ErrorType.DBInsertError, "DB Memory backup aborting error!\n" + ex);
+                logger.LogError(ErrorType.DBDeleteError, "DB Memory backup aborting error!\n" + ex);
                 Console.WriteLine($" {DateTime.Now } DB Memory backup aborting error!\n {ex}");
+            }
+        }
+
+        public void DBMemoryLoad(DatabaseConfig dbConfig, Guid networkID, string destinationMemoryFilePath)
+        {
+            Logger logger = new Logger();
+
+            try
+            {
+                DBSelector dbSelector = new DBSelector(logger, dbConfig);
+
+                // Creating the general string list of memory:
+                List<string> memoryInTextList = new List<string>();
+
+                // Getting all layers ids' ordered by own number in network:
+                List<Guid> layersIDList = dbSelector.GetLayerIDList(networkID);
+
+                // As parallel fill the metadata of network:
+                NetworkStructure networkStructure = new NetworkStructure();
+                networkStructure.NeuronsByLayers = new int[layersIDList.Count];
+
+                for(int i = 0; i < layersIDList.Count; i++)
+                {
+                    List<Guid> neuronsIDList = dbSelector.GetNeuronsIDList(layersIDList[i]);
+
+                    // Fillin the metadata of count of neurons on current layer:
+                    networkStructure.NeuronsByLayers[i] = neuronsIDList.Count;
+
+                    for(int k = 0; k < neuronsIDList.Count; k++)
+                    {
+                        List<double> weightList = dbSelector.GetWeightsList(neuronsIDList[k]);
+
+                        // Adding memory neuron data to text list:
+                        string neuronDataText = $"layer_{i} neuron_{k} ";
+
+                        for(int j = 0; j < weightList.Count; j++)
+                        {
+                            neuronDataText += weightList[j];
+                        }
+
+                        memoryInTextList.Add(neuronDataText);
+
+                        // Fillin metadata of inputVectorLength of network:
+                        if (i == 0 && k == 0)
+                        {
+                            networkStructure.InputVectorLength = weightList.Count;
+                        }
+                    }
+                }
+
+                // Saving memory from textList:
+                _fileManager.SaveMemoryFromModel(memoryInTextList, destinationMemoryFilePath);
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ErrorType.DBMemoryLoadError, "DB Memory loading error!\n" + ex);
+                Console.WriteLine($" {DateTime.Now } DB Memory loading error!\n {ex}");
             }
         }
 
