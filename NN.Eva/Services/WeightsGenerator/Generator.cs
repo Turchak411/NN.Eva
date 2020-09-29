@@ -67,7 +67,7 @@ namespace NN.Eva.Services.WeightsGenerator
         {
             for (int i = 0; i < valuesRowLength; i++)
             {
-                fileWriter.Write(" " + GenerateValue(rnd));
+                fileWriter.Write(" " + GenerateValue(rnd).ToString().Replace('.', ','));
             }
 
             fileWriter.WriteLine();
