@@ -3,6 +3,7 @@ using System.Diagnostics;
 using MySql.Data.MySqlClient;
 using NN.Eva.Core;
 using NN.Eva.Models;
+using NN.Eva.Models.Database;
 using NN.Eva.Services;
 
 namespace NN.Eva
@@ -114,13 +115,13 @@ namespace NN.Eva
         /// <param name="dbConnection"></param>
         /// <param name="networkStructure"></param>
         /// <returns>State of operation success</returns>
-        public bool BackupMemory(string memoryFolder, MySqlConnection dbConnection, string networkStructureInfo = "no information")
+        public bool BackupMemory(string memoryFolder, DatabaseConfig dbConfig, string networkStructureInfo = "no information")
         {
             try
             {
                 if (_networkTeacher.CheckMemory(memoryFolder))
                 {
-                    _networkTeacher.BackupMemory(memoryFolder, ".memory_backups", dbConnection);
+                    _networkTeacher.BackupMemory(memoryFolder, ".memory_backups", dbConfig);
                 }
                 else
                 {
@@ -140,11 +141,11 @@ namespace NN.Eva
         /// </summary>
         /// <param name="dbConnection"></param>
         /// <returns>State of operation success</returns>
-        public bool DBMemoryAbort(MySqlConnection dbConnection)
+        public bool DBMemoryAbort(DatabaseConfig dbConfig)
         {
             try
             {
-                _networkTeacher.DBMemoryAbort(dbConnection);
+                _networkTeacher.DBMemoryAbort(dbConfig);
 
                 return true;
             }
