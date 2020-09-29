@@ -20,6 +20,8 @@ namespace NN.Eva.Services
         /// </summary>
         public string MemoryFolderPath;
 
+        public bool IsMemoryLoadCorrect;
+
         private Logger _logger;
 
         /// <summary>
@@ -28,6 +30,8 @@ namespace NN.Eva.Services
         /// <param name="memoryFolderPath"></param>
         public FileManager(string memoryFolderPath = "Memory", string defaultMemoryFilePath = "memory.txt")
         {
+            IsMemoryLoadCorrect = true;
+
             _logger = new Logger();
 
             DefaultMemoryFilePath = defaultMemoryFilePath;
@@ -61,6 +65,8 @@ namespace NN.Eva.Services
         /// <param name="defaultMemoryFilePath"></param>
         public FileManager(NetworkStructure netStructure = null, string memoryFolderPath = "Memory", string defaultMemoryFilePath = "memory.txt")
         {
+            IsMemoryLoadCorrect = true;
+
             _logger = new Logger();
 
             DefaultMemoryFilePath = defaultMemoryFilePath;
@@ -98,6 +104,7 @@ namespace NN.Eva.Services
                 
                 if (!memoryChecker.IsValid(MemoryFolderPath + "//.clear//" + DefaultMemoryFilePath, netStructure))
                 {
+                    IsMemoryLoadCorrect = false;
                     _logger.LogError(ErrorType.MemoryInitializeError);
                 }
             }
@@ -162,9 +169,45 @@ namespace NN.Eva.Services
             return weights;
         }
 
-        public void PrepareToSaveMemory(string path)
+        public void PrepareToSaveMemory(string path, NetworkStructure networkStructure)
         {
-            File.Delete(path);
+            try
+            {
+                File.Delete(path);
+            }
+            catch { }
+
+            // Запись мета данных в начало файла памяти:
+            using (StreamWriter fileWriter = new StreamWriter(path))
+            {
+                fileWriter.Write(networkStructure.InputVectorLength);
+
+                for(int i = 0; i < networkStructure.NeuronsByLayers.Length; i++)
+                {
+                    fileWriter.Write(" " + networkStructure.NeuronsByLayers[i]);
+                }
+
+                fileWriter.WriteLine();
+            }
+        }
+
+        public NetworkStructure ReadNetworkMetadata(string path)
+        {
+            using (StreamReader fileReader = new StreamReader(path))
+            {
+                string[] readedLine = fileReader.ReadLine().Split(' ');
+
+                NetworkStructure networkStructure = new NetworkStructure();
+                networkStructure.InputVectorLength = Int32.Parse(readedLine[0]);
+                networkStructure.NeuronsByLayers = new int[readedLine.Length - 1];
+
+                for(int i = 1; i < readedLine.Length; i++)
+                {
+                    networkStructure.NeuronsByLayers[i - 1] = Int32.Parse(readedLine[i]);
+                }
+
+                return networkStructure;
+            }
         }
 
         public void SaveMemory(int layerNumber, int neuronNumber, double[] weights, string path)
@@ -223,7 +266,7 @@ namespace NN.Eva.Services
                 while (!fileReader.EndOfStream)
                 {
                     string[] readedLine = fileReader.ReadLine().Split(' ');
-                    double[] set = new double[readedLine.Length - 1];
+                    double[] set = new double[readedLine.Length];
 
                     for (int i = 0; i < readedLine.Length - 1; i++)
                     {

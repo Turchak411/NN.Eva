@@ -1,42 +1,61 @@
 ﻿using System;
 using MySql.Data.MySqlClient;
 using NN.Eva.Models;
+using NN.Eva.Models.Database;
 using NN.Eva.Services;
+using NN.Eva.Services.Database;
 
 namespace NN.Eva.Core.Database
 {
     public class DBInserter
     {
         /// <summary>
-        /// Name of the database for memory
+        /// Database configuarion
         /// </summary>
-        public string DatabaseName { get; set; }
-
-        private MySqlConnection _connection;
+        public DatabaseConfig DatabaseConfiguration { get; set; }
 
         private Logger _logger;
 
-        public DBInserter(MySqlConnection connection, Logger logger, string databaseName = "memorynn")
+        public DBInserter(Logger logger, DatabaseConfig databaseConfiguration)
         {
-            _connection = connection;
             _logger = logger;
 
-            DatabaseName = databaseName;
+            DatabaseConfiguration = databaseConfiguration;
         }
 
         public void InsertNetwork(Guid id, Guid userId, int iterations, string networkStructure)
         {
+            // Connection to Database:
+            MySqlConnection connection = null;
+
             try
             {
-                string savingDate = DateTime.Now.Year + "-" + DateTime.Now.Month + "-" + DateTime.Now.Day + " " +
-                                   +DateTime.Now.Hour + ":" + DateTime.Now.Minute + ":" + DateTime.Now.Second;
+                connection = GetNewDBConnection();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Error in connection to Database!");
+                _logger.LogError(ErrorType.DBConnectionError, ex);
+            }
 
-                string query =
-                    $"INSERT INTO {DatabaseName}.networks VALUES(\'{id}\',\'{userId}\',\'{savingDate}\'," +
-                    $"\'{networkStructure}\',\'{iterations}\');";
+            try
+            {
+                using (connection)
+                {
+                    connection.Open();
 
-                var command = new MySqlCommand(query, _connection);
-                command.ExecuteNonQuery();
+                    string savingDate = DateTime.Now.Year + "-" + DateTime.Now.Month + "-" + DateTime.Now.Day + " " +
+                                        +DateTime.Now.Hour + ":" + DateTime.Now.Minute + ":" + DateTime.Now.Second;
+
+                    string query =
+                        $"INSERT INTO {DatabaseConfiguration.Database}.networks VALUES(\'{id}\',\'{userId}\',\'{savingDate}\'," +
+                        $"\'{networkStructure}\',\'{iterations}\');";
+
+                    var command = new MySqlCommand(query, connection);
+                    command.ExecuteNonQuery();
+
+                    connection.Close();
+                }
             }
             catch (Exception ex)
             {
@@ -47,12 +66,32 @@ namespace NN.Eva.Core.Database
 
         public void InsertLayer(Guid id, Guid userId, Guid networkId, int number)
         {
+            // Connection to Database:
+            MySqlConnection connection = null;
+
             try
             {
-                string query = $"INSERT INTO {DatabaseName}.layers VALUES(\'{id}\',\'{userId}\',\'{networkId}\','{number}');";
+                connection = GetNewDBConnection();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Error in connection to Database!");
+                _logger.LogError(ErrorType.DBConnectionError, ex);
+            }
 
-                var command = new MySqlCommand(query, _connection);
-                command.ExecuteNonQuery();
+            try
+            {
+                using (connection)
+                {
+                    connection.Open();
+                    string query =
+                        $"INSERT INTO {DatabaseConfiguration.Database}.layers VALUES(\'{id}\',\'{userId}\',\'{networkId}\','{number}');";
+
+                    var command = new MySqlCommand(query, connection);
+                    command.ExecuteNonQuery();
+
+                    connection.Close();
+                }
             }
             catch (Exception ex)
             {
@@ -63,12 +102,33 @@ namespace NN.Eva.Core.Database
 
         public void InsertNeuron(Guid id, Guid userId, Guid layerId, int number)
         {
+            // Connection to Database:
+            MySqlConnection connection = null;
+
             try
             {
-                string query = $"INSERT INTO {DatabaseName}.neurons VALUES(\'{id}\',\'{userId}\',\'{layerId}\','{number}');";
+                connection = GetNewDBConnection();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Error in connection to Database!");
+                _logger.LogError(ErrorType.DBConnectionError, ex);
+            }
 
-                var command = new MySqlCommand(query, _connection);
-                command.ExecuteNonQuery();
+            try
+            {
+                using (connection)
+                {
+                    connection.Open();
+
+                    string query =
+                        $"INSERT INTO {DatabaseConfiguration.Database}.neurons VALUES(\'{id}\',\'{userId}\',\'{layerId}\','{number}');";
+
+                    var command = new MySqlCommand(query, connection);
+                    command.ExecuteNonQuery();
+
+                    connection.Close();
+                }
             }
             catch (Exception ex)
             {
@@ -79,18 +139,58 @@ namespace NN.Eva.Core.Database
 
         public void InsertWeight(Guid neuronId, Guid userId, int number, double value)
         {
+            // Connection to Database:
+            MySqlConnection connection = null;
+
             try
             {
-                string query = $"INSERT INTO {DatabaseName}.weights VALUES(\'{Guid.NewGuid()}\',\'{userId}\',\'{neuronId}\',\'{number}\',\'{value.ToString().Replace(',', '.')}\');";
+                connection = GetNewDBConnection();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Error in connection to Database!");
+                _logger.LogError(ErrorType.DBConnectionError, ex);
+            }
 
-                var command = new MySqlCommand(query, _connection);
-                command.ExecuteNonQuery();
+            try
+            {
+                using (connection)
+                {
+                    connection.Open();
+
+                    string query =
+                        $"INSERT INTO {DatabaseConfiguration.Database}.weights VALUES(\'{Guid.NewGuid()}\',\'{userId}\',\'{neuronId}\',\'{number}\',\'{value.ToString().Replace(',', '.')}\');";
+
+                    var command = new MySqlCommand(query, connection);
+                    command.ExecuteNonQuery();
+
+                    connection.Close();
+                }
             }
             catch (Exception ex)
             {
                 Console.WriteLine("Insert-error in table \"weights\"!");
                 _logger.LogError(ErrorType.DBInsertError, "Table 'networks'.\n" + ex);
             }
+        }
+
+        private MySqlConnection GetNewDBConnection()
+        {
+            MySqlConnection connection = null;
+
+            try
+            {
+                var dbConfigurator = new DatabaseConfigurator();
+
+                connection = new MySqlConnection(dbConfigurator.ReturnDatabaseConnection(DatabaseConfiguration));
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"{DateTime.Now }\nException: {ex}");
+                _logger.LogError(ErrorType.DBConnectionError, ex);
+            }
+
+            return connection;
         }
     }
 }

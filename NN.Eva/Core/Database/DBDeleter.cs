@@ -2,61 +2,81 @@
 using NN.Eva.Models;
 using NN.Eva.Services;
 using System;
+using NN.Eva.Models.Database;
+using NN.Eva.Services.Database;
 
 namespace NN.Eva.Core.Database
 {
     public class DBDeleter
     {
         /// <summary>
-        /// Name of the database for memory
+        /// Database configuarion
         /// </summary>
-        public string DatabaseName { get; set; }
-
-        private MySqlConnection _connection;
+        public DatabaseConfig DatabaseConfiguration { get; set; }
 
         private Logger _logger;
 
-        public DBDeleter(MySqlConnection connection, Logger logger, string databaseName = "memorynn")
+        public DBDeleter(Logger logger, DatabaseConfig databaseConfiguration)
         {
-            _connection = connection;
             _logger = logger;
 
-            DatabaseName = databaseName;
+            DatabaseConfiguration = databaseConfiguration;
         }
 
         public void DeleteFromTableNetworks(Guid id)
         {
-            DeleteFromTable(id, DatabaseName, "networks", "id");
+            DeleteFromTable(id, "networks", "id");
         }
 
         public void DeleteFromTableLayers(Guid networkId)
         {
-            DeleteFromTable(networkId, DatabaseName, "layers", "networkId");
+            DeleteFromTable(networkId, "layers", "networkId");
         }
 
         public void DeleteFromTableNeurons(Guid layerId)
         {
-            DeleteFromTable(layerId, DatabaseName, "neurons", "layerId");
+            DeleteFromTable(layerId, "neurons", "layerId");
         }
 
         public void DeleteFromTableWeights(Guid neuronId)
         {
-            DeleteFromTable(neuronId, DatabaseName, "weights", "neuronId");
+            DeleteFromTable(neuronId, "weights", "neuronId");
         }
 
-        private void DeleteFromTable(Guid id, string dbName, string tableName, string rowIdName)
+        private void DeleteFromTable(Guid id, string tableName, string rowIdName)
         {
             try
             {
-                string query = "DELETE FROM " + dbName + "." + tableName + " WHERE (`" + rowIdName + "` = '" + id + "');";
+                string query = "DELETE FROM " + DatabaseConfiguration.Database + "." + tableName + " WHERE (`" + rowIdName + "` = '" + id + "');";
 
-                var command = new MySqlCommand(query, _connection);
+                MySqlConnection connection = GetNewDBConnection();
+
+                var command = new MySqlCommand(query, connection);
                 command.ExecuteNonQuery();
             }
             catch (Exception ex)
             {
                 _logger.LogError(ErrorType.DBDeleteError, "Delete-error in table \"" + tableName + "\"!\nID: " + id + "\n" + ex);
             }
+        }
+
+        private MySqlConnection GetNewDBConnection()
+        {
+            MySqlConnection connection = null;
+
+            try
+            {
+                var dbConfigurator = new DatabaseConfigurator();
+
+                connection = new MySqlConnection(dbConfigurator.ReturnDatabaseConnection(DatabaseConfiguration));
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"{DateTime.Now }\nException: {ex}");
+                _logger.LogError(ErrorType.DBConnectionError, ex);
+            }
+
+            return connection;
         }
     }
 }

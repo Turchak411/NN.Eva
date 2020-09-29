@@ -11,6 +11,8 @@ namespace NN.Eva.Core
 
         public NeuralNetwork Network { get; set; }
 
+        public NetworkStructure NetworkStructure { get; set; }
+
         public TrainingConfiguration TrainingConfiguration { get; set; }
 
         public List<double[]> InputDatasets { get; set; }
@@ -56,7 +58,7 @@ namespace NN.Eva.Core
                 }
             }
 
-            Network.SaveMemory(TrainingConfiguration.MemoryFolder + "//memory_" + Id + ".txt");
+            Network.SaveMemory(TrainingConfiguration.MemoryFolder + "//memory_" + Id + ".txt", NetworkStructure);
         }
     }
 }
