@@ -441,6 +441,8 @@ namespace NN.Eva.Core
                 {
                     threadList = new List<Thread>();
 
+                    // TODO: сделать присваивание trainConfig[j]
+
                     for (int i = 0; i < netTeachers.Length; i++)
                     {
                         threadList.Add(new Thread(netTeachers[i].Train));
