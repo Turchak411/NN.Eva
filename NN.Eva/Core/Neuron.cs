@@ -125,7 +125,7 @@ namespace NN.Eva.Core
 
         public void SaveMemory(FileManager fileManager, int layerNumber, int neuronNumber, string memoryPath)
         {
-            fileManager.SaveMemory(layerNumber, neuronNumber, _weights, memoryPath);
+            fileManager.SaveMemory(layerNumber, neuronNumber, _weights, _offsetValue, _offsetWeight, memoryPath);
         }
 
         public void SaveMemoryToDB(Guid layerId, Guid userId, int number, DBInserter dbInserter)
@@ -136,6 +136,7 @@ namespace NN.Eva.Core
             // Saving weights info:
             for (int i = 0; i < _weights.Length; i++)
             {
+                // TODO: сделать insert еще и _offsetValue и _offsetWeight значений
                 dbInserter.InsertWeight(Id, userId, i, _weights[i]);
             }
         }

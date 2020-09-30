@@ -26,9 +26,12 @@ namespace NN.Eva.Test
 
             bool creatingSucceed = serviceEvaNN.CreateNetwork(trainConfig.MemoryFolder, netStructure);
 
+            double[] netResult;
+
             if (creatingSucceed)
             {
                 serviceEvaNN.Train(trainConfig, 20000, true);
+                netResult = serviceEvaNN.Handle(new double[2] { 0, 0 });
             }
 
             Console.WriteLine("Done");

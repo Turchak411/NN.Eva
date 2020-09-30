@@ -18,11 +18,12 @@ namespace NN.Eva.Core
         public Layer(int neuronCount, int weightCount, int layerNumber, FileManager fileManager)
         {
             double offsetValue = 0.5;
+            double offsetWeight = -1;
 
             for (int i = 0; i < neuronCount; i++)
             {
-                double[] weights = fileManager.LoadMemory(layerNumber, i);
-                Neuron neuron = new Neuron(weights, offsetValue, -1, ActivationFunction.Sigmoid);
+                double[] weights = fileManager.LoadMemory(layerNumber, i, ref offsetValue, ref offsetWeight);
+                Neuron neuron = new Neuron(weights, offsetValue, offsetWeight, ActivationFunction.Sigmoid);
 
                 _neuronList.Add(neuron);
             }
@@ -31,11 +32,12 @@ namespace NN.Eva.Core
         public Layer(int neuronCount, int weightCount, int layerNumber, FileManager fileManager, string memoryPath)
         {
             double offsetValue = 0.5;
+            double offsetWeight = -1;
 
             for (int i = 0; i < neuronCount; i++)
             {
-                double[] weights = fileManager.LoadMemory(layerNumber, i, memoryPath);
-                Neuron neuron = new Neuron(weights, offsetValue, -1, ActivationFunction.Sigmoid);
+                double[] weights = fileManager.LoadMemory(layerNumber, i, memoryPath, ref offsetValue, ref offsetWeight);
+                Neuron neuron = new Neuron(weights, offsetValue, offsetWeight, ActivationFunction.Sigmoid);
 
                 _neuronList.Add(neuron);
             }
