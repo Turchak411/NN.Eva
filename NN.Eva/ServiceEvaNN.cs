@@ -74,6 +74,12 @@ namespace NN.Eva
             }
         }
 
+        public void PrintLearnStatistic(TrainingConfiguration trainingConfiguration, bool withLoggingToFile = false)
+        {
+            // TODO: протестить
+            _networkTeacher.PrintLearnStatistic(trainingConfiguration, withLoggingToFile);
+        }
+
         /// <summary>
         /// Handling double-vector data as nets assembly
         /// </summary>

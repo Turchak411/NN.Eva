@@ -29,6 +29,7 @@ namespace NN.Eva.Test
             if (creatingSucceed)
             {
                 serviceEvaNN.Train(trainConfig, 4700, true);
+                //serviceEvaNN.PrintLearnStatistic(trainConfig, true);
             }
 
             Console.WriteLine("Done");
