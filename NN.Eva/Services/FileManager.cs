@@ -110,6 +110,15 @@ namespace NN.Eva.Services
             }
         }
 
+        public bool IsMemoryEqualsDefault(string memoryPathToCheck)
+        {
+            FileInfo fileDefaultMemory = new FileInfo(MemoryFolderPath + "//.clear//" + DefaultMemoryFilePath);
+            FileInfo fileToCheck = new FileInfo(MemoryFolderPath + "//" + memoryPathToCheck);
+
+            // Возвращает false, если вес проверяемого файла памяти отличается от файла с чистой памятью больше чем на 50%
+            return Math.Abs(fileDefaultMemory.Length - fileToCheck.Length) < fileDefaultMemory.Length * 0.5;
+        }
+
         public double[] LoadMemory(int layerNumber, int neuronNumber)
         {
             double[] memory = new double[0];
@@ -120,6 +129,7 @@ namespace NN.Eva.Services
                 {
                     string[] readedLine = fileReader.ReadLine().Split(' ');
 
+                    // TODO: Зарефакторить. Кинуть break, когда память загрузилась
                     if ((readedLine[0] == "layer_" + layerNumber) && (readedLine[1] == "neuron_" + neuronNumber))
                     {
                         memory = GetWeights(readedLine);
@@ -163,7 +173,7 @@ namespace NN.Eva.Services
 
             for (int i = 0; i < weights.Length; i++)
             {
-                weights[i] = double.Parse(readedLine[i + 2].Replace('.', ','));
+                weights[i] = double.Parse(readedLine[i + 2], CultureInfo.GetCultureInfo("ru-RU"));
             }
 
             return weights;
@@ -210,6 +220,13 @@ namespace NN.Eva.Services
             }
         }
 
+        /// <summary>
+        /// Main method of saving memory
+        /// </summary>
+        /// <param name="layerNumber"></param>
+        /// <param name="neuronNumber"></param>
+        /// <param name="weights"></param>
+        /// <param name="path"></param>
         public void SaveMemory(int layerNumber, int neuronNumber, double[] weights, string path)
         {
             using (StreamWriter fileWriter = new StreamWriter(path, true))
@@ -218,10 +235,25 @@ namespace NN.Eva.Services
 
                 for (int i = 0; i < weights.Length; i++)
                 {
-                    fileWriter.Write(" " + weights[i]);
+                    fileWriter.Write(" " + weights[i].ToString().Replace('.',','));
                 }
 
                 fileWriter.WriteLine("");
+            }
+        }
+
+        /// <summary>
+        /// Saving memory from textList memory-model
+        /// </summary>
+        /// <param name="memoryInTextList"></param>
+        public void SaveMemoryFromModel(List<string> memoryInTextList, string destinationMemoryFilePath)
+        {
+            using(StreamWriter fileWriter = new StreamWriter(destinationMemoryFilePath))
+            {
+                for (int i = 0; i < memoryInTextList.Count; i++)
+                {
+                    fileWriter.WriteLine(memoryInTextList[i]);
+                }
             }
         }
 
@@ -265,10 +297,10 @@ namespace NN.Eva.Services
             {
                 while (!fileReader.EndOfStream)
                 {
-                    string[] readedLine = fileReader.ReadLine().Split(' ');
+                    string[] readedLine = fileReader.ReadLine().Trim().Split(' ');
                     double[] set = new double[readedLine.Length];
 
-                    for (int i = 0; i < readedLine.Length - 1; i++)
+                    for (int i = 0; i < readedLine.Length; i++)
                     {
                         set[i] = double.Parse(readedLine[i]);
                     }

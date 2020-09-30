@@ -74,6 +74,12 @@ namespace NN.Eva
             }
         }
 
+        public void PrintLearnStatistic(TrainingConfiguration trainingConfiguration, bool withLoggingToFile = false)
+        {
+            // TODO: протестить
+            _networkTeacher.PrintLearnStatistic(trainingConfiguration, withLoggingToFile);
+        }
+
         /// <summary>
         /// Handling double-vector data as nets assembly
         /// </summary>
@@ -115,13 +121,13 @@ namespace NN.Eva
         /// <param name="dbConnection"></param>
         /// <param name="networkStructure"></param>
         /// <returns>State of operation success</returns>
-        public bool BackupMemory(string memoryFolder, DatabaseConfig dbConfig, string networkStructureInfo = "no information")
+        public bool BackupMemory(string memoryFolder, DatabaseConfig dbConfig = null, string networkStructureInfo = "no information")
         {
             try
             {
                 if (_networkTeacher.CheckMemory(memoryFolder))
                 {
-                    _networkTeacher.BackupMemory(memoryFolder, ".memory_backups", dbConfig);
+                    _networkTeacher.BackupMemory(memoryFolder, ".memory_backups", dbConfig);  
                 }
                 else
                 {
@@ -146,6 +152,20 @@ namespace NN.Eva
             try
             {
                 _networkTeacher.DBMemoryAbort(dbConfig);
+
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        public bool DBMemoryLoad(DatabaseConfig dbConfig, Guid networkID, string destinationMemoryFilePath)
+        {
+            try
+            {
+                _networkTeacher.DBMemoryLoad(dbConfig, networkID, destinationMemoryFilePath);
 
                 return true;
             }

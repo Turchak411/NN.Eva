@@ -51,7 +51,6 @@ namespace NN.Eva.Core
                     _netsList.Add(new NeuralNetwork(netStructure.InputVectorLength,
                         netStructure.NeuronsByLayers,
                         fileManager, "memory_" + i + ".txt"));
-                    // TODO: Сделать загрузку готовой памяти из базы данных (реализация DBSelector'а)
                 }
             }
             catch (Exception ex)
@@ -59,6 +58,8 @@ namespace NN.Eva.Core
                 _logger.LogError(ErrorType.MemoryInitializeError, ex);
             }
         }
+
+        #region Trained testing
 
         public void CommonTest()
         {
@@ -145,6 +146,82 @@ namespace NN.Eva.Core
 
             int testPassed = 0;
             int testFailed = 0;
+
+            #region Load data from file
+
+            List<double[]> inputDataSets;
+            List<double[]> outputDataSets;
+
+            try
+            {
+                inputDataSets = _fileManager.LoadTrainingDataset(trainingConfig.InputDatasetFilename);
+                outputDataSets = _fileManager.LoadTrainingDataset(trainingConfig.OutputDatasetFilename);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ErrorType.SetMissing, ex);
+                return;
+            }
+
+            #endregion
+
+            for (int i = 0; i < inputDataSets.Count; i++)
+            {
+                List<double> netResults = new List<double>();
+
+                for (int k = 0; k < _netsList.Count; k++)
+                {
+                    // Получение ответа:
+                    netResults.Add(_netsList[k].Handle(inputDataSets[i])[0]);
+                }
+
+                if (IsVectorsRoughlyEquals(outputDataSets[i], netResults.ToArray(), 0.3))
+                {
+                    testPassed++;
+                }
+                else
+                {
+                    testFailed++;
+                }
+            }
+
+            // Logging (optional):
+            if (withLogging)
+            {
+                _logger.LogTrainResults(testPassed, testFailed, Iteration);
+            }
+
+            Console.WriteLine("Test passed: {0}\nTest failed: {1}\nPercent learned: {2:f2}", testPassed,
+                                                                                             testFailed,
+                                                                                             (double)testPassed * 100 / (testPassed + testFailed));
+        }
+
+        private bool IsVectorsRoughlyEquals(double[] sourceVector0, double[] controlVector1, double equalsPercent)
+        {
+            // Возвращение неравенства, если длины векторов не совпадают
+            if(sourceVector0.Length != controlVector1.Length)
+            {
+                return false;
+            }
+
+            for(int i = 0; i < sourceVector0.Length; i++)
+            {
+                // TODO: Сделать универсальную формулу подсчета:
+                if (controlVector1[i] < sourceVector0[i] - equalsPercent || controlVector1[i] > sourceVector0[i] + equalsPercent)
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        public void PrintLearnStatisticAsAssembly(TrainingConfiguration trainingConfig, bool withLogging = false)
+        {
+            Console.WriteLine("Start calculating statistic (as assembly)...");
+
+            int testPassed = 0;
+            int testFailed = 0;
             int testFailed_lowActivationCause = 0;
 
             #region Load data from file
@@ -208,6 +285,25 @@ namespace NN.Eva.Core
                                                                                                                            (double)testPassed * 100 / (testPassed + testFailed));
         }
 
+        private int FindMaxIndex(List<double> netResults, double threshold = 0.8)
+        {
+            int maxIndex = -1;
+            double maxValue = -1;
+
+            for (int i = 0; i < netResults.Count; i++)
+            {
+                if (maxValue < netResults[i] && netResults[i] >= threshold)
+                {
+                    maxIndex = i;
+                    maxValue = netResults[i];
+                }
+            }
+
+            return maxIndex;
+        }
+
+        #endregion
+
         public bool CheckMemory(string memoryFolder = "Memory")
         {
             bool isValid = true;
@@ -220,7 +316,8 @@ namespace NN.Eva.Core
             {
                 bool isCurrentNetMemoryValid = _netStructure == null
                     ? _memoryChecker.IsValidQuickCheck(memoryFolder + "//memory_" + i + ".txt")
-                    : _memoryChecker.IsValid(memoryFolder + "//memory_" + i + ".txt", _netStructure);
+                    : _memoryChecker.IsValid(memoryFolder + "//memory_" + i + ".txt", _netStructure) && 
+                      _fileManager.IsMemoryEqualsDefault("memory_" + i + ".txt");
 
                 if (isCurrentNetMemoryValid)
                 {
@@ -238,23 +335,6 @@ namespace NN.Eva.Core
             Console.ForegroundColor = ConsoleColor.Gray;
 
             return isValid;
-        }
-
-        private int FindMaxIndex(List<double> netResults, double threshold = 0.8)
-        {
-            int maxIndex = -1;
-            double maxValue = -1;
-
-            for (int i = 0; i < netResults.Count; i++)
-            {
-                if (maxValue < netResults[i] && netResults[i] >= threshold)
-                {
-                    maxIndex = i;
-                    maxValue = netResults[i];
-                }
-            }
-
-            return maxIndex;
         }
 
         public void BackupMemory(string memoryFolder = "Memory", string backupsDirectoryName = ".memory_backups",
@@ -302,6 +382,8 @@ namespace NN.Eva.Core
 
             Console.WriteLine("Memory backuped!");
         }
+
+        #region Training
 
         /// <summary>
         /// Обучение сети
@@ -361,6 +443,8 @@ namespace NN.Eva.Core
 
                     for (int i = 0; i < netTeachers.Length; i++)
                     {
+                        netTeachers[i].TrainingConfiguration = trainingConfigs[i];
+
                         threadList.Add(new Thread(netTeachers[i].Train));
                         threadList[i].Start();
                     }
@@ -400,6 +484,7 @@ namespace NN.Eva.Core
                     {
                         StartIteration = currentIterPosition,
                         EndIteration = currentIterPosition + iterationsToPause,
+                        MemoryFolder = trainingConfig.MemoryFolder,
                         InputDatasetFilename = trainingConfig.InputDatasetFilename,
                         OutputDatasetFilename = trainingConfig.OutputDatasetFilename
                     };
@@ -414,6 +499,7 @@ namespace NN.Eva.Core
                     {
                         StartIteration = currentIterPosition,
                         EndIteration = trainingConfig.EndIteration,
+                        MemoryFolder = trainingConfig.MemoryFolder,
                         InputDatasetFilename = trainingConfig.InputDatasetFilename,
                         OutputDatasetFilename = trainingConfig.OutputDatasetFilename
                     };
@@ -443,6 +529,10 @@ namespace NN.Eva.Core
                 if (WorkCount == threadList.Count) break;
             }
         }
+
+        #endregion
+
+        #region Database
 
         private void SavingMemoryToDB(DatabaseConfig dbConfig, string networkStructure, Guid userId)
         {
@@ -483,10 +573,71 @@ namespace NN.Eva.Core
             }
             catch (Exception ex)
             {
-                logger.LogError(ErrorType.DBInsertError, "DB Memory backup aborting error!\n" + ex);
+                logger.LogError(ErrorType.DBDeleteError, "DB Memory backup aborting error!\n" + ex);
                 Console.WriteLine($" {DateTime.Now } DB Memory backup aborting error!\n {ex}");
             }
         }
+
+        public void DBMemoryLoad(DatabaseConfig dbConfig, Guid networkID, string destinationMemoryFilePath)
+        {
+            Logger logger = new Logger();
+
+            try
+            {
+                DBSelector dbSelector = new DBSelector(logger, dbConfig);
+
+                // Creating the general string list of memory:
+                List<string> memoryInTextList = new List<string>();
+
+                // Getting all layers ids' ordered by own number in network:
+                List<Guid> layersIDList = dbSelector.GetLayerIDList(networkID);
+
+                // As parallel fill the metadata of network:
+                NetworkStructure networkStructure = new NetworkStructure();
+                networkStructure.NeuronsByLayers = new int[layersIDList.Count];
+
+                for(int i = 0; i < layersIDList.Count; i++)
+                {
+                    List<Guid> neuronsIDList = dbSelector.GetNeuronsIDList(layersIDList[i]);
+
+                    // Fillin the metadata of count of neurons on current layer:
+                    networkStructure.NeuronsByLayers[i] = neuronsIDList.Count;
+
+                    for(int k = 0; k < neuronsIDList.Count; k++)
+                    {
+                        List<double> weightList = dbSelector.GetWeightsList(neuronsIDList[k]);
+
+                        // Adding memory neuron data to text list:
+                        string neuronDataText = $"layer_{i} neuron_{k} ";
+
+                        for(int j = 0; j < weightList.Count; j++)
+                        {
+                            neuronDataText += weightList[j];
+                        }
+
+                        memoryInTextList.Add(neuronDataText);
+
+                        // Fillin metadata of inputVectorLength of network:
+                        if (i == 0 && k == 0)
+                        {
+                            networkStructure.InputVectorLength = weightList.Count;
+                        }
+                    }
+                }
+
+                // Saving memory from textList:
+                _fileManager.SaveMemoryFromModel(memoryInTextList, destinationMemoryFilePath);
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ErrorType.DBMemoryLoadError, "DB Memory loading error!\n" + ex);
+                Console.WriteLine($" {DateTime.Now } DB Memory loading error!\n {ex}");
+            }
+        }
+
+        #endregion
+
+        #region Handling
 
         public double[] HandleAsAssembly(double[] data)
         {
@@ -518,5 +669,7 @@ namespace NN.Eva.Core
                 return null;
             }
         }
+
+        #endregion
     }
 }
