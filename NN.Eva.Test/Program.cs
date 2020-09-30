@@ -12,7 +12,7 @@ namespace NN.Eva.Test
             NetworkStructure netStructure = new NetworkStructure
             {
                 InputVectorLength = 2,
-                NeuronsByLayers = new[] { 5, 1 }
+                NeuronsByLayers = new[] { 1, 1 }
             };
 
             TrainingConfiguration trainConfig = new TrainingConfiguration
@@ -23,8 +23,6 @@ namespace NN.Eva.Test
                 OutputDatasetFilename = "TrainingSets//outputSets.txt",
                 MemoryFolder = "Memory"
             };
-
-            // TODO: выпилить возможность создания ансамбля сети внутри 1 сервиса
 
             bool creatingSucceed = serviceEvaNN.CreateNetwork(trainConfig.MemoryFolder, netStructure);
 
