@@ -17,12 +17,14 @@ namespace NN.Eva.Test
 
             TrainingConfiguration trainConfig = new TrainingConfiguration
             {
-                StartIteration = 0,
-                EndIteration = 100000,
+                StartIteration = 100000,
+                EndIteration = 200000,
                 InputDatasetFilename = "TrainingSets//inputSets.txt",
                 OutputDatasetFilename = "TrainingSets//outputSets.txt",
                 MemoryFolder = "Memory"
             };
+
+            // TODO: выпилить возможность создания ансамбля сети внутри 1 сервиса
 
             bool creatingSucceed = serviceEvaNN.CreateNetwork(trainConfig.MemoryFolder, netStructure);
 

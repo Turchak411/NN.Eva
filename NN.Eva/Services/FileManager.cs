@@ -28,7 +28,7 @@ namespace NN.Eva.Services
         /// Uses only for checking memory validity
         /// </summary>
         /// <param name="memoryFolderPath"></param>
-        public FileManager(string memoryFolderPath = "Memory", string defaultMemoryFilePath = "memory.txt")
+        public FileManager(string memoryFolderPath = "Memory", string defaultMemoryFilePath = "memoryClear.txt")
         {
             IsMemoryLoadCorrect = true;
 
@@ -63,7 +63,7 @@ namespace NN.Eva.Services
         /// <param name="netStructure"></param>
         /// <param name="memoryFolderPath"></param>
         /// <param name="defaultMemoryFilePath"></param>
-        public FileManager(NetworkStructure netStructure = null, string memoryFolderPath = "Memory", string defaultMemoryFilePath = "memory.txt")
+        public FileManager(NetworkStructure netStructure = null, string memoryFolderPath = "Memory", string defaultMemoryFilePath = "memoryClear.txt")
         {
             IsMemoryLoadCorrect = true;
 
