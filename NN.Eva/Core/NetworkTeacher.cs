@@ -280,7 +280,7 @@ namespace NN.Eva.Core
         /// </summary>
         /// <param name="startIteration"></param>
         /// <param name="withSort"></param>
-        public void TrainNets(TrainingConfiguration trainingConfig, int iterationsToPause)
+        public void TrainNet(TrainingConfiguration trainingConfig, int iterationsToPause)
         {
             Iteration = trainingConfig.EndIteration;
 
@@ -325,6 +325,7 @@ namespace NN.Eva.Core
 
                     Thread thread = new Thread(netTeacher.Train);
                     thread.Start();
+                    Wait(thread);
 
                     if (j != trainingConfigs.Count - 1)
                     {
@@ -338,11 +339,26 @@ namespace NN.Eva.Core
                     CommonTestColorized();
                 }
 
+                // TODO:
+                // ПОлучение обученной сети:
+                _net = netTeacher.Network;
+
                 Console.WriteLine("Training success!");
             }
             catch (Exception ex)
             {
                 _logger.LogError(ErrorType.TrainError, ex);
+            }
+        }
+
+        private void Wait(Thread thread)
+        {
+            while (true)
+            {
+                if(!thread.IsAlive)
+                {
+                    break;
+                }
             }
         }
 

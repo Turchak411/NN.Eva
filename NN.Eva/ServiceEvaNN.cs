@@ -60,7 +60,7 @@ namespace NN.Eva
 
             if (_networkTeacher.CheckMemory(trainingConfiguration.MemoryFolder))
             {
-                _networkTeacher.TrainNets(trainingConfiguration, iterationToPause);
+                _networkTeacher.TrainNet(trainingConfiguration, iterationToPause);
 
                 if (printLearnStatistic)
                 {
