@@ -167,21 +167,19 @@ namespace NN.Eva.Core
 
             for (int i = 0; i < inputDataSets.Count; i++)
             {
-                List<double> netResults = new List<double>();
-
                 for (int k = 0; k < _netsList.Count; k++)
                 {
                     // Получение ответа:
-                    netResults.Add(_netsList[k].Handle(inputDataSets[i])[0]);
-                }
+                    double[] netResult = _netsList[k].Handle(inputDataSets[i]);
 
-                if (IsVectorsRoughlyEquals(outputDataSets[i], netResults.ToArray(), 0.3))
-                {
-                    testPassed++;
-                }
-                else
-                {
-                    testFailed++;
+                    if (IsVectorsRoughlyEquals(outputDataSets[i], netResult, 0.3))
+                    {
+                        testPassed++;
+                    }
+                    else
+                    {
+                        testFailed++;
+                    }
                 }
             }
 
