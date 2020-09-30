@@ -206,8 +206,8 @@ namespace NN.Eva.Core
 
             for(int i = 0; i < sourceVector0.Length; i++)
             {
-                // TODO: Протестировать
-                if(controlVector1[i] / sourceVector0[i] - (1 - equalsPercent) > equalsPercent)
+                // TODO: Сделать универсальную формулу подсчета:
+                if (controlVector1[i] < sourceVector0[i] - equalsPercent || controlVector1[i] > sourceVector0[i] + equalsPercent)
                 {
                     return false;
                 }
@@ -441,10 +441,10 @@ namespace NN.Eva.Core
                 {
                     threadList = new List<Thread>();
 
-                    // TODO: сделать присваивание trainConfig[j]
-
                     for (int i = 0; i < netTeachers.Length; i++)
                     {
+                        netTeachers[i].TrainingConfiguration = trainingConfigs[i];
+
                         threadList.Add(new Thread(netTeachers[i].Train));
                         threadList[i].Start();
                     }
@@ -484,6 +484,7 @@ namespace NN.Eva.Core
                     {
                         StartIteration = currentIterPosition,
                         EndIteration = currentIterPosition + iterationsToPause,
+                        MemoryFolder = trainingConfig.MemoryFolder,
                         InputDatasetFilename = trainingConfig.InputDatasetFilename,
                         OutputDatasetFilename = trainingConfig.OutputDatasetFilename
                     };
@@ -498,6 +499,7 @@ namespace NN.Eva.Core
                     {
                         StartIteration = currentIterPosition,
                         EndIteration = trainingConfig.EndIteration,
+                        MemoryFolder = trainingConfig.MemoryFolder,
                         InputDatasetFilename = trainingConfig.InputDatasetFilename,
                         OutputDatasetFilename = trainingConfig.OutputDatasetFilename
                     };
