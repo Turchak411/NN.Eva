@@ -167,12 +167,69 @@ namespace NN.Eva.Core
 
             for (int i = 0; i < inputDataSets.Count; i++)
             {
+                // Получение ответа:
+                double[] netResult = _netsList[0].Handle(inputDataSets[i]);
+
+                if (IsVectorsRoughlyEquals(outputDataSets[i], netResult, 0.3))
+                {
+                    testPassed++;
+                }
+                else
+                {
+                    testFailed++;
+                }
+            }
+
+            // Logging (optional):
+            if (withLogging)
+            {
+                _logger.LogTrainResults(testPassed, testFailed, Iteration);
+            }
+
+            Console.WriteLine("Test passed: {0}\nTest failed: {1}\nPercent learned: {2:f2}", testPassed,
+                                                                                             testFailed,
+                                                                                             (double)testPassed * 100 / (testPassed + testFailed));
+        }
+
+        /// <summary>
+        /// Сбор статистики обучения по датасету относительно ассамблейной структуры
+        /// Подразумевается, что каждая сеть ансамбля имеет 1 нейрон на выходе
+        /// </summary>
+        /// <param name="trainingConfig"></param>
+        /// <param name="withLogging"></param>
+        public void PrintLearnStatisticAsAssembly(TrainingConfiguration trainingConfig, bool withLogging = false)
+        {
+            Console.WriteLine("Start calculating statistic...");
+
+            int testPassed = 0;
+            int testFailed = 0;
+
+            #region Load data from file
+
+            List<double[]> inputDataSets;
+            List<double[]> outputDataSets;
+
+            try
+            {
+                inputDataSets = _fileManager.LoadTrainingDataset(trainingConfig.InputDatasetFilename);
+                outputDataSets = _fileManager.LoadTrainingDataset(trainingConfig.OutputDatasetFilename);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ErrorType.SetMissing, ex);
+                return;
+            }
+
+            #endregion
+
+            for (int i = 0; i < inputDataSets.Count; i++)
+            {
                 for (int k = 0; k < _netsList.Count; k++)
                 {
                     // Получение ответа:
                     double[] netResult = _netsList[k].Handle(inputDataSets[i]);
 
-                    if (IsVectorsRoughlyEquals(outputDataSets[i], netResult, 0.3))
+                    if (IsVectorsRoughlyEquals(new double[1] { outputDataSets[i][k] }, netResult, 0.3))
                     {
                         testPassed++;
                     }
@@ -190,8 +247,8 @@ namespace NN.Eva.Core
             }
 
             Console.WriteLine("Test passed: {0}\nTest failed: {1}\nPercent learned: {2:f2}", testPassed,
-                                                                                             testFailed,
-                                                                                             (double)testPassed * 100 / (testPassed + testFailed));
+                testFailed,
+                (double)testPassed * 100 / (testPassed + testFailed));
         }
 
         private bool IsVectorsRoughlyEquals(double[] sourceVector0, double[] controlVector1, double equalsPercent)
@@ -214,74 +271,74 @@ namespace NN.Eva.Core
             return true;
         }
 
-        public void PrintLearnStatisticAsAssembly(TrainingConfiguration trainingConfig, bool withLogging = false)
-        {
-            Console.WriteLine("Start calculating statistic (as assembly)...");
+        //public void PrintLearnStatisticAsAssemblyOld(TrainingConfiguration trainingConfig, bool withLogging = false)
+        //{
+        //    Console.WriteLine("Start calculating statistic (as assembly)...");
 
-            int testPassed = 0;
-            int testFailed = 0;
-            int testFailed_lowActivationCause = 0;
+        //    int testPassed = 0;
+        //    int testFailed = 0;
+        //    int testFailed_lowActivationCause = 0;
 
-            #region Load data from file
+        //    #region Load data from file
 
-            List<double[]> inputDataSets;
-            List<double[]> outputDataSets;
+        //    List<double[]> inputDataSets;
+        //    List<double[]> outputDataSets;
 
-            try
-            {
-                inputDataSets = _fileManager.LoadTrainingDataset(trainingConfig.InputDatasetFilename);
-                outputDataSets = _fileManager.LoadTrainingDataset(trainingConfig.OutputDatasetFilename);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ErrorType.SetMissing, ex);
-                return;
-            }
+        //    try
+        //    {
+        //        inputDataSets = _fileManager.LoadTrainingDataset(trainingConfig.InputDatasetFilename);
+        //        outputDataSets = _fileManager.LoadTrainingDataset(trainingConfig.OutputDatasetFilename);
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        _logger.LogError(ErrorType.SetMissing, ex);
+        //        return;
+        //    }
 
-            #endregion
+        //    #endregion
 
-            for (int i = 0; i < inputDataSets.Count; i++)
-            {
-                List<double> netResults = new List<double>();
+        //    for (int i = 0; i < inputDataSets.Count; i++)
+        //    {
+        //        List<double> netResults = new List<double>();
 
-                for (int k = 0; k < _netsList.Count; k++)
-                {
-                    // Получение ответа:
-                    netResults.Add(_netsList[k].Handle(inputDataSets[i])[0]);
-                }
+        //        for (int k = 0; k < _netsList.Count; k++)
+        //        {
+        //            Получение ответа:
+        //            netResults.Add(_netsList[k].Handle(inputDataSets[i])[0]);
+        //        }
 
-                // Поиск максимально активирующейся сети (класса) с заданным порогом активации:
-                int maxIndex = FindMaxIndex(netResults, 0.8);
+        //        Поиск максимально активирующейся сети(класса) с заданным порогом активации:
+        //        int maxIndex = FindMaxIndex(netResults, 0.8);
 
-                if (maxIndex == -1)
-                {
-                    testFailed++;
-                    testFailed_lowActivationCause++;
-                }
-                else
-                {
-                    if (outputDataSets[i][maxIndex] != 1)
-                    {
-                        testFailed++;
-                    }
-                    else
-                    {
-                        testPassed++;
-                    }
-                }
-            }
+        //        if (maxIndex == -1)
+        //        {
+        //            testFailed++;
+        //            testFailed_lowActivationCause++;
+        //        }
+        //        else
+        //        {
+        //            if (outputDataSets[i][maxIndex] != 1)
+        //            {
+        //                testFailed++;
+        //            }
+        //            else
+        //            {
+        //                testPassed++;
+        //            }
+        //        }
+        //    }
 
-            // Logging (optional):
-            if (withLogging)
-            {
-                _logger.LogTrainResults(testPassed, testFailed, testFailed_lowActivationCause, Iteration);
-            }
+        //    Logging(optional):
+        //    if (withLogging)
+        //    {
+        //        _logger.LogTrainResults(testPassed, testFailed, testFailed_lowActivationCause, Iteration);
+        //    }
 
-            Console.WriteLine("Test passed: {0}\nTest failed: {1}\n     - Low activation causes: {2}\nPercent learned: {3:f2}", testPassed,
-                                                                                                                           testFailed,
-                                                                                                                           testFailed_lowActivationCause,
-                                                                                                                           (double)testPassed * 100 / (testPassed + testFailed));
-        }
+        //    Console.WriteLine("Test passed: {0}\nTest failed: {1}\n     - Low activation causes: {2}\nPercent learned: {3:f2}", testPassed,
+        //                                                                                                                   testFailed,
+        //                                                                                                                   testFailed_lowActivationCause,
+        //                                                                                                                   (double)testPassed * 100 / (testPassed + testFailed));
+        //}
 
         private int FindMaxIndex(List<double> netResults, double threshold = 0.8)
         {
@@ -441,7 +498,7 @@ namespace NN.Eva.Core
 
                     for (int i = 0; i < netTeachers.Length; i++)
                     {
-                        netTeachers[i].TrainingConfiguration = trainingConfigs[i];
+                        netTeachers[i].TrainingConfiguration = trainingConfigs[j];
 
                         threadList.Add(new Thread(netTeachers[i].Train));
                         threadList[i].Start();

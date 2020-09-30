@@ -12,7 +12,7 @@ namespace NN.Eva.Test
             NetworkStructure netStructure = new NetworkStructure
             {
                 InputVectorLength = 2,
-                NeuronsByLayers = new[] { 1, 1 }
+                NeuronsByLayers = new[] { 5, 1 }
             };
 
             TrainingConfiguration trainConfig = new TrainingConfiguration
