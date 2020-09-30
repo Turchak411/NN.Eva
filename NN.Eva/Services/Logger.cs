@@ -105,7 +105,7 @@ namespace NN.Eva.Services
                     break;
             }
 
-            Console.WriteLine(errorText + "\n");
+            Console.WriteLine(errorText);
             return errorText + "\n";
         }
 

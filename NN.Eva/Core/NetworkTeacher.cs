@@ -13,7 +13,7 @@ namespace NN.Eva.Core
 {
     public class NetworksTeacher
     {
-        private List<NeuralNetwork> _netsList;
+        private NeuralNetwork _net;
 
         private NetworkStructure _netStructure;
 
@@ -34,11 +34,9 @@ namespace NN.Eva.Core
         /// </summary>
         public List<TrainObject> TestVectors { get; set; }
 
-        public NetworksTeacher(NetworkStructure netStructure, int netsCount, FileManager fileManager)
+        public NetworksTeacher(NetworkStructure netStructure, FileManager fileManager)
         {
             _netStructure = netStructure;
-
-            _netsList = new List<NeuralNetwork>();
 
             _fileManager = fileManager;
             _logger = new Logger();
@@ -46,12 +44,9 @@ namespace NN.Eva.Core
             try
             {
                 // Ицициализация сети по одинаковому шаблону:
-                for (int i = 0; i < netsCount; i++)
-                {
-                    _netsList.Add(new NeuralNetwork(netStructure.InputVectorLength,
+                _net = new NeuralNetwork(netStructure.InputVectorLength,
                         netStructure.NeuronsByLayers,
-                        fileManager, "memory_" + i + ".txt"));
-                }
+                        fileManager, "memory.txt");
             }
             catch (Exception ex)
             {
@@ -69,17 +64,14 @@ namespace NN.Eva.Core
             TestVectors.ForEach(vector => result.Append($"   {vector._content}     "));
             result.Append('\n');
 
-            for (int i = 0; i < _netsList.Count; i++)
+            for (int k = 0; k < TestVectors.Count; k++)
             {
-                for (int k = 0; k < TestVectors.Count; k++)
-                {
-                    // Получение ответа:
-                    var outputVector = _netsList[i].Handle(TestVectors[k]._vectorValues);
+                // Получение ответа:
+                var outputVector = _net.Handle(TestVectors[k]._vectorValues);
 
-                    result.Append($"{outputVector[0]:f5}\t");
-                }
-                result.Append('\n');
+                result.Append($"{outputVector[0]:f5}\t");
             }
+            result.Append('\n');
 
             Console.WriteLine(result);
         }
@@ -92,32 +84,27 @@ namespace NN.Eva.Core
             TestVectors.ForEach(vector => result.Append($"   {vector._content}     "));
             result.Append('\n');
 
-            for (int i = 0; i < _netsList.Count; i++)
+            for (int k = 0; k < TestVectors.Count; k++)
             {
-                for (int k = 0; k < TestVectors.Count; k++)
+                // Получение ответа:
+                var outputVector = _net.Handle(TestVectors[k]._vectorValues);
+
+                try
                 {
-                    // Получение ответа:
-                    var outputVector = _netsList[i].Handle(TestVectors[k]._vectorValues);
-
-                    try
-                    {
-                        // Костыль: для корректного теста сетям нужна по крайней мере одна итерация обучения:
-                        _netsList[i].Teach(TestVectors[k]._vectorValues, new double[1] { 1 }, 0.01); //0.000000000000001);
-                    }
-                    catch (Exception ex)
-                    {
-                        _logger.LogError(ErrorType.TrainError, ex);
-                    }
-
-                    Console.ForegroundColor = GetColorByActivation(outputVector[0]);
-                    Console.Write($"{outputVector[0]:f5}\t");
+                    // Костыль: для корректного теста сетям нужна по крайней мере одна итерация обучения:
+                    _net.Teach(TestVectors[k]._vectorValues, new double[1] { 1 }, 0.01); //0.000000000000001);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ErrorType.TrainError, ex);
                 }
 
-                Console.ForegroundColor = ConsoleColor.Gray;
-                Console.Write('\n');
+                Console.ForegroundColor = GetColorByActivation(outputVector[0]);
+                Console.Write($"{outputVector[0]:f5}\t");
             }
 
             Console.ForegroundColor = ConsoleColor.Gray;
+            Console.Write('\n');
         }
 
         private ConsoleColor GetColorByActivation(double value)
@@ -167,15 +154,10 @@ namespace NN.Eva.Core
 
             for (int i = 0; i < inputDataSets.Count; i++)
             {
-                List<double> netResults = new List<double>();
+                // Получение ответа:
+                double[] netResult = _net.Handle(inputDataSets[i]);
 
-                for (int k = 0; k < _netsList.Count; k++)
-                {
-                    // Получение ответа:
-                    netResults.Add(_netsList[k].Handle(inputDataSets[i])[0]);
-                }
-
-                if (IsVectorsRoughlyEquals(outputDataSets[i], netResults.ToArray(), 0.3))
+                if (IsVectorsRoughlyEquals(outputDataSets[i], netResult, 0.3))
                 {
                     testPassed++;
                 }
@@ -216,92 +198,6 @@ namespace NN.Eva.Core
             return true;
         }
 
-        public void PrintLearnStatisticAsAssembly(TrainingConfiguration trainingConfig, bool withLogging = false)
-        {
-            Console.WriteLine("Start calculating statistic (as assembly)...");
-
-            int testPassed = 0;
-            int testFailed = 0;
-            int testFailed_lowActivationCause = 0;
-
-            #region Load data from file
-
-            List<double[]> inputDataSets;
-            List<double[]> outputDataSets;
-
-            try
-            {
-                inputDataSets = _fileManager.LoadTrainingDataset(trainingConfig.InputDatasetFilename);
-                outputDataSets = _fileManager.LoadTrainingDataset(trainingConfig.OutputDatasetFilename);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ErrorType.SetMissing, ex);
-                return;
-            }
-
-            #endregion
-
-            for (int i = 0; i < inputDataSets.Count; i++)
-            {
-                List<double> netResults = new List<double>();
-
-                for (int k = 0; k < _netsList.Count; k++)
-                {
-                    // Получение ответа:
-                    netResults.Add(_netsList[k].Handle(inputDataSets[i])[0]);
-                }
-
-                // Поиск максимально активирующейся сети (класса) с заданным порогом активации:
-                int maxIndex = FindMaxIndex(netResults, 0.8);
-
-                if (maxIndex == -1)
-                {
-                    testFailed++;
-                    testFailed_lowActivationCause++;
-                }
-                else
-                {
-                    if (outputDataSets[i][maxIndex] != 1)
-                    {
-                        testFailed++;
-                    }
-                    else
-                    {
-                        testPassed++;
-                    }
-                }
-            }
-
-            // Logging (optional):
-            if (withLogging)
-            {
-                _logger.LogTrainResults(testPassed, testFailed, testFailed_lowActivationCause, Iteration);
-            }
-
-            Console.WriteLine("Test passed: {0}\nTest failed: {1}\n     - Low activation causes: {2}\nPercent learned: {3:f2}", testPassed,
-                                                                                                                           testFailed,
-                                                                                                                           testFailed_lowActivationCause,
-                                                                                                                           (double)testPassed * 100 / (testPassed + testFailed));
-        }
-
-        private int FindMaxIndex(List<double> netResults, double threshold = 0.8)
-        {
-            int maxIndex = -1;
-            double maxValue = -1;
-
-            for (int i = 0; i < netResults.Count; i++)
-            {
-                if (maxValue < netResults[i] && netResults[i] >= threshold)
-                {
-                    maxIndex = i;
-                    maxValue = netResults[i];
-                }
-            }
-
-            return maxIndex;
-        }
-
         #endregion
 
         public bool CheckMemory(string memoryFolder = "Memory")
@@ -312,24 +208,21 @@ namespace NN.Eva.Core
 
             _memoryChecker = new MemoryChecker();
 
-            for (int i = 0; i < _netsList.Count; i++)
-            {
-                bool isCurrentNetMemoryValid = _netStructure == null
-                    ? _memoryChecker.IsValidQuickCheck(memoryFolder + "//memory_" + i + ".txt")
-                    : _memoryChecker.IsValid(memoryFolder + "//memory_" + i + ".txt", _netStructure) && 
-                      _fileManager.IsMemoryEqualsDefault("memory_" + i + ".txt");
+            bool isCurrentNetMemoryValid = _netStructure == null
+                ? _memoryChecker.IsValidQuickCheck(memoryFolder + "//memory.txt")
+                : _memoryChecker.IsValid(memoryFolder + "//memory.txt", _netStructure) &&
+                  _fileManager.IsMemoryEqualsDefault("memory.txt");
 
-                if (isCurrentNetMemoryValid)
-                {
-                    Console.ForegroundColor = ConsoleColor.Green;
-                    Console.WriteLine("memory_" + i + " - is valid.");
-                }
-                else
-                {
-                    isValid = false;
-                    Console.ForegroundColor = ConsoleColor.Red;
-                    Console.WriteLine("memory_" + i + " - is invalid!");
-                }
+            if (isCurrentNetMemoryValid)
+            {
+                Console.ForegroundColor = ConsoleColor.Green;
+                Console.WriteLine("memory.txt is valid.");
+            }
+            else
+            {
+                isValid = false;
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine("memory.txt - is invalid!");
             }
 
             Console.ForegroundColor = ConsoleColor.Gray;
@@ -353,10 +246,7 @@ namespace NN.Eva.Core
             }
 
             // Saving memory:
-            for (int i = 0; i < _netsList.Count; i++)
-            {
-                _netsList[i].SaveMemory(memoryFolder + "//" + backupsDirectoryName + "//" + Iteration + "//memory_" + i + ".txt", _netStructure);
-            }
+            _net.SaveMemory(memoryFolder + "//" + backupsDirectoryName + "//" + Iteration + "//memory.txt", _netStructure);
 
             // Parsing userID:
             string[] memoryFolderPathArray = memoryFolder.Split('/');
@@ -390,7 +280,7 @@ namespace NN.Eva.Core
         /// </summary>
         /// <param name="startIteration"></param>
         /// <param name="withSort"></param>
-        public void TrainNets(TrainingConfiguration trainingConfig, int iterationsToPause)
+        public void TrainNet(TrainingConfiguration trainingConfig, int iterationsToPause)
         {
             Iteration = trainingConfig.EndIteration;
 
@@ -415,41 +305,27 @@ namespace NN.Eva.Core
             Console.WriteLine("Training start...");
             try
             {
-                SingleNetworkTeacher[] netTeachers = new SingleNetworkTeacher[_netsList.Count];
-
                 List<TrainingConfiguration> trainingConfigs = InitializeTrainingSubConfigs(trainingConfig, iterationsToPause);
 
                 // Initialize teachers:
-                for (int i = 0; i < netTeachers.Length; i++)
+                SingleNetworkTeacher netTeacher = new SingleNetworkTeacher
                 {
-                    netTeachers[i] = new SingleNetworkTeacher
-                    {
-                        Id = i,
-                        Network = _netsList[i],
-                        NetworkStructure = _netStructure,
-                        TrainingConfiguration = trainingConfig,
-                        InputDatasets = inputDataSets,
-                        OutputDatasets = outputDataSets,
-                        Logger = _logger
-                    };
-                }
-
-                List<Thread> threadList;
+                    Network = _net,
+                    NetworkStructure = _netStructure,
+                    TrainingConfiguration = trainingConfig,
+                    InputDatasets = inputDataSets,
+                    OutputDatasets = outputDataSets,
+                    Logger = _logger
+                };
 
                 // Iteration multithreading train:
                 for (int j = 0; j < trainingConfigs.Count; j++)
                 {
-                    threadList = new List<Thread>();
+                    netTeacher.TrainingConfiguration = trainingConfigs[j];
 
-                    for (int i = 0; i < netTeachers.Length; i++)
-                    {
-                        netTeachers[i].TrainingConfiguration = trainingConfigs[i];
-
-                        threadList.Add(new Thread(netTeachers[i].Train));
-                        threadList[i].Start();
-                    }
-
-                    Wait(threadList);
+                    Thread thread = new Thread(netTeacher.Train);
+                    thread.Start();
+                    Wait(thread);
 
                     if (j != trainingConfigs.Count - 1)
                     {
@@ -463,11 +339,26 @@ namespace NN.Eva.Core
                     CommonTestColorized();
                 }
 
+                // TODO:
+                // ПОлучение обученной сети:
+                _net = netTeacher.Network;
+
                 Console.WriteLine("Training success!");
             }
             catch (Exception ex)
             {
                 _logger.LogError(ErrorType.TrainError, ex);
+            }
+        }
+
+        private void Wait(Thread thread)
+        {
+            while (true)
+            {
+                if(!thread.IsAlive)
+                {
+                    break;
+                }
             }
         }
 
@@ -515,21 +406,6 @@ namespace NN.Eva.Core
             return trainingConfigs;
         }
 
-        private void Wait(List<Thread> threadList)
-        {
-            while (true)
-            {
-                int WorkCount = 0;
-
-                for (int i = 0; i < threadList.Count; i++)
-                {
-                    WorkCount += (threadList[i].IsAlive) ? 0 : 1;
-                }
-
-                if (WorkCount == threadList.Count) break;
-            }
-        }
-
         #endregion
 
         #region Database
@@ -543,11 +419,8 @@ namespace NN.Eva.Core
                 DBInserter dbInserter = new DBInserter(logger, dbConfig);
 
                 // Saving networks info:
-                for (int i = 0; i < _netsList.Count; i++)
-                {
-                    _netsList[i].SaveMemoryToDB(Iteration, networkStructure, userId, dbInserter);
-                    Console.WriteLine("Network #{0} backuped successfully!", i);
-                }
+                _net.SaveMemoryToDB(Iteration, networkStructure, userId, dbInserter);
+                    Console.WriteLine("Networks memory backuped successfully!");
             }
             catch (Exception ex)
             {
@@ -565,11 +438,8 @@ namespace NN.Eva.Core
                 DBDeleter dbDeleter = new DBDeleter(logger, dbConfig);
 
                 // Aborting saving network's info:
-                for (int i = 0; i < _netsList.Count; i++)
-                {
-                    _netsList[i].DBMemoryAbort(dbDeleter);
+                _net.DBMemoryAbort(dbDeleter);
                     Console.WriteLine("Another network's memory backup aborted successfully!");
-                }
             }
             catch (Exception ex)
             {
@@ -639,30 +509,11 @@ namespace NN.Eva.Core
 
         #region Handling
 
-        public double[] HandleAsAssembly(double[] data)
-        {
-            try
-            {
-                double[] resultVector = new double[_netsList.Count];
-
-                for (int i = 0; i < _netsList.Count; i++)
-                {
-                    resultVector[i] = _netsList[i].Handle(data)[0];
-                }
-
-                return resultVector;
-            }
-            catch
-            {
-                return null;
-            }
-        }
-
         public double[] Handle(double[] data)
         {
             try
             {
-                return _netsList[0].Handle(data);
+                return _net.Handle(data);
             }
             catch
             {

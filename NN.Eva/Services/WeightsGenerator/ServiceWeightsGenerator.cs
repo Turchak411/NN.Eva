@@ -13,7 +13,7 @@ namespace NN.Eva.Services.WeightsGenerator
 
             int[] netScheme = InputNetScheme();
 
-            generator.GenerateMemory(inputVectorLength, netScheme, "memory.txt");
+            generator.GenerateMemory(inputVectorLength, netScheme, "memoryClear.txt");
 
             Console.WriteLine("Memory generated!");
         }

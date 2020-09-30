@@ -22,14 +22,13 @@ namespace NN.Eva
         /// <param name="testDatasetPath"></param>
         /// <returns>Returns success result of network creating</returns>
         public bool CreateNetwork(string memoryFolderName, NetworkStructure networkStructure,
-                                  int netsCountInAssembly = 1,
-                                  string testDatasetPath = null)
+                                    string testDatasetPath = null)
         {
             _fileManager = new FileManager(networkStructure, memoryFolderName);
 
             if(_fileManager.IsMemoryLoadCorrect)
             {
-                _networkTeacher = new NetworksTeacher(networkStructure, netsCountInAssembly, _fileManager);
+                _networkTeacher = new NetworksTeacher(networkStructure, _fileManager);
 
                 if (testDatasetPath != null)
                 {
@@ -57,11 +56,11 @@ namespace NN.Eva
 
             // Set the process priority class:
             Process thisProc = Process.GetCurrentProcess();
-            thisProc.PriorityClass = ProcessPriorityClass.AboveNormal;
+            thisProc.PriorityClass = processPriorityClass;
 
             if (_networkTeacher.CheckMemory(trainingConfiguration.MemoryFolder))
             {
-                _networkTeacher.TrainNets(trainingConfiguration, iterationToPause);
+                _networkTeacher.TrainNet(trainingConfiguration, iterationToPause);
 
                 if (printLearnStatistic)
                 {
@@ -71,29 +70,6 @@ namespace NN.Eva
             else
             {
                 Console.WriteLine("Train failed! Invalid memory!");
-            }
-        }
-
-        public void PrintLearnStatistic(TrainingConfiguration trainingConfiguration, bool withLoggingToFile = false)
-        {
-            // TODO: протестить
-            _networkTeacher.PrintLearnStatistic(trainingConfiguration, withLoggingToFile);
-        }
-
-        /// <summary>
-        /// Handling double-vector data as nets assembly
-        /// </summary>
-        /// <param name="data"></param>
-        /// <returns>Vector-classes</returns>
-        public double[] HandleAsAssembly(double[] data)
-        {
-            try
-            {
-                return _networkTeacher.HandleAsAssembly(data);
-            }
-            catch
-            {
-                return null;
             }
         }
 

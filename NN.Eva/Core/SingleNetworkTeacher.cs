@@ -7,8 +7,6 @@ namespace NN.Eva.Core
 {
     public class SingleNetworkTeacher
     {
-        public int Id { get; set; }
-
         public NeuralNetwork Network { get; set; }
 
         public NetworkStructure NetworkStructure { get; set; }
@@ -42,13 +40,9 @@ namespace NN.Eva.Core
                 {
                     Network.Handle(InputDatasets[k]);
 
-                    // Передает для обучения только 1 элемент выходного вектора
-                    // (Класс на который конкретной сети нужно активироваться)
-                    double[] outputDataSetArray = { OutputDatasets[k][Id] };
-
                     try
                     {
-                        Network.Teach(InputDatasets[k], outputDataSetArray, learningSpeed);
+                        Network.Teach(InputDatasets[k], OutputDatasets[k], learningSpeed);
                     }
                     catch (Exception ex)
                     {
@@ -58,7 +52,7 @@ namespace NN.Eva.Core
                 }
             }
 
-            Network.SaveMemory(TrainingConfiguration.MemoryFolder + "//memory_" + Id + ".txt", NetworkStructure);
+            Network.SaveMemory(TrainingConfiguration.MemoryFolder + "//memory.txt", NetworkStructure);
         }
     }
 }
