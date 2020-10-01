@@ -119,7 +119,7 @@ namespace NN.Eva.Services
             return Math.Abs(fileDefaultMemory.Length - fileToCheck.Length) < fileDefaultMemory.Length * 0.5;
         }
 
-        public double[] LoadMemory(int layerNumber, int neuronNumber)
+        public double[] LoadMemory(int layerNumber, int neuronNumber, ref double offsetValue, ref double offsetWeight)
         {
             double[] memory = new double[0];
 
@@ -129,10 +129,13 @@ namespace NN.Eva.Services
                 {
                     string[] readedLine = fileReader.ReadLine().Split(' ');
 
-                    // TODO: Зарефакторить. Кинуть break, когда память загрузилась
                     if ((readedLine[0] == "layer_" + layerNumber) && (readedLine[1] == "neuron_" + neuronNumber))
                     {
+                        // TODO: Еще протестировать на других настройках осей
+                        offsetValue = double.Parse(readedLine[2].Replace('.', ','));
+                        offsetWeight = double.Parse(readedLine[3].Replace('.', ','));
                         memory = GetWeights(readedLine);
+                        break;
                     }
                 }
             }
@@ -140,7 +143,7 @@ namespace NN.Eva.Services
             return memory;
         }
 
-        public double[] LoadMemory(int layerNumber, int neuronNumber, string memoryPath)
+        public double[] LoadMemory(int layerNumber, int neuronNumber, string memoryPath, ref double offsetValue, ref double offsetWeight)
         {
             double[] memory = new double[0];
 
@@ -159,6 +162,9 @@ namespace NN.Eva.Services
 
                     if ((readedLine[0] == "layer_" + layerNumber) && (readedLine[1] == "neuron_" + neuronNumber))
                     {
+                        // TODO: Еще протестировать на других настройках осей
+                        offsetValue = double.Parse(readedLine[2].Replace('.', ','));
+                        offsetWeight = double.Parse(readedLine[3].Replace('.', ','));
                         memory = GetWeights(readedLine);
                     }
                 }
@@ -169,11 +175,11 @@ namespace NN.Eva.Services
 
         private double[] GetWeights(string[] readedLine)
         {
-            double[] weights = new double[readedLine.Length - 2];
+            double[] weights = new double[readedLine.Length - 4];
 
             for (int i = 0; i < weights.Length; i++)
             {
-                weights[i] = double.Parse(readedLine[i + 2], CultureInfo.GetCultureInfo("ru-RU"));
+                weights[i] = double.Parse(readedLine[i + 4], CultureInfo.GetCultureInfo("ru-RU"));
             }
 
             return weights;
@@ -227,11 +233,11 @@ namespace NN.Eva.Services
         /// <param name="neuronNumber"></param>
         /// <param name="weights"></param>
         /// <param name="path"></param>
-        public void SaveMemory(int layerNumber, int neuronNumber, double[] weights, string path)
+        public void SaveMemory(int layerNumber, int neuronNumber, double[] weights, double offsetValue, double offsetWeight, string path)
         {
             using (StreamWriter fileWriter = new StreamWriter(path, true))
             {
-                fileWriter.Write("layer_{0} neuron_{1}", layerNumber, neuronNumber);
+                fileWriter.Write("layer_{0} neuron_{1} {2} {3}", layerNumber, neuronNumber, offsetValue, offsetWeight);
 
                 for (int i = 0; i < weights.Length; i++)
                 {

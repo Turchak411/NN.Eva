@@ -339,7 +339,6 @@ namespace NN.Eva.Core
                     CommonTestColorized();
                 }
 
-                // TODO:
                 // ПОлучение обученной сети:
                 _net = netTeacher.Network;
 
