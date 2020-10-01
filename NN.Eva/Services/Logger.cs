@@ -100,6 +100,12 @@ namespace NN.Eva.Services
                 case ErrorType.DBDeleteError:
                     errorText = "Database deleting error!";
                     break;
+                case ErrorType.DBMemoryLoadError:
+                    errorText = "Database loading error!";
+                    break;
+                case ErrorType.NonEqualsInputLengths:
+                    errorText = "Length of network's input vector and length of training dataset's vector is not equals!";
+                    break;
                 default:
                     errorText = "";
                     break;

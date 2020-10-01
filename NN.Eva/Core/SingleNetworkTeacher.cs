@@ -38,7 +38,15 @@ namespace NN.Eva.Core
                 var learningSpeed = 0.01 * Math.Pow(0.1, iteration / 150000);
                 for (int k = 0; k < InputDatasets.Count; k++)
                 {
-                    Network.Handle(InputDatasets[k]);
+                    try
+                    {
+                        Network.Handle(InputDatasets[k]);
+                    }
+                    catch (Exception ex)
+                    {
+                        Logger.LogError(ErrorType.NonEqualsInputLengths, ex);
+                        return;
+                    }
 
                     try
                     {

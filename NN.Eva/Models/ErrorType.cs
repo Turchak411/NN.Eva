@@ -11,6 +11,7 @@ namespace NN.Eva.Models
         DBConnectionError,
         DBInsertError,
         DBDeleteError,
-        DBMemoryLoadError
+        DBMemoryLoadError,
+        NonEqualsInputLengths
     }
 }
