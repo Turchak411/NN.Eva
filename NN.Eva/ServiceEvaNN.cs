@@ -42,7 +42,7 @@ namespace NN.Eva
         }
 
         /// <summary>
-        /// Training FFNN
+        /// Training FeedForward - NeuralNetwork
         /// </summary>
         /// <param name="trainingConfiguration"></param>
         /// <param name="iterationToPause"></param>
@@ -89,7 +89,7 @@ namespace NN.Eva
         }
 
         /// <summary>
-        /// Backuping memory to db or local folder or to both ones
+        /// Backuping network's memory to db OR/AND local folder
         /// </summary>
         /// <param name="memoryFolder"></param>
         /// <param name="dbConnection"></param>
@@ -117,7 +117,7 @@ namespace NN.Eva
         }
 
         /// <summary>
-        /// Aborting memory of current neural network
+        /// Aborting network's memory from database
         /// </summary>
         /// <param name="dbConnection"></param>
         /// <returns>State of operation success</returns>
@@ -135,6 +135,13 @@ namespace NN.Eva
             }
         }
 
+        /// <summary>
+        /// Loading network's memory from database
+        /// </summary>
+        /// <param name="dbConfig"></param>
+        /// <param name="networkID"></param>
+        /// <param name="destinationMemoryFilePath"></param>
+        /// <returns></returns>
         public bool DBMemoryLoad(DatabaseConfig dbConfig, Guid networkID, string destinationMemoryFilePath)
         {
             try
