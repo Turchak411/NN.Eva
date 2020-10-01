@@ -35,7 +35,9 @@ namespace NN.Eva.Services.WeightsGenerator
                     {
                         for (int k = 0; k < netScheme[i]; k++)
                         {
-                            fileWriter.Write("layer_{0} neuron_{1} {2} {3}", i, k, offsetValue, offsetWeight);
+                            fileWriter.Write("layer_{0} neuron_{1} {2} {3}", i, k, 
+                                                                        offsetValue.ToString().Replace('.', ','),
+                                                                        offsetWeight.ToString().Replace('.', ','));
 
                             if (i == 0)
                             {
