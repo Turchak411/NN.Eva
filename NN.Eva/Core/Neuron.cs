@@ -131,7 +131,7 @@ namespace NN.Eva.Core
         public void SaveMemoryToDB(Guid layerId, Guid userId, int number, DBInserter dbInserter)
         {
             // Saving networks info:
-            dbInserter.InsertNeuron(Id, userId, layerId, number);
+            dbInserter.InsertNeuron(Id, userId, layerId, number, _offsetValue, _offsetWeight);
 
             // Saving weights info:
             for (int i = 0; i < _weights.Length; i++)

@@ -23,122 +23,82 @@ namespace NN.Eva.Core.Database
             DatabaseConfiguration = databaseConfiguration;
         }
 
+        /// <summary>
+        /// Inserting networks data to table "networks"
+        /// </summary>
+        /// <param name="id"></param>
+        /// <param name="userId"></param>
+        /// <param name="iterations"></param>
+        /// <param name="networkStructure"></param>
         public void InsertNetwork(Guid id, Guid userId, int iterations, string networkStructure)
         {
-            // Connection to Database:
-            MySqlConnection connection = null;
-
-            try
-            {
-                connection = GetNewDBConnection();
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine("Error in connection to Database!");
-                _logger.LogError(ErrorType.DBConnectionError, ex);
-            }
-
-            try
-            {
-                using (connection)
-                {
-                    connection.Open();
-
-                    string savingDate = DateTime.Now.Year + "-" + DateTime.Now.Month + "-" + DateTime.Now.Day + " " +
+            string savingDate = DateTime.Now.Year + "-" + DateTime.Now.Month + "-" + DateTime.Now.Day + " " +
                                         +DateTime.Now.Hour + ":" + DateTime.Now.Minute + ":" + DateTime.Now.Second;
 
-                    string query =
+            string query =
                         $"INSERT INTO {DatabaseConfiguration.Database}.networks VALUES(\'{id}\',\'{userId}\',\'{savingDate}\'," +
                         $"\'{networkStructure}\',\'{iterations}\');";
 
-                    var command = new MySqlCommand(query, connection);
-                    command.ExecuteNonQuery();
-
-                    connection.Close();
-                }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine("Insert-error in table \"networks\"!");
-                _logger.LogError(ErrorType.DBInsertError, "Table 'networks'.\n" + ex);
-            }
+            InsertInTable(query, "networks");
         }
 
+        /// <summary>
+        /// Inserting layers data to table "layers"
+        /// </summary>
+        /// <param name="id"></param>
+        /// <param name="userId"></param>
+        /// <param name="networkId"></param>
+        /// <param name="number"></param>
         public void InsertLayer(Guid id, Guid userId, Guid networkId, int number)
         {
-            // Connection to Database:
-            MySqlConnection connection = null;
+            string query =
+                $"INSERT INTO {DatabaseConfiguration.Database}.layers " +
+                $"VALUES(\'{id}\',\'{userId}\',\'{networkId}\','{number}');";
 
-            try
-            {
-                connection = GetNewDBConnection();
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine("Error in connection to Database!");
-                _logger.LogError(ErrorType.DBConnectionError, ex);
-            }
-
-            try
-            {
-                using (connection)
-                {
-                    connection.Open();
-                    string query =
-                        $"INSERT INTO {DatabaseConfiguration.Database}.layers VALUES(\'{id}\',\'{userId}\',\'{networkId}\','{number}');";
-
-                    var command = new MySqlCommand(query, connection);
-                    command.ExecuteNonQuery();
-
-                    connection.Close();
-                }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine("Insert-error in table \"layers\"!");
-                _logger.LogError(ErrorType.DBInsertError, "Table 'networks'.\n" + ex);
-            }
+            InsertInTable(query, "layers");
         }
 
-        public void InsertNeuron(Guid id, Guid userId, Guid layerId, int number)
+        /// <summary>
+        /// Inserting neurons data to table "neurons"
+        /// </summary>
+        /// <param name="id"></param>
+        /// <param name="userId"></param>
+        /// <param name="layerId"></param>
+        /// <param name="number"></param>
+        /// <param name="offsetValue"></param>
+        /// <param name="offsetWeight"></param>
+        public void InsertNeuron(Guid id, Guid userId, Guid layerId, int number, double offsetValue, double offsetWeight)
         {
-            // Connection to Database:
-            MySqlConnection connection = null;
+            string query = $"INSERT INTO {DatabaseConfiguration.Database}.neurons " +
+                           $"VALUES(\'{id}\',\'{userId}\',\'{layerId}\','{number}'," +
+                           $"'{offsetValue}','{offsetWeight}');";
 
-            try
-            {
-                connection = GetNewDBConnection();
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine("Error in connection to Database!");
-                _logger.LogError(ErrorType.DBConnectionError, ex);
-            }
-
-            try
-            {
-                using (connection)
-                {
-                    connection.Open();
-
-                    string query =
-                        $"INSERT INTO {DatabaseConfiguration.Database}.neurons VALUES(\'{id}\',\'{userId}\',\'{layerId}\','{number}');";
-
-                    var command = new MySqlCommand(query, connection);
-                    command.ExecuteNonQuery();
-
-                    connection.Close();
-                }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine("Insert-error in table \"neurons\"!");
-                _logger.LogError(ErrorType.DBInsertError, "Table 'networks'.\n" + ex);
-            }
+            InsertInTable(query, "neurons");
         }
 
+        /// <summary>
+        /// Inserting weights data to table "weights"
+        /// </summary>
+        /// <param name="neuronId"></param>
+        /// <param name="userId"></param>
+        /// <param name="number"></param>
+        /// <param name="value"></param>
         public void InsertWeight(Guid neuronId, Guid userId, int number, double value)
         {
+            string query = $"INSERT INTO {DatabaseConfiguration.Database}.weights " +
+                           $"VALUES(\'{Guid.NewGuid()}\',\'{userId}\'," +
+                           $"\'{neuronId}\',\'{number}\',\'{value.ToString().Replace(',', '.')}\');";
+
+            InsertInTable(query, "weights");        
+        }
+
+        /// <summary>
+        /// Executing insert-query
+        /// </summary>
+        /// <param name="query"></param>
+        /// <param name="tableName"></param>
+        private void InsertInTable(string query, string tableName)
+        {
             // Connection to Database:
             MySqlConnection connection = null;
 
@@ -157,10 +117,7 @@ namespace NN.Eva.Core.Database
                 using (connection)
                 {
                     connection.Open();
-
-                    string query =
-                        $"INSERT INTO {DatabaseConfiguration.Database}.weights VALUES(\'{Guid.NewGuid()}\',\'{userId}\',\'{neuronId}\',\'{number}\',\'{value.ToString().Replace(',', '.')}\');";
-
+                    
                     var command = new MySqlCommand(query, connection);
                     command.ExecuteNonQuery();
 
@@ -169,11 +126,15 @@ namespace NN.Eva.Core.Database
             }
             catch (Exception ex)
             {
-                Console.WriteLine("Insert-error in table \"weights\"!");
-                _logger.LogError(ErrorType.DBInsertError, "Table 'networks'.\n" + ex);
+                Console.WriteLine($"Insert-error in table \"{tableName}\"!");
+                _logger.LogError(ErrorType.DBInsertError, $"Table '{tableName}'.\n" + ex);
             }
         }
 
+        /// <summary>
+        /// Getting new DB connect
+        /// </summary>
+        /// <returns></returns>
         private MySqlConnection GetNewDBConnection()
         {
             MySqlConnection connection = null;
