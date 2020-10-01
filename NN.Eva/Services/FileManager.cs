@@ -20,6 +20,9 @@ namespace NN.Eva.Services
         /// </summary>
         public string MemoryFolderPath;
 
+        /// <summary>
+        /// Result of success of network creating
+        /// </summary>
         public bool IsMemoryLoadCorrect;
 
         private Logger _logger;
@@ -110,6 +113,11 @@ namespace NN.Eva.Services
             }
         }
 
+        /// <summary>
+        /// Checking memory for equaling to checked
+        /// </summary>
+        /// <param name="memoryPathToCheck"></param>
+        /// <returns></returns>
         public bool IsMemoryEqualsDefault(string memoryPathToCheck)
         {
             FileInfo fileDefaultMemory = new FileInfo(MemoryFolderPath + "//.clear//" + DefaultMemoryFilePath);
@@ -119,6 +127,14 @@ namespace NN.Eva.Services
             return Math.Abs(fileDefaultMemory.Length - fileToCheck.Length) < fileDefaultMemory.Length * 0.5;
         }
 
+        /// <summary>
+        /// Loading network's clear memory
+        /// </summary>
+        /// <param name="layerNumber"></param>
+        /// <param name="neuronNumber"></param>
+        /// <param name="offsetValue"></param>
+        /// <param name="offsetWeight"></param>
+        /// <returns></returns>
         public double[] LoadMemory(int layerNumber, int neuronNumber, ref double offsetValue, ref double offsetWeight)
         {
             double[] memory = new double[0];
@@ -143,6 +159,15 @@ namespace NN.Eva.Services
             return memory;
         }
 
+        /// <summary>
+        /// Loading network's exists memory from memory-file
+        /// </summary>
+        /// <param name="layerNumber"></param>
+        /// <param name="neuronNumber"></param>
+        /// <param name="memoryPath"></param>
+        /// <param name="offsetValue"></param>
+        /// <param name="offsetWeight"></param>
+        /// <returns></returns>
         public double[] LoadMemory(int layerNumber, int neuronNumber, string memoryPath, ref double offsetValue, ref double offsetWeight)
         {
             double[] memory = new double[0];
@@ -185,6 +210,11 @@ namespace NN.Eva.Services
             return weights;
         }
 
+        /// <summary>
+        /// Used in saving method for preparing memory files to saving procedure
+        /// </summary>
+        /// <param name="path"></param>
+        /// <param name="networkStructure"></param>
         public void PrepareToSaveMemory(string path, NetworkStructure networkStructure)
         {
             try
@@ -207,6 +237,11 @@ namespace NN.Eva.Services
             }
         }
 
+        /// <summary>
+        /// Read the network's metadata
+        /// </summary>
+        /// <param name="path"></param>
+        /// <returns></returns>
         public NetworkStructure ReadNetworkMetadata(string path)
         {
             using (StreamReader fileReader = new StreamReader(path))
@@ -263,6 +298,11 @@ namespace NN.Eva.Services
             }
         }
 
+        /// <summary>
+        /// Loading testing dataset
+        /// </summary>
+        /// <param name="filePath"></param>
+        /// <returns></returns>
         public List<TrainObject> LoadTestDataset(string filePath)
         {
             if (!File.Exists(filePath))
@@ -295,6 +335,11 @@ namespace NN.Eva.Services
             return vectors;
         }
 
+        /// <summary>
+        /// Loading training dataset
+        /// </summary>
+        /// <param name="path"></param>
+        /// <returns></returns>
         public List<double[]> LoadTrainingDataset(string path)
         {
             List<double[]> sets = new List<double[]>();

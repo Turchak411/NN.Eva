@@ -1,7 +1,7 @@
-﻿using MySql.Data.MySqlClient;
+﻿using System;
+using MySql.Data.MySqlClient;
 using NN.Eva.Models;
 using NN.Eva.Services;
-using System;
 using NN.Eva.Models.Database;
 using NN.Eva.Services.Database;
 
