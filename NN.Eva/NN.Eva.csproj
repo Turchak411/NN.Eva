@@ -9,7 +9,6 @@
     <PackageProjectUrl>https://github.com/Turchak411/NN.Eva</PackageProjectUrl>
     <PackageTags>AI, Artificial Intelligence, ML, MachineLearning, NN, NeuralNetworks, FeedForwad NeuralNetwork</PackageTags>
     <RepositoryUrl>https://github.com/Turchak411/NN.Eva</RepositoryUrl>
-    <PackageLicenseFile>LICENSE.md</PackageLicenseFile>
   </PropertyGroup>
 
   <ItemGroup>
