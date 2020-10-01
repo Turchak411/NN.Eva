@@ -13,11 +13,10 @@ namespace NN.Eva
         private NetworksTeacher _networkTeacher;
 
         /// <summary>
-        /// Creating FFNN
+        /// Creating FeedForward - Neural Network
         /// </summary>
         /// <param name="memoryFolderName"></param>
         /// <param name="networkStructure"></param>
-        /// <param name="netsCountInAssembly"></param>
         /// <param name="testDatasetPath"></param>
         /// <returns>Returns success result of network creating</returns>
         public bool CreateNetwork(string memoryFolderName, NetworkStructure networkStructure,
