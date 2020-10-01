@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Diagnostics;
-using MySql.Data.MySqlClient;
 using NN.Eva.Core;
 using NN.Eva.Models;
 using NN.Eva.Models.Database;
