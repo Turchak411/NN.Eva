@@ -10,6 +10,9 @@ namespace NN.Eva.Services.WeightsGenerator
         {
             Random rnd = new Random(DateTime.Now.Millisecond);
 
+            double offsetValue = 0.5;
+            double offsetWeight = -1;
+
             using (var progress = new ProgressBar())
             {
                 int iteration = 0;
@@ -32,7 +35,7 @@ namespace NN.Eva.Services.WeightsGenerator
                     {
                         for (int k = 0; k < netScheme[i]; k++)
                         {
-                            fileWriter.Write("layer_{0} neuron_{1}", i, k);
+                            fileWriter.Write("layer_{0} neuron_{1} {2} {3}", i, k, offsetValue, offsetWeight);
 
                             if (i == 0)
                             {
