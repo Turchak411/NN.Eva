@@ -64,7 +64,7 @@ namespace NN.Eva
 
                 if (printLearnStatistic)
                 {
-                    _networkTeacher.PrintLearnStatistic(trainingConfiguration, true);
+                    _networkTeacher.PrintLearningStatistic(trainingConfiguration, true);
                 }
             }
             else

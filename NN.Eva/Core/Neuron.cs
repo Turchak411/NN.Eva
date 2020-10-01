@@ -136,7 +136,6 @@ namespace NN.Eva.Core
             // Saving weights info:
             for (int i = 0; i < _weights.Length; i++)
             {
-                // TODO: сделать insert еще и _offsetValue и _offsetWeight значений
                 dbInserter.InsertWeight(Id, userId, i, _weights[i]);
             }
         }
