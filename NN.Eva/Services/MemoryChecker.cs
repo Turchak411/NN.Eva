@@ -22,7 +22,7 @@ namespace NN.Eva.Services
                     {
                         string[] readedLine = fileReader.ReadLine().Split(' ');
 
-                        if (readedLine.Length < 3)
+                        if (readedLine.Length < 2)
                         {
                             return false;
                         }
