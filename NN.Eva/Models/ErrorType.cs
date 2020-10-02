@@ -3,6 +3,7 @@ namespace NN.Eva.Models
 {
     public enum ErrorType
     {
+        UnknownError,
         MemoryMissing,
         MemoryInitializeError,
         MemoryGenerateError,
@@ -11,6 +12,7 @@ namespace NN.Eva.Models
         DBConnectionError,
         DBInsertError,
         DBDeleteError,
-        DBMemoryLoadError
+        DBMemoryLoadError,
+        NonEqualsInputLengths
     }
 }

@@ -19,6 +19,8 @@ namespace NN.Eva.Core
 
         public Logger Logger { get; set; }
 
+        public bool LastTrainingSuccess { get; set; } = false;
+
         private int Iteration = 0;
 
         public void Train()
@@ -38,8 +40,18 @@ namespace NN.Eva.Core
                 var learningSpeed = 0.01 * Math.Pow(0.1, iteration / 150000);
                 for (int k = 0; k < InputDatasets.Count; k++)
                 {
-                    Network.Handle(InputDatasets[k]);
+                    string handlingErrorText = "";
 
+                    // Handling:
+                    double[] netResult = Network.Handle(InputDatasets[k], ref handlingErrorText);
+
+                    if(netResult == null)
+                    {
+                        Logger.LogError(ErrorType.NonEqualsInputLengths, handlingErrorText);
+                        return;
+                    }
+
+                    // Teaching:
                     try
                     {
                         Network.Teach(InputDatasets[k], OutputDatasets[k], learningSpeed);
@@ -52,6 +64,10 @@ namespace NN.Eva.Core
                 }
             }
 
+            // Запись события об успешном обучении:
+            LastTrainingSuccess = true;
+
+            // Сохранение памяти сети:
             Network.SaveMemory(TrainingConfiguration.MemoryFolder + "//memory.txt", NetworkStructure);
         }
     }
