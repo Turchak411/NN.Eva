@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using NN.Eva.Core.Database;
+using NN.Eva.Exceptions;
 using NN.Eva.Models;
 using NN.Eva.Services;
 
@@ -45,6 +46,13 @@ namespace NN.Eva.Core
 
         public double[] Handle(double[] data)
         {
+            // Check for non equaling of input length of data and network's receptors:
+            if (data.Length != _layerList[0].GetWeights()[0].Length)
+            {
+                throw new NonEqualsInputLengthsException($"Expected by network input-vector length: {_layerList[0].GetWeights()[0].Length}\n" +
+                                    $"Inputed data-vector length: {data.Length}");
+            }
+
             double[] tempData = data;
 
             for (int i = 0; i < _layerList.Count; i++)

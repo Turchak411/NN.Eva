@@ -3,6 +3,7 @@ namespace NN.Eva.Models
 {
     public enum ErrorType
     {
+        UnknownError,
         MemoryMissing,
         MemoryInitializeError,
         MemoryGenerateError,

@@ -88,6 +88,11 @@ namespace NN.Eva
             }
         }
 
+        public void CalculateStatistic(TrainingConfiguration trainingConfig)
+        {
+            _networkTeacher.PrintLearningStatistic(trainingConfig, true);
+        }
+
         /// <summary>
         /// Backuping network's memory to db OR/AND local folder
         /// </summary>

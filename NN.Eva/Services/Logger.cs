@@ -40,26 +40,6 @@ namespace NN.Eva.Services
             Console.WriteLine("Learn statistic logs saved in {0}!", _trainLogsDirectoryName);
         }
 
-        public void LogTrainResults(int testPassed, int testFailed, int testFailedLowActivationCause, int iteration)
-        {
-            // Check for existing this logs-directory:
-            if (!Directory.Exists(_trainLogsDirectoryName))
-            {
-                Directory.CreateDirectory(_trainLogsDirectoryName);
-            }
-
-            // Save log:
-            using (StreamWriter fileWriter = new StreamWriter(_trainLogsDirectoryName + "/" + iteration + ".txt"))
-            {
-                fileWriter.WriteLine("Test passed: " + testPassed);
-                fileWriter.WriteLine("Test failed: " + testFailed);
-                fileWriter.WriteLine("     - Low activation causes: " + testFailedLowActivationCause);
-                fileWriter.WriteLine("Percent learned: {0:f2}", (double)testPassed * 100 / (testPassed + testFailed));
-            }
-
-            Console.WriteLine("Learn statistic logs saved in {0}!", _trainLogsDirectoryName);
-        }
-
         public void LogError(ErrorType errorType, Exception ex)
         {
             WriteError(GetErrorTextByType(errorType) + ex);

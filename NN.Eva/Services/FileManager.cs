@@ -191,6 +191,7 @@ namespace NN.Eva.Services
                         offsetValue = double.Parse(readedLine[2].Replace('.', ','));
                         offsetWeight = double.Parse(readedLine[3].Replace('.', ','));
                         memory = GetWeights(readedLine);
+                        break;
                     }
                 }
             }

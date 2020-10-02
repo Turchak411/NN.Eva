@@ -2,6 +2,7 @@
 using NN.Eva.Services;
 using System;
 using System.Collections.Generic;
+using NN.Eva.Exceptions;
 
 namespace NN.Eva.Core
 {
@@ -38,16 +39,23 @@ namespace NN.Eva.Core
                 var learningSpeed = 0.01 * Math.Pow(0.1, iteration / 150000);
                 for (int k = 0; k < InputDatasets.Count; k++)
                 {
+                    // Handling:
                     try
                     {
                         Network.Handle(InputDatasets[k]);
                     }
-                    catch (Exception ex)
+                    catch (NonEqualsInputLengthsException ex)
                     {
                         Logger.LogError(ErrorType.NonEqualsInputLengths, ex);
                         return;
                     }
+                    catch(Exception ex)
+                    {
+                        Logger.LogError(ErrorType.UnknownError, ex);
+                        return;
+                    }
 
+                    // Teaching:
                     try
                     {
                         Network.Teach(InputDatasets[k], OutputDatasets[k], learningSpeed);
