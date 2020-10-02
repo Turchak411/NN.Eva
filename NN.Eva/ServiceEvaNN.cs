@@ -97,8 +97,8 @@ namespace NN.Eva
         /// Backuping network's memory to db OR/AND local folder
         /// </summary>
         /// <param name="memoryFolder"></param>
-        /// <param name="dbConnection"></param>
-        /// <param name="networkStructure"></param>
+        /// <param name="dbConfig"></param>
+        /// <param name="networkStructureInfo"></param>
         /// <returns>State of operation success</returns>
         public bool BackupMemory(string memoryFolder, DatabaseConfig dbConfig = null, string networkStructureInfo = "no information")
         {

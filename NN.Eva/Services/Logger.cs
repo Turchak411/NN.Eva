@@ -91,7 +91,10 @@ namespace NN.Eva.Services
                     break;
             }
 
-            Console.WriteLine(errorText);
+            Console.ForegroundColor = ConsoleColor.Red;
+            Console.WriteLine("[ERROR] " + errorText);
+            Console.ForegroundColor = ConsoleColor.Gray;
+
             return errorText + "\n";
         }
 

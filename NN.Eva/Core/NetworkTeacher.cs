@@ -1,5 +1,4 @@
-﻿using MySql.Data.MySqlClient;
-using NN.Eva.Models;
+﻿using NN.Eva.Models;
 using NN.Eva.Services;
 using System;
 using System.IO;
@@ -66,10 +65,19 @@ namespace NN.Eva.Core
             for (int k = 0; k < TestVectors.Count; k++)
             {
                 // Получение ответа:
-                var outputVector = _net.Handle(TestVectors[k]._vectorValues);
+                string handlingErrorText = "";
+                var outputVector = _net.Handle(TestVectors[k]._vectorValues, ref handlingErrorText);
 
-                Console.ForegroundColor = GetColorByActivation(outputVector[0]);
-                Console.Write($"{outputVector[0]:f5}\t");
+                if (outputVector != null)
+                {
+                    Console.ForegroundColor = GetColorByActivation(outputVector[0]);
+                    Console.Write($"{outputVector[0]:f5}\t");
+                }
+                else
+                {
+                    _logger.LogError(ErrorType.NonEqualsInputLengths, handlingErrorText);
+                    break;
+                }
             }
 
             Console.ForegroundColor = ConsoleColor.Gray;
@@ -129,15 +137,24 @@ namespace NN.Eva.Core
             for (int i = 0; i < inputDataSets.Count; i++)
             {
                 // Получение ответа:
-                double[] netResult = _net.Handle(inputDataSets[i]);
+                string handlingErrorText = "";
+                double[] netResult = _net.Handle(inputDataSets[i], ref handlingErrorText);
 
-                if (IsVectorsRoughlyEquals(outputDataSets[i], netResult, 0.3))
+                if (netResult != null)
                 {
-                    testPassed++;
+                    if (IsVectorsRoughlyEquals(outputDataSets[i], netResult, 0.3))
+                    {
+                        testPassed++;
+                    }
+                    else
+                    {
+                        testFailed++;
+                    }
                 }
                 else
                 {
-                    testFailed++;
+                    _logger.LogError(ErrorType.NonEqualsInputLengths, handlingErrorText);
+                    return;
                 }
             }
 
@@ -265,6 +282,11 @@ namespace NN.Eva.Core
                     Thread thread = new Thread(netSubTeacher.Train);
                     thread.Start();
                     Wait(thread);
+
+                    if (!netSubTeacher.LastTrainingSuccess)
+                    {
+                        return;
+                    }
 
                     if (j != trainingConfigs.Count - 1)
                     {
@@ -512,7 +534,18 @@ namespace NN.Eva.Core
         {
             try
             {
-                return _net.Handle(data);
+                string handlingErrorText = "";
+                double[] netResult =  _net.Handle(data, ref handlingErrorText);
+
+                if (netResult == null)
+                {
+                    _logger.LogError(ErrorType.NonEqualsInputLengths, handlingErrorText);
+                    return null;
+                }
+                else
+                {
+                    return netResult;
+                }
             }
             catch
             {

@@ -2,7 +2,6 @@
 using NN.Eva.Services;
 using System;
 using System.Collections.Generic;
-using NN.Eva.Exceptions;
 
 namespace NN.Eva.Core
 {
@@ -19,6 +18,8 @@ namespace NN.Eva.Core
         public List<double[]> OutputDatasets { get; set; }
 
         public Logger Logger { get; set; }
+
+        public bool LastTrainingSuccess { get; set; } = false;
 
         private int Iteration = 0;
 
@@ -39,19 +40,14 @@ namespace NN.Eva.Core
                 var learningSpeed = 0.01 * Math.Pow(0.1, iteration / 150000);
                 for (int k = 0; k < InputDatasets.Count; k++)
                 {
+                    string handlingErrorText = "";
+
                     // Handling:
-                    try
+                    double[] netResult = Network.Handle(InputDatasets[k], ref handlingErrorText);
+
+                    if(netResult == null)
                     {
-                        Network.Handle(InputDatasets[k]);
-                    }
-                    catch (NonEqualsInputLengthsException ex)
-                    {
-                        Logger.LogError(ErrorType.NonEqualsInputLengths, ex);
-                        return;
-                    }
-                    catch(Exception ex)
-                    {
-                        Logger.LogError(ErrorType.UnknownError, ex);
+                        Logger.LogError(ErrorType.NonEqualsInputLengths, handlingErrorText);
                         return;
                     }
 
@@ -68,6 +64,10 @@ namespace NN.Eva.Core
                 }
             }
 
+            // Запись события об успешном обучении:
+            LastTrainingSuccess = true;
+
+            // Сохранение памяти сети:
             Network.SaveMemory(TrainingConfiguration.MemoryFolder + "//memory.txt", NetworkStructure);
         }
     }
