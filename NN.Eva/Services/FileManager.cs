@@ -326,7 +326,7 @@ namespace NN.Eva.Services
 
                     for (int i = 0; i < readedData.Length - 1 - additionalSpaceIndex; i++)
                     {
-                        inputVector[i] = double.Parse(readedData[i + 1]);
+                        inputVector[i] = double.Parse(readedData[i + 1].Replace('.', ','));
                     }
 
                     vectors.Add(new TrainObject(readedData[0], inputVector));
@@ -354,7 +354,7 @@ namespace NN.Eva.Services
 
                     for (int i = 0; i < readedLine.Length; i++)
                     {
-                        set[i] = double.Parse(readedLine[i]);
+                        set[i] = double.Parse(readedLine[i].Replace('.', ','));
                     }
 
                     sets.Add(set);
