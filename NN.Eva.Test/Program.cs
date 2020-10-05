@@ -22,7 +22,7 @@ namespace NN.Eva.Test
             TrainingConfiguration trainConfig = new TrainingConfiguration
             {
                 StartIteration = 0,
-                EndIteration = 1,
+                EndIteration = 5,
                 InputDatasetFilename = "TrainingSets//inputSets.txt",
                 OutputDatasetFilename = "TrainingSets//outputSets.txt",
                 MemoryFolder = "Memory"
@@ -33,7 +33,7 @@ namespace NN.Eva.Test
             if (creatingSucceed)
             {
                 serviceEvaNN.Train(trainConfig,
-                                  1,
+                                  5,
                                  false,
                                    ProcessPriorityClass.Normal,
                                   true);
@@ -45,9 +45,7 @@ namespace NN.Eva.Test
             stopWatch.Stop();
             TimeSpan ts = stopWatch.Elapsed;
 
-            string elapsedTime = String.Format("{0:00}:{1:00}:{2:00}.{3:00}",
-                ts.Hours, ts.Minutes, ts.Seconds,
-                ts.Milliseconds / 10);
+            string elapsedTime = String.Format("{0:00}:{1:00}", ts.Minutes, ts.Seconds);
             Console.WriteLine("Time spend: " + elapsedTime);
 
             Console.ReadKey();
