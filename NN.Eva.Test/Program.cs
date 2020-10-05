@@ -8,6 +8,9 @@ namespace NN.Eva.Test
     {
         static void Main(string[] args)
         {
+            Stopwatch stopWatch = new Stopwatch();
+            stopWatch.Start();
+
             ServiceEvaNN serviceEvaNN = new ServiceEvaNN();
 
             NetworkStructure netStructure = new NetworkStructure
@@ -19,7 +22,7 @@ namespace NN.Eva.Test
             TrainingConfiguration trainConfig = new TrainingConfiguration
             {
                 StartIteration = 0,
-                EndIteration = 5,
+                EndIteration = 1,
                 InputDatasetFilename = "TrainingSets//inputSets.txt",
                 OutputDatasetFilename = "TrainingSets//outputSets.txt",
                 MemoryFolder = "Memory"
@@ -29,11 +32,24 @@ namespace NN.Eva.Test
 
             if (creatingSucceed)
             {
-                serviceEvaNN.Train(trainConfig, 5, true, ProcessPriorityClass.Normal, true);
+                serviceEvaNN.Train(trainConfig,
+                                  1,
+                                 false,
+                                   ProcessPriorityClass.Normal,
+                                  true);
                 //serviceEvaNN.CalculateStatistic(trainConfig);
             }
 
-            Console.WriteLine("Done");
+            Console.WriteLine("Done!");
+
+            stopWatch.Stop();
+            TimeSpan ts = stopWatch.Elapsed;
+
+            string elapsedTime = String.Format("{0:00}:{1:00}:{2:00}.{3:00}",
+                ts.Hours, ts.Minutes, ts.Seconds,
+                ts.Milliseconds / 10);
+            Console.WriteLine("Time spend: " + elapsedTime);
+
             Console.ReadKey();
         }
     }
