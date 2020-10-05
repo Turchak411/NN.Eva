@@ -37,7 +37,8 @@ namespace NN.Eva.Core
             for (int iteration = TrainingConfiguration.StartIteration; iteration < Iteration; iteration++)
             {
                 // Calculating learn-speed rate:
-                var learningSpeed = 0.01 * Math.Pow(0.1, iteration / 150000);
+                var learningSpeed = 0.01 * Math.Pow(0.1, (double)iteration / 150000);
+
                 for (int k = 0; k < InputDatasets.Count; k++)
                 {
                     string handlingErrorText = "";
