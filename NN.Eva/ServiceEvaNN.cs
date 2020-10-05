@@ -48,7 +48,12 @@ namespace NN.Eva
         /// <param name="iterationToPause"></param>
         /// <param name="printLearnStatistic"></param>
         /// <param name="processPriorityClass"></param>
-        public void Train(TrainingConfiguration trainingConfiguration, int iterationToPause = 100, bool printLearnStatistic = false, ProcessPriorityClass processPriorityClass = ProcessPriorityClass.Normal)
+        /// <param name="unsafeTrainingMode"></param>
+        public void Train(TrainingConfiguration trainingConfiguration,
+                          int iterationToPause = 100,
+                          bool printLearnStatistic = false,
+                          ProcessPriorityClass processPriorityClass = ProcessPriorityClass.Normal,
+                          bool unsafeTrainingMode = false)
         {
             trainingConfiguration.MemoryFolder = trainingConfiguration.MemoryFolder == "" ? "Memory" : trainingConfiguration.MemoryFolder;
 
@@ -58,7 +63,7 @@ namespace NN.Eva
 
             if (_networkTeacher.CheckMemory(trainingConfiguration.MemoryFolder))
             {
-                _networkTeacher.TrainNet(trainingConfiguration, iterationToPause);
+                _networkTeacher.TrainNet(trainingConfiguration, iterationToPause, unsafeTrainingMode);
 
                 if (printLearnStatistic)
                 {

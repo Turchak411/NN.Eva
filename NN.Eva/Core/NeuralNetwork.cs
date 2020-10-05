@@ -43,6 +43,12 @@ namespace NN.Eva.Core
             }
         }
 
+        /// <summary>
+        /// Handling data
+        /// </summary>
+        /// <param name="data"></param>
+        /// <param name="errorText"></param>
+        /// <returns></returns>
         public double[] Handle(double[] data, ref string errorText)
         {
             // Check for non equaling of input length of data and network's receptors:
@@ -52,6 +58,26 @@ namespace NN.Eva.Core
                 return null;
             }
 
+            double[] tempData = data;
+
+            for (int i = 0; i < _layerList.Count; i++)
+            {
+                tempData = _layerList[i].Handle(tempData);
+            }
+
+            // There is one double value at the last handle
+
+            return HandleNetAnwser(tempData);
+        }
+
+        /// <summary>
+        /// Handling data without vector's length check
+        /// </summary>
+        /// <param name="data"></param>
+        /// <param name="errorText"></param>
+        /// <returns></returns>
+        public double[] HandleUnsafe(double[] data)
+        {
             double[] tempData = data;
 
             for (int i = 0; i < _layerList.Count; i++)

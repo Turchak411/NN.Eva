@@ -234,9 +234,10 @@ namespace NN.Eva.Core
         /// <summary>
         /// Обучение сети
         /// </summary>
-        /// <param name="startIteration"></param>
-        /// <param name="withSort"></param>
-        public void TrainNet(TrainingConfiguration trainingConfig, int iterationsToPause)
+        /// <param name="trainingConfig"></param>
+        /// <param name="iterationsToPause"></param>
+        /// <param name="unsafeTrainingMode"></param>
+        public void TrainNet(TrainingConfiguration trainingConfig, int iterationsToPause, bool unsafeTrainingMode = false)
         {
             Iteration = trainingConfig.EndIteration;
 
@@ -271,7 +272,8 @@ namespace NN.Eva.Core
                     TrainingConfiguration = trainingConfig,
                     InputDatasets = inputDataSets,
                     OutputDatasets = outputDataSets,
-                    Logger = _logger
+                    Logger = _logger,
+                    SafeTrainingMode = !unsafeTrainingMode
                 };
 
                 // Iteration multithreading train:

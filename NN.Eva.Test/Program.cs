@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using NN.Eva.Models;
 
 namespace NN.Eva.Test
@@ -18,7 +19,7 @@ namespace NN.Eva.Test
             TrainingConfiguration trainConfig = new TrainingConfiguration
             {
                 StartIteration = 0,
-                EndIteration = 27300,
+                EndIteration = 5,
                 InputDatasetFilename = "TrainingSets//inputSets.txt",
                 OutputDatasetFilename = "TrainingSets//outputSets.txt",
                 MemoryFolder = "Memory"
@@ -28,7 +29,7 @@ namespace NN.Eva.Test
 
             if (creatingSucceed)
             {
-                serviceEvaNN.Train(trainConfig, 27300, true);
+                serviceEvaNN.Train(trainConfig, 5, true, ProcessPriorityClass.Normal, true);
                 //serviceEvaNN.CalculateStatistic(trainConfig);
             }
 
