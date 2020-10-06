@@ -57,6 +57,10 @@ namespace NN.Eva
         {
             trainingConfiguration.MemoryFolder = trainingConfiguration.MemoryFolder == "" ? "Memory" : trainingConfiguration.MemoryFolder;
 
+            // Start process timer:
+            Stopwatch stopWatch = new Stopwatch();
+            stopWatch.Start();
+
             // Set the process priority class:
             Process thisProc = Process.GetCurrentProcess();
             thisProc.PriorityClass = processPriorityClass;
@@ -74,6 +78,13 @@ namespace NN.Eva
             {
                 Console.WriteLine("Train failed! Invalid memory!");
             }
+
+            // Stopping timer and print spend time in [HH:MM:SS]:
+            stopWatch.Stop();
+            TimeSpan ts = stopWatch.Elapsed;
+
+            string elapsedTime = String.Format("{0:00}:{1:00}:{2:00}", ts.Hours, ts.Minutes, ts.Seconds);
+            Console.WriteLine("Time spend: " + elapsedTime);
         }
 
         /// <summary>

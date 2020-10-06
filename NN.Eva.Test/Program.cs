@@ -8,9 +8,6 @@ namespace NN.Eva.Test
     {
         static void Main(string[] args)
         {
-            Stopwatch stopWatch = new Stopwatch();
-            stopWatch.Start();
-
             ServiceEvaNN serviceEvaNN = new ServiceEvaNN();
 
             NetworkStructure netStructure = new NetworkStructure
@@ -41,12 +38,6 @@ namespace NN.Eva.Test
             }
 
             Console.WriteLine("Done!");
-
-            stopWatch.Stop();
-            TimeSpan ts = stopWatch.Elapsed;
-
-            string elapsedTime = String.Format("{0:00}:{1:00}", ts.Minutes, ts.Seconds);
-            Console.WriteLine("Time spend: " + elapsedTime);
 
             Console.ReadKey();
         }
