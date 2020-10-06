@@ -52,9 +52,6 @@ namespace NN.Eva.Core
                 UnsafeTraining();
             }
 
-            // Запись события об успешном обучении:
-            LastTrainingSuccess = true;
-
             // Сохранение памяти сети:
             Network.SaveMemory(TrainingConfiguration.MemoryFolder + "//memory.txt", NetworkStructure);
         }
@@ -91,6 +88,9 @@ namespace NN.Eva.Core
                     }
                 }
             }
+
+            // Запись события об успешном обучении:
+            LastTrainingSuccess = true;
         }
 
         private void UnsafeTraining()
@@ -117,6 +117,9 @@ namespace NN.Eva.Core
                     }
                 }
             }
+
+            // Запись события об успешном обучении:
+            LastTrainingSuccess = true;
         }
     }
 }
