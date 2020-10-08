@@ -159,8 +159,8 @@ namespace NN.Eva.Services
 
                     if ((readedLine[0] == "layer_" + layerNumber) && (readedLine[1] == "neuron_" + neuronNumber))
                     {
-                        offsetValue = double.Parse(readedLine[2].Replace('.', ','));
-                        offsetWeight = double.Parse(readedLine[3].Replace('.', ','));
+                        offsetValue = double.Parse(readedLine[2], new CultureInfo("ru-RU"));
+                        offsetWeight = double.Parse(readedLine[3], new CultureInfo("ru-RU"));
                         memory = GetWeights(readedLine);
                         break;
                     }
@@ -198,8 +198,8 @@ namespace NN.Eva.Services
 
                     if ((readedLine[0] == "layer_" + layerNumber) && (readedLine[1] == "neuron_" + neuronNumber))
                     {
-                        offsetValue = double.Parse(readedLine[2].Replace('.', ','));
-                        offsetWeight = double.Parse(readedLine[3].Replace('.', ','));
+                        offsetValue = double.Parse(readedLine[2], new CultureInfo("ru-RU"));
+                        offsetWeight = double.Parse(readedLine[3], new CultureInfo("ru-RU"));
                         memory = GetWeights(readedLine);
                         break;
                     }
