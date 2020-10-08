@@ -42,12 +42,12 @@ namespace NN.Eva.Services
 
         public void LogError(ErrorType errorType, Exception ex)
         {
-            WriteError(GetErrorTextByType(errorType) + ex);
+            WriteError(GetErrorTextByType(errorType), ex.Message);
         }
 
         public void LogError(ErrorType errorType, string errorText = "")
         {
-            WriteError(GetErrorTextByType(errorType) + errorText);
+            WriteError(GetErrorTextByType(errorType), errorText);
         }
 
         private string GetErrorTextByType(ErrorType errorType)
@@ -86,8 +86,12 @@ namespace NN.Eva.Services
                 case ErrorType.NonEqualsInputLengths:
                     errorText = "Length of network's input vector and length of training dataset's vector is not equals!";
                     break;
+                case ErrorType.OperationWithNonexistentNetwork:
+                    errorText = "Error in operation with nonexistent network! Please, create the Network first!";
+                    break;
+                case ErrorType.UnknownError:
                 default:
-                    errorText = "";
+                    errorText = "Unknown error!";
                     break;
             }
 
@@ -98,7 +102,7 @@ namespace NN.Eva.Services
             return errorText + "\n";
         }
 
-        private void WriteError(string error)
+        private void WriteError(string systemErrorText, string additionalErrorText)
         {
             // Check for existing this logs - directory:
             if (!Directory.Exists(_errorLogsDirectoryName))
@@ -117,7 +121,8 @@ namespace NN.Eva.Services
                                                                                           ".txt"))
                 {
                     fileWriter.WriteLine("\nTime: " + DateTime.Now);
-                    fileWriter.WriteLine(error);
+                    fileWriter.WriteLine("System error text: " + systemErrorText);
+                    fileWriter.Write("Additional error text: " + additionalErrorText);
                 }
 
                 Console.WriteLine("Error log saved in {0}!", _errorLogsDirectoryName);

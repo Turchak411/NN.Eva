@@ -33,6 +33,12 @@ namespace NN.Eva.Services
         /// <param name="memoryFolderPath"></param>
         public FileManager(string memoryFolderPath = "Memory", string defaultMemoryFilePath = "memoryClear.txt")
         {
+            if (memoryFolderPath == "" || defaultMemoryFilePath == "")
+            {
+                IsMemoryLoadCorrect = false;
+                return;
+            }
+
             IsMemoryLoadCorrect = true;
 
             _logger = new Logger();
@@ -68,6 +74,12 @@ namespace NN.Eva.Services
         /// <param name="defaultMemoryFilePath"></param>
         public FileManager(NetworkStructure netStructure = null, string memoryFolderPath = "Memory", string defaultMemoryFilePath = "memoryClear.txt")
         {
+            if (memoryFolderPath == "" || defaultMemoryFilePath == "")
+            {
+                IsMemoryLoadCorrect = false;
+                return;
+            }
+
             IsMemoryLoadCorrect = true;
 
             _logger = new Logger();

@@ -57,7 +57,8 @@ namespace NN.Eva
         {
             if (_networkTeacher == null)
             {
-                Console.WriteLine("Training failed! Please, create the Network first!");
+                Logger localLogger = new Logger();
+                localLogger.LogError(ErrorType.OperationWithNonexistentNetwork, "Training failed!");
                 return;
             }
 
@@ -100,6 +101,13 @@ namespace NN.Eva
         /// <returns>Vector-classes</returns>
         public double[] Handle(double[] data)
         {
+            if (_networkTeacher == null)
+            {
+                Logger localLogger = new Logger();
+                localLogger.LogError(ErrorType.TrainError, "Training failed! Please, create the Network first!");
+                return null;
+            }
+
             try
             {
                 return _networkTeacher.Handle(data);
@@ -112,6 +120,13 @@ namespace NN.Eva
 
         public void CalculateStatistic(TrainingConfiguration trainingConfig)
         {
+            if (_networkTeacher == null)
+            {
+                Logger localLogger = new Logger();
+                localLogger.LogError(ErrorType.OperationWithNonexistentNetwork, "Calculate statistic failed!");
+                return;
+            }
+
             _networkTeacher.PrintLearningStatistic(trainingConfig, true);
         }
 
@@ -124,6 +139,13 @@ namespace NN.Eva
         /// <returns>State of operation success</returns>
         public bool BackupMemory(string memoryFolder, DatabaseConfig dbConfig = null, string networkStructureInfo = "no information")
         {
+            if (_networkTeacher == null)
+            {
+                Logger localLogger = new Logger();
+                localLogger.LogError(ErrorType.OperationWithNonexistentNetwork, "Database memory backuping failed!");
+                return false;
+            }
+
             try
             {
                 if (_networkTeacher.CheckMemory(memoryFolder))
@@ -150,6 +172,13 @@ namespace NN.Eva
         /// <returns>State of operation success</returns>
         public bool DBMemoryAbort(DatabaseConfig dbConfig)
         {
+            if (_networkTeacher == null)
+            {
+                Logger localLogger = new Logger();
+                localLogger.LogError(ErrorType.OperationWithNonexistentNetwork, "Database memory aborting failed!");
+                return false;
+            }
+
             try
             {
                 _networkTeacher.DBMemoryAbort(dbConfig);
@@ -171,6 +200,13 @@ namespace NN.Eva
         /// <returns></returns>
         public bool DBMemoryLoad(DatabaseConfig dbConfig, Guid networkID, string destinationMemoryFilePath)
         {
+            if (_networkTeacher == null)
+            {
+                Logger localLogger = new Logger();
+                localLogger.LogError(ErrorType.OperationWithNonexistentNetwork, "Database memory loading failed!");
+                return false;
+            }
+
             try
             {
                 _networkTeacher.DBMemoryLoad(dbConfig, networkID, destinationMemoryFilePath);
