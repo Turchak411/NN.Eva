@@ -433,7 +433,7 @@ namespace NN.Eva.Core
 
                 // Saving networks info:
                 _net.SaveMemoryToDB(Iteration, networkStructure, userId, dbInserter);
-                    Console.WriteLine("Networks memory backuped successfully!");
+                    Console.WriteLine("Networks memory backuped to database successfully!");
             }
             catch (Exception ex)
             {

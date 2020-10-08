@@ -122,7 +122,7 @@ namespace NN.Eva
             {
                 if (_networkTeacher.CheckMemory(memoryFolder))
                 {
-                    _networkTeacher.BackupMemory(memoryFolder, ".memory_backups", dbConfig);  
+                    _networkTeacher.BackupMemory(memoryFolder, ".memory_backups", dbConfig, networkStructureInfo);  
                 }
                 else
                 {

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
 using NN.Eva.Models;
+using NN.Eva.Models.Database;
 
 namespace NN.Eva.Test
 {
@@ -13,13 +14,13 @@ namespace NN.Eva.Test
             NetworkStructure netStructure = new NetworkStructure
             {
                 InputVectorLength = 10,
-                NeuronsByLayers = new[] { 230, 150, 120, 1 }
+                NeuronsByLayers = new[] { 1337, 1 }
             };
 
             TrainingConfiguration trainConfig = new TrainingConfiguration
             {
-                StartIteration = 0,
-                EndIteration = 5,
+                StartIteration = 35000,
+                EndIteration = 56000,
                 InputDatasetFilename = "TrainingSets//inputSets.txt",
                 OutputDatasetFilename = "TrainingSets//outputSets.txt",
                 MemoryFolder = "Memory"
@@ -30,15 +31,14 @@ namespace NN.Eva.Test
             if (creatingSucceed)
             {
                 serviceEvaNN.Train(trainConfig,
-                                  5,
-                                 false,
-                                   ProcessPriorityClass.Normal,
-                                  true);
+                                   21000,
+                                   true,
+                                   ProcessPriorityClass.High,
+                                   true);
                 //serviceEvaNN.CalculateStatistic(trainConfig);
             }
 
             Console.WriteLine("Done!");
-
             Console.ReadKey();
         }
     }
