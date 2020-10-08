@@ -283,7 +283,9 @@ namespace NN.Eva.Services
         {
             using (StreamWriter fileWriter = new StreamWriter(path, true))
             {
-                fileWriter.Write("layer_{0} neuron_{1} {2} {3}", layerNumber, neuronNumber, offsetValue, offsetWeight);
+                fileWriter.Write("layer_{0} neuron_{1} {2} {3}", layerNumber, neuronNumber, 
+                                                                 offsetValue.ToString().Replace('.', ','),
+                                                                 offsetWeight.ToString().Replace('.', ','));
 
                 for (int i = 0; i < weights.Length; i++)
                 {
