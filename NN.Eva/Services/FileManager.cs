@@ -159,7 +159,6 @@ namespace NN.Eva.Services
 
                     if ((readedLine[0] == "layer_" + layerNumber) && (readedLine[1] == "neuron_" + neuronNumber))
                     {
-                        // TODO: Еще протестировать на других настройках осей
                         offsetValue = double.Parse(readedLine[2].Replace('.', ','));
                         offsetWeight = double.Parse(readedLine[3].Replace('.', ','));
                         memory = GetWeights(readedLine);
@@ -199,7 +198,6 @@ namespace NN.Eva.Services
 
                     if ((readedLine[0] == "layer_" + layerNumber) && (readedLine[1] == "neuron_" + neuronNumber))
                     {
-                        // TODO: Еще протестировать на других настройках осей
                         offsetValue = double.Parse(readedLine[2].Replace('.', ','));
                         offsetWeight = double.Parse(readedLine[3].Replace('.', ','));
                         memory = GetWeights(readedLine);
@@ -338,7 +336,7 @@ namespace NN.Eva.Services
 
                     for (int i = 0; i < readedData.Length - 1 - additionalSpaceIndex; i++)
                     {
-                        inputVector[i] = double.Parse(readedData[i + 1].Replace('.', ','));
+                        inputVector[i] = double.Parse(readedData[i + 1], CultureInfo.GetCultureInfo("ru-RU"));
                     }
 
                     vectors.Add(new TrainObject(readedData[0], inputVector));
@@ -366,7 +364,7 @@ namespace NN.Eva.Services
 
                     for (int i = 0; i < readedLine.Length; i++)
                     {
-                        set[i] = double.Parse(readedLine[i].Replace('.', ','));
+                        set[i] = double.Parse(readedLine[i], CultureInfo.GetCultureInfo("ru-RU"));
                     }
 
                     sets.Add(set);

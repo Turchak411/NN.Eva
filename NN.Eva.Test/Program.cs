@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
 using NN.Eva.Models;
-using NN.Eva.Models.Database;
 
 namespace NN.Eva.Test
 {
