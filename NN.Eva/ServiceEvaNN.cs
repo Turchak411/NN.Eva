@@ -10,7 +10,7 @@ namespace NN.Eva
     public class ServiceEvaNN
     {
         private FileManager _fileManager;
-        private NetworksTeacher _networkTeacher;
+        private NetworksTeacher _networkTeacher = null;
 
         /// <summary>
         /// Creating FeedForward - Neural Network
@@ -55,6 +55,12 @@ namespace NN.Eva
                           ProcessPriorityClass processPriorityClass = ProcessPriorityClass.Normal,
                           bool unsafeTrainingMode = false)
         {
+            if (_networkTeacher == null)
+            {
+                Console.WriteLine("Training failed! Please, create the Network first!");
+                return;
+            }
+
             trainingConfiguration.MemoryFolder = trainingConfiguration.MemoryFolder == "" ? "Memory" : trainingConfiguration.MemoryFolder;
 
             // Start process timer:
@@ -76,7 +82,7 @@ namespace NN.Eva
             }
             else
             {
-                Console.WriteLine("Train failed! Invalid memory!");
+                Console.WriteLine("Training failed! Invalid memory!");
             }
 
             // Stopping timer and print spend time in [HH:MM:SS]:
