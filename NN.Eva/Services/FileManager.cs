@@ -33,6 +33,12 @@ namespace NN.Eva.Services
         /// <param name="memoryFolderPath"></param>
         public FileManager(string memoryFolderPath = "Memory", string defaultMemoryFilePath = "memoryClear.txt")
         {
+            if (memoryFolderPath == "" || defaultMemoryFilePath == "")
+            {
+                IsMemoryLoadCorrect = false;
+                return;
+            }
+
             IsMemoryLoadCorrect = true;
 
             _logger = new Logger();
@@ -68,6 +74,12 @@ namespace NN.Eva.Services
         /// <param name="defaultMemoryFilePath"></param>
         public FileManager(NetworkStructure netStructure = null, string memoryFolderPath = "Memory", string defaultMemoryFilePath = "memoryClear.txt")
         {
+            if (memoryFolderPath == "" || defaultMemoryFilePath == "")
+            {
+                IsMemoryLoadCorrect = false;
+                return;
+            }
+
             IsMemoryLoadCorrect = true;
 
             _logger = new Logger();
@@ -147,9 +159,8 @@ namespace NN.Eva.Services
 
                     if ((readedLine[0] == "layer_" + layerNumber) && (readedLine[1] == "neuron_" + neuronNumber))
                     {
-                        // TODO: Еще протестировать на других настройках осей
-                        offsetValue = double.Parse(readedLine[2].Replace('.', ','));
-                        offsetWeight = double.Parse(readedLine[3].Replace('.', ','));
+                        offsetValue = double.Parse(readedLine[2], new CultureInfo("ru-RU"));
+                        offsetWeight = double.Parse(readedLine[3], new CultureInfo("ru-RU"));
                         memory = GetWeights(readedLine);
                         break;
                     }
@@ -187,9 +198,8 @@ namespace NN.Eva.Services
 
                     if ((readedLine[0] == "layer_" + layerNumber) && (readedLine[1] == "neuron_" + neuronNumber))
                     {
-                        // TODO: Еще протестировать на других настройках осей
-                        offsetValue = double.Parse(readedLine[2].Replace('.', ','));
-                        offsetWeight = double.Parse(readedLine[3].Replace('.', ','));
+                        offsetValue = double.Parse(readedLine[2], new CultureInfo("ru-RU"));
+                        offsetWeight = double.Parse(readedLine[3], new CultureInfo("ru-RU"));
                         memory = GetWeights(readedLine);
                         break;
                     }
@@ -273,7 +283,9 @@ namespace NN.Eva.Services
         {
             using (StreamWriter fileWriter = new StreamWriter(path, true))
             {
-                fileWriter.Write("layer_{0} neuron_{1} {2} {3}", layerNumber, neuronNumber, offsetValue, offsetWeight);
+                fileWriter.Write("layer_{0} neuron_{1} {2} {3}", layerNumber, neuronNumber, 
+                                                                 offsetValue.ToString().Replace('.', ','),
+                                                                 offsetWeight.ToString().Replace('.', ','));
 
                 for (int i = 0; i < weights.Length; i++)
                 {
@@ -326,7 +338,7 @@ namespace NN.Eva.Services
 
                     for (int i = 0; i < readedData.Length - 1 - additionalSpaceIndex; i++)
                     {
-                        inputVector[i] = double.Parse(readedData[i + 1].Replace('.', ','));
+                        inputVector[i] = double.Parse(readedData[i + 1], CultureInfo.GetCultureInfo("ru-RU"));
                     }
 
                     vectors.Add(new TrainObject(readedData[0], inputVector));
@@ -354,7 +366,7 @@ namespace NN.Eva.Services
 
                     for (int i = 0; i < readedLine.Length; i++)
                     {
-                        set[i] = double.Parse(readedLine[i].Replace('.', ','));
+                        set[i] = double.Parse(readedLine[i], CultureInfo.GetCultureInfo("ru-RU"));
                     }
 
                     sets.Add(set);

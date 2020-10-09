@@ -71,7 +71,7 @@ namespace NN.Eva.Core.Database
         {
             string query = $"INSERT INTO {DatabaseConfiguration.Database}.neurons " +
                            $"VALUES(\'{id}\',\'{userId}\',\'{layerId}\','{number}'," +
-                           $"'{offsetValue}','{offsetWeight}');";
+                           $"'{offsetValue.ToString().Replace(',', '.')}','{offsetWeight.ToString().Replace(',', '.')}');";
 
             InsertInTable(query, "neurons");
         }

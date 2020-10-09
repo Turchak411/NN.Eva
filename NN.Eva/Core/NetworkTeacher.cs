@@ -13,7 +13,7 @@ namespace NN.Eva.Core
     {
         private NeuralNetwork _net;
 
-        private NetworkStructure _netStructure;
+        private NetworkStructure _networkStructure;
 
         /// <summary>
         /// Services
@@ -32,18 +32,25 @@ namespace NN.Eva.Core
         /// </summary>
         public List<TrainObject> TestVectors { get; set; }
 
-        public NetworksTeacher(NetworkStructure netStructure, FileManager fileManager)
+        public NetworksTeacher(NetworkStructure networkStructure, FileManager fileManager)
         {
-            _netStructure = netStructure;
+            _networkStructure = networkStructure;
 
             _fileManager = fileManager;
+            _memoryChecker = new MemoryChecker();
             _logger = new Logger();
 
+            if (_memoryChecker.IsValidQuickCheck(_fileManager.MemoryFolderPath, "memory.txt", networkStructure))
+            {
+                _logger.LogError(ErrorType.MemoryInitializeError);
+                return;
+            }
+                
             try
             {
                 // Ицициализация сети по одинаковому шаблону:
-                _net = new NeuralNetwork(netStructure.InputVectorLength,
-                        netStructure.NeuronsByLayers,
+                _net = new NeuralNetwork(networkStructure.InputVectorLength,
+                    networkStructure.NeuronsByLayers,
                         fileManager, "memory.txt");
             }
             catch (Exception ex)
@@ -203,11 +210,9 @@ namespace NN.Eva.Core
 
             Console.WriteLine("Start memory cheсking...");
 
-            _memoryChecker = new MemoryChecker();
-
-            bool isCurrentNetMemoryValid = _netStructure == null
-                ? _memoryChecker.IsValidQuickCheck(memoryFolder + "//memory.txt")
-                : _memoryChecker.IsValid(memoryFolder + "//memory.txt", _netStructure) &&
+            bool isCurrentNetMemoryValid = _networkStructure == null
+                ? _memoryChecker.IsFileNotCorrupted(memoryFolder + "//memory.txt")
+                : _memoryChecker.IsValid(memoryFolder + "//memory.txt", _networkStructure) &&
                   _fileManager.IsMemoryEqualsDefault("memory.txt");
 
             if (isCurrentNetMemoryValid)
@@ -234,9 +239,10 @@ namespace NN.Eva.Core
         /// <summary>
         /// Обучение сети
         /// </summary>
-        /// <param name="startIteration"></param>
-        /// <param name="withSort"></param>
-        public void TrainNet(TrainingConfiguration trainingConfig, int iterationsToPause)
+        /// <param name="trainingConfig"></param>
+        /// <param name="iterationsToPause"></param>
+        /// <param name="unsafeTrainingMode"></param>
+        public void TrainNet(TrainingConfiguration trainingConfig, int iterationsToPause, bool unsafeTrainingMode = false)
         {
             Iteration = trainingConfig.EndIteration;
 
@@ -267,11 +273,12 @@ namespace NN.Eva.Core
                 SingleNetworkTeacher netSubTeacher = new SingleNetworkTeacher
                 {
                     Network = _net,
-                    NetworkStructure = _netStructure,
+                    NetworkStructure = _networkStructure,
                     TrainingConfiguration = trainingConfig,
                     InputDatasets = inputDataSets,
                     OutputDatasets = outputDataSets,
-                    Logger = _logger
+                    Logger = _logger,
+                    SafeTrainingMode = !unsafeTrainingMode
                 };
 
                 // Iteration multithreading train:
@@ -394,7 +401,7 @@ namespace NN.Eva.Core
             }
 
             // Saving memory:
-            _net.SaveMemory(memoryFolder + "//" + backupsDirectoryName + "//" + Iteration + "//memory.txt", _netStructure);
+            _net.SaveMemory(memoryFolder + "//" + backupsDirectoryName + "//" + Iteration + "//memory.txt", _networkStructure);
 
             // Parsing userID:
             string[] memoryFolderPathArray = memoryFolder.Split('/');
@@ -431,7 +438,7 @@ namespace NN.Eva.Core
 
                 // Saving networks info:
                 _net.SaveMemoryToDB(Iteration, networkStructure, userId, dbInserter);
-                    Console.WriteLine("Networks memory backuped successfully!");
+                    Console.WriteLine("Networks memory backuped to database successfully!");
             }
             catch (Exception ex)
             {

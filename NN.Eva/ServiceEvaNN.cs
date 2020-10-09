@@ -10,7 +10,7 @@ namespace NN.Eva
     public class ServiceEvaNN
     {
         private FileManager _fileManager;
-        private NetworksTeacher _networkTeacher;
+        private NetworksTeacher _networkTeacher = null;
 
         /// <summary>
         /// Creating FeedForward - Neural Network
@@ -45,12 +45,42 @@ namespace NN.Eva
         /// Training FeedForward - NeuralNetwork
         /// </summary>
         /// <param name="trainingConfiguration"></param>
-        /// <param name="iterationToPause"></param>
         /// <param name="printLearnStatistic"></param>
         /// <param name="processPriorityClass"></param>
-        public void Train(TrainingConfiguration trainingConfiguration, int iterationToPause = 100, bool printLearnStatistic = false, ProcessPriorityClass processPriorityClass = ProcessPriorityClass.Normal)
+        /// <param name="unsafeTrainingMode"></param>
+        /// <param name="iterationsToPause"></param>
+        public void Train(TrainingConfiguration trainingConfiguration, 
+                          bool printLearnStatistic = false,
+                          ProcessPriorityClass processPriorityClass = ProcessPriorityClass.Normal,
+                          bool unsafeTrainingMode = false,
+                          int iterationsToPause = -1)
         {
+            // Check for unexistent network:
+            if (_networkTeacher == null)
+            {
+                Logger localLogger = new Logger();
+                localLogger.LogError(ErrorType.OperationWithNonexistentNetwork, "Training failed!");
+                return;
+            }
+
+            // Check for set of iterations to pause:
+            if (iterationsToPause == -1)
+            {
+                iterationsToPause = trainingConfiguration.EndIteration - trainingConfiguration.StartIteration;
+            }
+
+            // Print warning about using unsafe mode:
+            if (unsafeTrainingMode)
+            {
+                Logger localLogger = new Logger();
+                localLogger.LogWarning(WarningType.UsingUnsafeTrainingMode);
+            }
+
             trainingConfiguration.MemoryFolder = trainingConfiguration.MemoryFolder == "" ? "Memory" : trainingConfiguration.MemoryFolder;
+
+            // Start process timer:
+            Stopwatch stopWatch = new Stopwatch();
+            stopWatch.Start();
 
             // Set the process priority class:
             Process thisProc = Process.GetCurrentProcess();
@@ -58,7 +88,7 @@ namespace NN.Eva
 
             if (_networkTeacher.CheckMemory(trainingConfiguration.MemoryFolder))
             {
-                _networkTeacher.TrainNet(trainingConfiguration, iterationToPause);
+                _networkTeacher.TrainNet(trainingConfiguration, iterationsToPause, unsafeTrainingMode);
 
                 if (printLearnStatistic)
                 {
@@ -67,8 +97,15 @@ namespace NN.Eva
             }
             else
             {
-                Console.WriteLine("Train failed! Invalid memory!");
+                Console.WriteLine("Training failed! Invalid memory!");
             }
+
+            // Stopping timer and print spend time in [HH:MM:SS]:
+            stopWatch.Stop();
+            TimeSpan ts = stopWatch.Elapsed;
+
+            string elapsedTime = String.Format("{0:00}:{1:00}:{2:00}", ts.Hours, ts.Minutes, ts.Seconds);
+            Console.WriteLine("Time spend: " + elapsedTime);
         }
 
         /// <summary>
@@ -78,6 +115,13 @@ namespace NN.Eva
         /// <returns>Vector-classes</returns>
         public double[] Handle(double[] data)
         {
+            if (_networkTeacher == null)
+            {
+                Logger localLogger = new Logger();
+                localLogger.LogError(ErrorType.TrainError, "Training failed! Please, create the Network first!");
+                return null;
+            }
+
             try
             {
                 return _networkTeacher.Handle(data);
@@ -90,6 +134,13 @@ namespace NN.Eva
 
         public void CalculateStatistic(TrainingConfiguration trainingConfig)
         {
+            if (_networkTeacher == null)
+            {
+                Logger localLogger = new Logger();
+                localLogger.LogError(ErrorType.OperationWithNonexistentNetwork, "Calculate statistic failed!");
+                return;
+            }
+
             _networkTeacher.PrintLearningStatistic(trainingConfig, true);
         }
 
@@ -102,11 +153,18 @@ namespace NN.Eva
         /// <returns>State of operation success</returns>
         public bool BackupMemory(string memoryFolder, DatabaseConfig dbConfig = null, string networkStructureInfo = "no information")
         {
+            if (_networkTeacher == null)
+            {
+                Logger localLogger = new Logger();
+                localLogger.LogError(ErrorType.OperationWithNonexistentNetwork, "Database memory backuping failed!");
+                return false;
+            }
+
             try
             {
                 if (_networkTeacher.CheckMemory(memoryFolder))
                 {
-                    _networkTeacher.BackupMemory(memoryFolder, ".memory_backups", dbConfig);  
+                    _networkTeacher.BackupMemory(memoryFolder, ".memory_backups", dbConfig, networkStructureInfo);  
                 }
                 else
                 {
@@ -128,6 +186,13 @@ namespace NN.Eva
         /// <returns>State of operation success</returns>
         public bool DBMemoryAbort(DatabaseConfig dbConfig)
         {
+            if (_networkTeacher == null)
+            {
+                Logger localLogger = new Logger();
+                localLogger.LogError(ErrorType.OperationWithNonexistentNetwork, "Database memory aborting failed!");
+                return false;
+            }
+
             try
             {
                 _networkTeacher.DBMemoryAbort(dbConfig);
@@ -149,6 +214,13 @@ namespace NN.Eva
         /// <returns></returns>
         public bool DBMemoryLoad(DatabaseConfig dbConfig, Guid networkID, string destinationMemoryFilePath)
         {
+            if (_networkTeacher == null)
+            {
+                Logger localLogger = new Logger();
+                localLogger.LogError(ErrorType.OperationWithNonexistentNetwork, "Database memory loading failed!");
+                return false;
+            }
+
             try
             {
                 _networkTeacher.DBMemoryLoad(dbConfig, networkID, destinationMemoryFilePath);
