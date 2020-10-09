@@ -45,21 +45,35 @@ namespace NN.Eva
         /// Training FeedForward - NeuralNetwork
         /// </summary>
         /// <param name="trainingConfiguration"></param>
-        /// <param name="iterationToPause"></param>
         /// <param name="printLearnStatistic"></param>
         /// <param name="processPriorityClass"></param>
         /// <param name="unsafeTrainingMode"></param>
-        public void Train(TrainingConfiguration trainingConfiguration,
-                          int iterationToPause = 100,
+        /// <param name="iterationsToPause"></param>
+        public void Train(TrainingConfiguration trainingConfiguration, 
                           bool printLearnStatistic = false,
                           ProcessPriorityClass processPriorityClass = ProcessPriorityClass.Normal,
-                          bool unsafeTrainingMode = false)
+                          bool unsafeTrainingMode = false,
+                          int iterationsToPause = -1)
         {
+            // Check for unexistent network:
             if (_networkTeacher == null)
             {
                 Logger localLogger = new Logger();
                 localLogger.LogError(ErrorType.OperationWithNonexistentNetwork, "Training failed!");
                 return;
+            }
+
+            // Check for set of iterations to pause:
+            if (iterationsToPause == -1)
+            {
+                iterationsToPause = trainingConfiguration.EndIteration - trainingConfiguration.StartIteration;
+            }
+
+            // Print warning about using unsafe mode:
+            if (unsafeTrainingMode)
+            {
+                Logger localLogger = new Logger();
+                localLogger.LogWarning(WarningType.UsingUnsafeTrainingMode);
             }
 
             trainingConfiguration.MemoryFolder = trainingConfiguration.MemoryFolder == "" ? "Memory" : trainingConfiguration.MemoryFolder;
@@ -74,7 +88,7 @@ namespace NN.Eva
 
             if (_networkTeacher.CheckMemory(trainingConfiguration.MemoryFolder))
             {
-                _networkTeacher.TrainNet(trainingConfiguration, iterationToPause, unsafeTrainingMode);
+                _networkTeacher.TrainNet(trainingConfiguration, iterationsToPause, unsafeTrainingMode);
 
                 if (printLearnStatistic)
                 {

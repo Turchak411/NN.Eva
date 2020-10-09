@@ -40,14 +40,40 @@ namespace NN.Eva.Services
             Console.WriteLine("Learn statistic logs saved in {0}!", _trainLogsDirectoryName);
         }
 
+        public void LogWarning(WarningType warningType)
+        {
+            WriteLog(GetWarningTextByType(warningType));
+        }
+
         public void LogError(ErrorType errorType, Exception ex)
         {
-            WriteError(GetErrorTextByType(errorType), ex.Message);
+            WriteLog(GetErrorTextByType(errorType), ex.Message);
         }
 
         public void LogError(ErrorType errorType, string errorText = "")
         {
-            WriteError(GetErrorTextByType(errorType), errorText);
+            WriteLog(GetErrorTextByType(errorType), errorText);
+        }
+
+        private string GetWarningTextByType(WarningType warningType)
+        {
+            string warningText;
+
+            switch (warningType)
+            {
+                case WarningType.UsingUnsafeTrainingMode:
+                    warningText = "You are using unsafe training mode! Make sure that your input-vectors lengths are equals with Network's ones!";
+                    break;
+                default:
+                    warningText = "";
+                    break;
+            }
+
+            Console.ForegroundColor = ConsoleColor.Red;
+            Console.WriteLine("[WARNING] " + warningText);
+            Console.ForegroundColor = ConsoleColor.Gray;
+
+            return warningText + "\n";
         }
 
         private string GetErrorTextByType(ErrorType errorType)
@@ -102,7 +128,7 @@ namespace NN.Eva.Services
             return errorText + "\n";
         }
 
-        private void WriteError(string systemErrorText, string additionalErrorText)
+        private void WriteLog(string systemErrorText, string additionalErrorText = "")
         {
             // Check for existing this logs - directory:
             if (!Directory.Exists(_errorLogsDirectoryName))
@@ -122,7 +148,11 @@ namespace NN.Eva.Services
                 {
                     fileWriter.WriteLine("\nTime: " + DateTime.Now);
                     fileWriter.WriteLine("System error text: " + systemErrorText);
-                    fileWriter.Write("Additional error text: " + additionalErrorText);
+
+                    if (additionalErrorText != "")
+                    {
+                        fileWriter.Write("Additional error text: " + additionalErrorText);
+                    }
                 }
 
                 Console.WriteLine("Error log saved in {0}!", _errorLogsDirectoryName);

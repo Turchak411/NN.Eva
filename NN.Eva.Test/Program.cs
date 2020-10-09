@@ -18,8 +18,8 @@ namespace NN.Eva.Test
 
             TrainingConfiguration trainConfig = new TrainingConfiguration
             {
-                StartIteration = 35000,
-                EndIteration = 56000,
+                StartIteration = 0,
+                EndIteration = 118833,
                 InputDatasetFilename = "TrainingSets//inputSets.txt",
                 OutputDatasetFilename = "TrainingSets//outputSets.txt",
                 MemoryFolder = "Memory"
@@ -30,7 +30,6 @@ namespace NN.Eva.Test
             if (creatingSucceed)
             {
                 serviceEvaNN.Train(trainConfig,
-                                   21000,
                                    true,
                                    ProcessPriorityClass.High,
                                    true);
