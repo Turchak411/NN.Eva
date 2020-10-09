@@ -19,7 +19,7 @@ namespace NN.Eva.Test
             TrainingConfiguration trainConfig = new TrainingConfiguration
             {
                 StartIteration = 0,
-                EndIteration = 118833,
+                EndIteration = 120000,
                 InputDatasetFilename = "TrainingSets//inputSets.txt",
                 OutputDatasetFilename = "TrainingSets//outputSets.txt",
                 MemoryFolder = "Memory"
@@ -35,6 +35,16 @@ namespace NN.Eva.Test
                                    true);
                 //serviceEvaNN.CalculateStatistic(trainConfig);
             }
+
+            //DatabaseConfig dbConfig = new DatabaseConfig
+            //{
+            //    Server = "localhost",
+            //    Database = "memorynnn",
+            //    Password = "root",
+            //    UID = "root"
+            //};
+
+            //serviceEvaNN.BackupMemory("Memory", dbConfig, "first backup :)");
 
             Console.WriteLine("Done!");
             Console.ReadKey();

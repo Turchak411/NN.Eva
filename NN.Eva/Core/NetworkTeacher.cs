@@ -394,14 +394,17 @@ namespace NN.Eva.Core
                 Directory.CreateDirectory(memoryFolder + "//" + backupsDirectoryName);
             }
 
+            // Creating path of backuped memory:
+            string backupedMemoryFoldersPath = $"{memoryFolder}//{backupsDirectoryName}//{DateTime.Now.Day}_{DateTime.Now.Month}_{DateTime.Now.Year}_{DateTime.Now.Ticks}_{Iteration}";
+
             // Check for already-existing sub-directory (trainCount-named):
-            if (!Directory.Exists(memoryFolder + "//" + backupsDirectoryName + "//" + Iteration))
+            if (!Directory.Exists(backupedMemoryFoldersPath))
             {
-                Directory.CreateDirectory(memoryFolder + "//" + backupsDirectoryName + "//" + Iteration);
+                Directory.CreateDirectory(backupedMemoryFoldersPath);
             }
 
             // Saving memory:
-            _net.SaveMemory(memoryFolder + "//" + backupsDirectoryName + "//" + Iteration + "//memory.txt", _networkStructure);
+            _net.SaveMemory(backupedMemoryFoldersPath + "//memory.txt", _networkStructure);
 
             // Parsing userID:
             string[] memoryFolderPathArray = memoryFolder.Split('/');
@@ -438,7 +441,7 @@ namespace NN.Eva.Core
 
                 // Saving networks info:
                 _net.SaveMemoryToDB(Iteration, networkStructure, userId, dbInserter);
-                    Console.WriteLine("Networks memory backuped to database successfully!");
+                Console.WriteLine("Networks memory backuped to database successfully!");
             }
             catch (Exception ex)
             {
