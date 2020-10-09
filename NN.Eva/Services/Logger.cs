@@ -69,7 +69,7 @@ namespace NN.Eva.Services
                     break;
             }
 
-            Console.ForegroundColor = ConsoleColor.Red;
+            Console.ForegroundColor = ConsoleColor.DarkYellow;
             Console.WriteLine("[WARNING] " + warningText);
             Console.ForegroundColor = ConsoleColor.Gray;
 
