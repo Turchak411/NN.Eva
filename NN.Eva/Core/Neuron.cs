@@ -13,7 +13,7 @@ namespace NN.Eva.Core
         private double _offsetValue;
         private double _offsetWeight;
 
-        private double _lastAnwser;
+        private double _lastAnswer;
 
         private double _error;
 
@@ -38,7 +38,7 @@ namespace NN.Eva.Core
             double x = CalcSum(data);
             double actFunc = ActivationFunction(x);
 
-            _lastAnwser = actFunc;
+            _lastAnswer = actFunc;
             return actFunc;
         }
 
@@ -76,13 +76,13 @@ namespace NN.Eva.Core
 
         public void CalcErrorForOutNeuron(double rightAnwser)
         {
-            _error = (rightAnwser - _lastAnwser) * _lastAnwser * (1 - _lastAnwser);
+            _error = (rightAnwser - _lastAnswer) * _lastAnswer * (1 - _lastAnswer);
         }
 
         public double CalcErrorForHiddenNeuron(int neuronIndex, double[][] nextLayerWeights, double[] nextLayerErrors)
         {
             // Вычисление производной активационной функции:
-            _error = _lastAnwser * (1 - _lastAnwser);
+            _error = _lastAnswer * (1 - _lastAnswer);
 
             // Суммирование ошибок со следующего слоя:
             double sum = 0;
@@ -111,7 +111,7 @@ namespace NN.Eva.Core
 
         public double GetLastAnswer()
         {
-            return _lastAnwser;
+            return _lastAnswer;
         }
 
         #region Weights changing
