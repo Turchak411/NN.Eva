@@ -149,7 +149,7 @@ namespace NN.Eva.Core
 
                 if (netResult != null)
                 {
-                    if (IsVectorsRoughlyEquals(outputDataSets[i], netResult, 0.3))
+                    if (IsVectorsRoughlyEquals(outputDataSets[i], netResult, 0.15))
                     {
                         testPassed++;
                     }

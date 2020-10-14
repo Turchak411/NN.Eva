@@ -43,6 +43,8 @@ namespace NN.Eva.Core
             }
         }
 
+        #region Handling
+
         /// <summary>
         /// Handling data
         /// </summary>
@@ -66,15 +68,13 @@ namespace NN.Eva.Core
             }
 
             // There is one double value at the last handle
-
-            return HandleNetAnwser(tempData);
+            return tempData;
         }
 
         /// <summary>
         /// Handling data without vector's length check
         /// </summary>
         /// <param name="data"></param>
-        /// <param name="errorText"></param>
         /// <returns></returns>
         public double[] HandleUnsafe(double[] data)
         {
@@ -86,19 +86,17 @@ namespace NN.Eva.Core
             }
 
             // There is one double value at the last handle
-
-            return HandleNetAnwser(tempData);
+            return tempData;
         }
 
-        private double[] HandleNetAnwser(double[] netResult)
-        {
-            return netResult;
-        }
+        #endregion
 
-        public void Teach(double[] data, double[] rightAnwsersSet, double learnSpeed)
+        #region Teaching
+
+        public void Teach(double[] data, double[] rightAnswersSet, double learnSpeed)
         {
             // Подсчет ошибки:
-            _layerList[_layerList.Count - 1].CalcErrorAsOut(rightAnwsersSet);
+            _layerList[_layerList.Count - 1].CalcErrorAsOut(rightAnswersSet);
 
             for (int i = _layerList.Count - 2; i >= 0; i--)
             {
@@ -109,14 +107,18 @@ namespace NN.Eva.Core
             }
 
             // Корректировка весов нейронов:
-            double[] anwsersFromPrewLayer = data;
+            double[] answersFromPrevLayer = data;
 
             for (int i = 0; i < _layerList.Count; i++)
             {
-                _layerList[i].ChangeWeights(learnSpeed, anwsersFromPrewLayer);
-                anwsersFromPrewLayer = _layerList[i].GetLastAnwsers();
+                _layerList[i].ChangeWeights(learnSpeed, answersFromPrevLayer);
+                answersFromPrevLayer = _layerList[i].GetLastAnswers();
             }
         }
+
+        #endregion
+
+        #region Memory saving/loading
 
         public void SaveMemory(string path, NetworkStructure networkStructure)
         {
@@ -129,6 +131,8 @@ namespace NN.Eva.Core
                 _layerList[i].SaveMemory(_fileManager, i, path);
             }
         }
+
+        #region Database operations
 
         public void SaveMemoryToDB(int iterations, string networkStructure, Guid userId, DBInserter dbInserter)
         {
@@ -154,7 +158,11 @@ namespace NN.Eva.Core
             dbDeleter.DeleteFromTableNetworks(Id);
         }
 
-        // MEMORY CHECK:
+        #endregion
+
+        #endregion
+
+        #region Memory checking
 
         public bool IsMemoryEquals(NetworkStructure netStructure)
         {
@@ -175,5 +183,7 @@ namespace NN.Eva.Core
 
             return true;
         }
+
+        #endregion
     }
 }

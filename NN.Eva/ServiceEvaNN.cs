@@ -26,7 +26,14 @@ namespace NN.Eva
 
             if(_fileManager.IsMemoryLoadCorrect)
             {
-                _networkTeacher = new NetworksTeacher(networkStructure, _fileManager);
+                try
+                {
+                    _networkTeacher = new NetworksTeacher(networkStructure, _fileManager);
+                }
+                catch
+                {
+                    return false;
+                }
 
                 if (testDatasetPath != null)
                 {

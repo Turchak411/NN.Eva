@@ -42,6 +42,8 @@ namespace NN.Eva.Core
             }
         }
 
+        #region Handling
+
         public double[] Handle(double[] data)
         {
             double[] layerResultVector = new double[_neuronList.Count];
@@ -54,7 +56,11 @@ namespace NN.Eva.Core
             return layerResultVector;
         }
 
-        // CALCULATING ERRORS:
+        #endregion
+
+        #region Teaching
+
+        #region Error calculating
 
         public void CalcErrorAsOut(double[] rightAnwsersSet)
         {
@@ -72,7 +78,9 @@ namespace NN.Eva.Core
             }
         }
 
-        // CHANGE WEIGHTS:
+        #endregion
+
+        #region Weights changing
 
         public void ChangeWeights(double learnSpeed, double[] anwsersFromPrewLayer)
         {
@@ -82,13 +90,15 @@ namespace NN.Eva.Core
             }
         }
 
-        public double[] GetLastAnwsers()
+        #endregion
+
+        public double[] GetLastAnswers()
         {
             double[] lastAnwsers = new double[_neuronList.Count];
 
             for (int i = 0; i < _neuronList.Count; i++)
             {
-                lastAnwsers[i] = _neuronList[i].GetLastAnwser();
+                lastAnwsers[i] = _neuronList[i].GetLastAnswer();
             }
 
             return lastAnwsers;
@@ -118,7 +128,9 @@ namespace NN.Eva.Core
             return errors;
         }
 
-        // SAVE MEMORY:
+        #endregion
+
+        #region Memory operations
 
         public void SaveMemory(FileManager fileManager, int layerNumber, string path)
         {
@@ -127,6 +139,8 @@ namespace NN.Eva.Core
                 _neuronList[i].SaveMemory(fileManager, layerNumber, i, path);
             }
         }
+
+        #region Database operations
 
         public void SaveMemoryToDB(Guid networkId, Guid userId, int number, DBInserter dbInserter)
         {
@@ -152,7 +166,9 @@ namespace NN.Eva.Core
             dbDeleter.DeleteFromTableLayers(networkId);
         }
 
-        // MEMORY CHECK:
+        #endregion
+
+        #endregion
 
         public bool IsMemoryEquals(NetworkStructure netStructure, int currentLayerNumber)
         {

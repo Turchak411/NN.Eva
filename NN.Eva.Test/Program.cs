@@ -13,7 +13,7 @@ namespace NN.Eva.Test
             NetworkStructure netStructure = new NetworkStructure
             {
                 InputVectorLength = 10,
-                NeuronsByLayers = new[] { 1337, 1 }
+                NeuronsByLayers = new[] { 230, 150, 120, 1 }
             };
 
             TrainingConfiguration trainConfig = new TrainingConfiguration
@@ -29,22 +29,12 @@ namespace NN.Eva.Test
 
             if (creatingSucceed)
             {
-                serviceEvaNN.Train(trainConfig,
-                                   true,
-                                   ProcessPriorityClass.High,
-                                   true);
-                //serviceEvaNN.CalculateStatistic(trainConfig);
+                //serviceEvaNN.Train(trainConfig,
+                //                   true,
+                //                   ProcessPriorityClass.High,
+                //                   true);
+                serviceEvaNN.CalculateStatistic(trainConfig);
             }
-
-            //DatabaseConfig dbConfig = new DatabaseConfig
-            //{
-            //    Server = "localhost",
-            //    Database = "memorynnn",
-            //    Password = "root",
-            //    UID = "root"
-            //};
-
-            //serviceEvaNN.BackupMemory("Memory", dbConfig, "first backup :)");
 
             Console.WriteLine("Done!");
             Console.ReadKey();

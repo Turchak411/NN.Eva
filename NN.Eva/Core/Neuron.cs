@@ -31,6 +31,8 @@ namespace NN.Eva.Core
             _actFunc = actFunc;
         }
 
+        #region Handling
+
         public double Handle(double[] data)
         {
             double x = CalcSum(data);
@@ -66,7 +68,11 @@ namespace NN.Eva.Core
             }
         }
 
-        // CALCULATING ERRORS:
+        #endregion
+
+        #region Teaching
+
+        #region Error calculating
 
         public void CalcErrorForOutNeuron(double rightAnwser)
         {
@@ -91,6 +97,8 @@ namespace NN.Eva.Core
             return _error;
         }
 
+        #endregion
+
         public double[] GetWeights()
         {
             return _weights;
@@ -101,7 +109,12 @@ namespace NN.Eva.Core
             return _error;
         }
 
-        // CHANGE WEIGHTS:
+        public double GetLastAnswer()
+        {
+            return _lastAnwser;
+        }
+
+        #region Weights changing
 
         public void ChangeWeights(double learnSpeed, double[] anwsersFromPrewLayer)
         {
@@ -114,17 +127,18 @@ namespace NN.Eva.Core
             _offsetWeight = _offsetWeight + learnSpeed * _error;
         }
 
-        public double GetLastAnwser()
-        {
-            return _lastAnwser;
-        }
+        #endregion
 
-        // SAVE MEMORY:
+        #endregion
+
+        #region Memory operations
 
         public void SaveMemory(FileManager fileManager, int layerNumber, int neuronNumber, string memoryPath)
         {
             fileManager.SaveMemory(layerNumber, neuronNumber, _weights, _offsetValue, _offsetWeight, memoryPath);
         }
+
+        #region Database operations
 
         public void SaveMemoryToDB(Guid layerId, Guid userId, int number, DBInserter dbInserter)
         {
@@ -150,7 +164,9 @@ namespace NN.Eva.Core
             dbDeleter.DeleteFromTableNeurons(layerId);
         }
 
-        // MEMORY:
+        #endregion
+
+        #endregion
 
         public bool IsMemoryEquals(int weightsCount)
         {
