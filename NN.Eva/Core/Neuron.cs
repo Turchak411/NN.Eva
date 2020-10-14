@@ -116,7 +116,7 @@ namespace NN.Eva.Core
 
         #region Weights changing
 
-        public void ChangeWeights(double learnSpeed, double[] anwsersFromPrewLayer)
+        public void ChangeWeightsBProp(double learnSpeed, double[] anwsersFromPrewLayer)
         {
             for (int i = 0; i < _weights.Length; i++)
             {
@@ -125,6 +125,14 @@ namespace NN.Eva.Core
 
             // Изменение величины смещения:
             _offsetWeight = _offsetWeight + learnSpeed * _error;
+        }
+
+        public void ChangeWeightsRProp(double updateValue)
+        {
+            for (int i = 0; i < _weights.Length; i++)
+            {
+                _weights[i] = _weights[i] + updateValue;
+            }
         }
 
         #endregion

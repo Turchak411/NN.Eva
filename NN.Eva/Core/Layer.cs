@@ -82,11 +82,19 @@ namespace NN.Eva.Core
 
         #region Weights changing
 
-        public void ChangeWeights(double learnSpeed, double[] answersFromPrevLayer)
+        public void ChangeWeightsBProp(double learnSpeed, double[] answersFromPrevLayer)
         {
             for (int i = 0; i < _neuronList.Count; i++)
             {
-                _neuronList[i].ChangeWeights(learnSpeed, answersFromPrevLayer);
+                _neuronList[i].ChangeWeightsBProp(learnSpeed, answersFromPrevLayer);
+            }
+        }
+
+        public void ChangeWeightsRProp(double[] updateValues)
+        {
+            for (int i = 0; i < _neuronList.Count; i++)
+            {
+                _neuronList[i].ChangeWeightsRProp(updateValues[i]);
             }
         }
 
@@ -126,6 +134,18 @@ namespace NN.Eva.Core
             }
 
             return errors;
+        }
+
+        public double[] GetGradients(double epochError)
+        {
+            double[] gradients = new double[_neuronList.Count];
+
+            for (int i = 0; i < _neuronList.Count; i++)
+            {
+                gradients[i] = epochError * _neuronList[i].GetLastAnswer();
+            }
+
+            return gradients;
         }
 
         #endregion

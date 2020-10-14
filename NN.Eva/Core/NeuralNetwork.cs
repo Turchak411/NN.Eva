@@ -93,9 +93,8 @@ namespace NN.Eva.Core
 
         #region Teaching
 
-        public void Teach(double[] data, double[] rightAnswersSet, double learnSpeed)
+        public void CalculateErrors(double[] rightAnswersSet)
         {
-            // Подсчет ошибки:
             _layerList[_layerList.Count - 1].CalcErrorAsOut(rightAnswersSet);
 
             for (int i = _layerList.Count - 2; i >= 0; i--)
@@ -105,14 +104,40 @@ namespace NN.Eva.Core
 
                 _layerList[i].CalcErrorAsHidden(nextLayerWeights, nextLayerErrors);
             }
+        }
+
+        public List<double[]> GetGradients(double epochError)
+        {
+            List<double[]> errorsList = new List<double[]>();
+
+            for (int i = 0; i < _layerList.Count; i++)
+            {
+                errorsList.Add(_layerList[i].GetGradients(epochError));
+            }
+
+            return errorsList;
+        }
+
+        public void TeachBProp(double[] data, double[] rightAnswersSet, double learnSpeed)
+        {
+            // Подсчет ошибки (внутреннее изменение):
+            CalculateErrors(rightAnswersSet);
 
             // Корректировка весов нейронов:
             double[] answersFromPrevLayer = data;
 
             for (int i = 0; i < _layerList.Count; i++)
             {
-                _layerList[i].ChangeWeights(learnSpeed, answersFromPrevLayer);
+                _layerList[i].ChangeWeightsBProp(learnSpeed, answersFromPrevLayer);
                 answersFromPrevLayer = _layerList[i].GetLastAnswers();
+            }
+        }
+
+        public void TeachRProp(List<double[]> updateValues)
+        {
+            for (int i = 0; i < _layerList.Count; i++)
+            {
+                _layerList[i].ChangeWeightsRProp(updateValues[i]);
             }
         }
 

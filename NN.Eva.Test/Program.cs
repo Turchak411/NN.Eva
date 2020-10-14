@@ -18,6 +18,7 @@ namespace NN.Eva.Test
 
             TrainingConfiguration trainConfig = new TrainingConfiguration
             {
+                TrainingAlgorithmType = TrainingAlgorithmType.RProp,
                 StartIteration = 0,
                 EndIteration = 120000,
                 InputDatasetFilename = "TrainingSets//inputSets.txt",
