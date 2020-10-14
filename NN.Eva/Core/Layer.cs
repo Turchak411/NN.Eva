@@ -14,7 +14,7 @@ namespace NN.Eva.Core
 
         private Layer() { }
 
-        public Layer(int neuronCount, int weightCount, int layerNumber, FileManager fileManager)
+        public Layer(int neuronCount, int layerNumber, FileManager fileManager)
         {
             double offsetValue = 0.5;
             double offsetWeight = -1;
@@ -28,7 +28,7 @@ namespace NN.Eva.Core
             }
         }
 
-        public Layer(int neuronCount, int weightCount, int layerNumber, FileManager fileManager, string memoryPath)
+        public Layer(int neuronCount, int layerNumber, FileManager fileManager, string memoryPath)
         {
             double offsetValue = 0.5;
             double offsetWeight = -1;
