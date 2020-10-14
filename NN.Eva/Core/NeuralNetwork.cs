@@ -15,30 +15,30 @@ namespace NN.Eva.Core
 
         protected NeuralNetwork() { }
 
-        public NeuralNetwork(int receptorsNumber, int[] neuronsNumberByLayers, FileManager fileManager)
+        public NeuralNetwork(int[] neuronsNumberByLayers, FileManager fileManager)
         {
             _fileManager = fileManager;
 
-            Layer firstLayer = new Layer(neuronsNumberByLayers[0], receptorsNumber, 0, fileManager);
+            Layer firstLayer = new Layer(neuronsNumberByLayers[0], 0, fileManager);
             _layerList.Add(firstLayer);
 
             for (int i = 1; i < neuronsNumberByLayers.Length; i++)
             {
-                Layer layer = new Layer(neuronsNumberByLayers[i], neuronsNumberByLayers[i - 1], i, fileManager);
+                Layer layer = new Layer(neuronsNumberByLayers[i], i, fileManager);
                 _layerList.Add(layer);
             }
         }
 
-        public NeuralNetwork(int receptorsNumber, int[] neuronsNumberByLayers, FileManager fileManager, string memoryPath)
+        public NeuralNetwork(int[] neuronsNumberByLayers, FileManager fileManager, string memoryPath)
         {
             _fileManager = fileManager;
 
-            Layer firstLayer = new Layer(neuronsNumberByLayers[0], receptorsNumber, 0, fileManager, memoryPath);
+            Layer firstLayer = new Layer(neuronsNumberByLayers[0], 0, fileManager, memoryPath);
             _layerList.Add(firstLayer);
 
             for (int i = 1; i < neuronsNumberByLayers.Length; i++)
             {
-                Layer layer = new Layer(neuronsNumberByLayers[i], neuronsNumberByLayers[i - 1], i, fileManager, memoryPath);
+                Layer layer = new Layer(neuronsNumberByLayers[i], i, fileManager, memoryPath);
                 _layerList.Add(layer);
             }
         }

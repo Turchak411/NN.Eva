@@ -102,9 +102,7 @@ namespace NN.Eva.Services
             {
                 FileManager fileManager = new FileManager(memoryFolderPath);
 
-                NeuralNetwork testNet = new NeuralNetwork(networkStructure.InputVectorLength,
-                                                          networkStructure.NeuronsByLayers,
-                                                          fileManager);
+                NeuralNetwork testNet = new NeuralNetwork(networkStructure.NeuronsByLayers, fileManager);
 
                 if(!testNet.IsMemoryEquals(networkStructure))
                 {

@@ -49,9 +49,7 @@ namespace NN.Eva.Core
             try
             {
                 // Ицициализация сети по одинаковому шаблону:
-                _net = new NeuralNetwork(networkStructure.InputVectorLength,
-                    networkStructure.NeuronsByLayers,
-                        fileManager, "memory.txt");
+                _net = new NeuralNetwork(networkStructure.NeuronsByLayers, fileManager, "memory.txt");
             }
             catch (Exception ex)
             {
