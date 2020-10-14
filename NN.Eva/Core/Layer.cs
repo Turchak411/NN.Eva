@@ -82,11 +82,11 @@ namespace NN.Eva.Core
 
         #region Weights changing
 
-        public void ChangeWeights(double learnSpeed, double[] anwsersFromPrewLayer)
+        public void ChangeWeights(double learnSpeed, double[] answersFromPrevLayer)
         {
             for (int i = 0; i < _neuronList.Count; i++)
             {
-                _neuronList[i].ChangeWeights(learnSpeed, anwsersFromPrewLayer);
+                _neuronList[i].ChangeWeights(learnSpeed, answersFromPrevLayer);
             }
         }
 
