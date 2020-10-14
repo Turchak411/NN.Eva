@@ -62,11 +62,11 @@ namespace NN.Eva.Core
 
         #region Error calculating
 
-        public void CalcErrorAsOut(double[] rightAnwsersSet)
+        public void CalcErrorAsOut(double[] rightAnswersSet)
         {
             for (int i = 0; i < _neuronList.Count; i++)
             {
-                _neuronList[i].CalcErrorForOutNeuron(rightAnwsersSet[i]);
+                _neuronList[i].CalcErrorForOutNeuron(rightAnswersSet[i]);
             }
         }
 
@@ -94,14 +94,14 @@ namespace NN.Eva.Core
 
         public double[] GetLastAnswers()
         {
-            double[] lastAnwsers = new double[_neuronList.Count];
+            double[] lastAnswers = new double[_neuronList.Count];
 
             for (int i = 0; i < _neuronList.Count; i++)
             {
-                lastAnwsers[i] = _neuronList[i].GetLastAnswer();
+                lastAnswers[i] = _neuronList[i].GetLastAnswer();
             }
 
-            return lastAnwsers;
+            return lastAnswers;
         }
 
         public double[][] GetWeights()
