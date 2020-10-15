@@ -339,6 +339,7 @@ namespace NN.Eva.Core
                 {
                     var trainingConfigItem = new TrainingConfiguration
                     {
+                        TrainingAlgorithmType = trainingConfig.TrainingAlgorithmType,
                         StartIteration = currentIterPosition,
                         EndIteration = currentIterPosition + iterationsToPause,
                         MemoryFolder = trainingConfig.MemoryFolder,
@@ -354,6 +355,7 @@ namespace NN.Eva.Core
                 {
                     var trainingConfigItem = new TrainingConfiguration
                     {
+                        TrainingAlgorithmType = trainingConfig.TrainingAlgorithmType,
                         StartIteration = currentIterPosition,
                         EndIteration = trainingConfig.EndIteration,
                         MemoryFolder = trainingConfig.MemoryFolder,

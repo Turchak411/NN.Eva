@@ -74,9 +74,9 @@ namespace NN.Eva.Core
 
         #region Error calculating
 
-        public void CalcErrorForOutNeuron(double rightAnwser)
+        public void CalcErrorForOutNeuron(double rightAnswer)
         {
-            _error = (rightAnwser - _lastAnswer) * _lastAnswer * (1 - _lastAnswer);
+            _error = (rightAnswer - _lastAnswer) * _lastAnswer * (1 - _lastAnswer);
         }
 
         public double CalcErrorForHiddenNeuron(int neuronIndex, double[][] nextLayerWeights, double[] nextLayerErrors)

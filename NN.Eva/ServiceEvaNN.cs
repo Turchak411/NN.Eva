@@ -189,7 +189,7 @@ namespace NN.Eva
         /// <summary>
         /// Aborting network's memory from database
         /// </summary>
-        /// <param name="dbConnection"></param>
+        /// <param name="dbConfig"></param>
         /// <returns>State of operation success</returns>
         public bool DBMemoryAbort(DatabaseConfig dbConfig)
         {

@@ -108,11 +108,23 @@ namespace NN.Eva.Core
 
         public List<double[]> GetGradients(double epochError)
         {
+            List<double[]> gradientList = new List<double[]>();
+
+            for (int i = 0; i < _layerList.Count; i++)
+            {
+                gradientList.Add(_layerList[i].GetGradients(epochError));
+            }
+
+            return gradientList;
+        }
+
+        public List<double[]> GetNeuronsErrors()
+        {
             List<double[]> errorsList = new List<double[]>();
 
             for (int i = 0; i < _layerList.Count; i++)
             {
-                errorsList.Add(_layerList[i].GetGradients(epochError));
+                errorsList.Add(_layerList[i].GetErrors());
             }
 
             return errorsList;
