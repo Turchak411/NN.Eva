@@ -59,9 +59,9 @@ namespace NN.Eva.Core
         {
             switch (trainingAlgorithm)
             {
-                case TrainingAlgorithmType.RProp:
-                    SavedTrainingRProp();
-                    break;
+                //case TrainingAlgorithmType.RProp:
+                //    SavedTrainingRProp();
+                //    break;
                 case TrainingAlgorithmType.BProp:
                 default:
                     SavedTrainingBProp();
@@ -73,9 +73,9 @@ namespace NN.Eva.Core
         {
             switch (trainingAlgorithm)
             {
-                case TrainingAlgorithmType.RProp:
-                    UnsafeTrainingRProp();
-                    break;
+                //case TrainingAlgorithmType.RProp:
+                //    UnsafeTrainingRProp();
+                //    break;
                 case TrainingAlgorithmType.BProp:
                 default:
                     UnsafeTrainingBProp();

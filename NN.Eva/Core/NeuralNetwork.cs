@@ -118,18 +118,6 @@ namespace NN.Eva.Core
             return gradientList;
         }
 
-        public List<double[]> GetNeuronsErrors()
-        {
-            List<double[]> errorsList = new List<double[]>();
-
-            for (int i = 0; i < _layerList.Count; i++)
-            {
-                errorsList.Add(_layerList[i].GetErrors());
-            }
-
-            return errorsList;
-        }
-
         public void TeachBProp(double[] data, double[] rightAnswersSet, double learnSpeed)
         {
             // Подсчет ошибки (внутреннее изменение):
