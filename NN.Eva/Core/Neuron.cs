@@ -13,7 +13,7 @@ namespace NN.Eva.Core
         private double _offsetValue;
         private double _offsetWeight;
 
-        private double _lastAnwser;
+        private double _lastAnswer;
 
         private double _error;
 
@@ -31,12 +31,14 @@ namespace NN.Eva.Core
             _actFunc = actFunc;
         }
 
+        #region Handling
+
         public double Handle(double[] data)
         {
             double x = CalcSum(data);
             double actFunc = ActivationFunction(x);
 
-            _lastAnwser = actFunc;
+            _lastAnswer = actFunc;
             return actFunc;
         }
 
@@ -66,17 +68,21 @@ namespace NN.Eva.Core
             }
         }
 
-        // CALCULATING ERRORS:
+        #endregion
 
-        public void CalcErrorForOutNeuron(double rightAnwser)
+        #region Teaching
+
+        #region Error calculating
+
+        public void CalcErrorForOutNeuron(double rightAnswer)
         {
-            _error = (rightAnwser - _lastAnwser) * _lastAnwser * (1 - _lastAnwser);
+            _error = (rightAnswer - _lastAnswer) * _lastAnswer * (1 - _lastAnswer);
         }
 
         public double CalcErrorForHiddenNeuron(int neuronIndex, double[][] nextLayerWeights, double[] nextLayerErrors)
         {
             // Вычисление производной активационной функции:
-            _error = _lastAnwser * (1 - _lastAnwser);
+            _error = _lastAnswer * (1 - _lastAnswer);
 
             // Суммирование ошибок со следующего слоя:
             double sum = 0;
@@ -91,6 +97,8 @@ namespace NN.Eva.Core
             return _error;
         }
 
+        #endregion
+
         public double[] GetWeights()
         {
             return _weights;
@@ -101,9 +109,14 @@ namespace NN.Eva.Core
             return _error;
         }
 
-        // CHANGE WEIGHTS:
+        public double GetLastAnswer()
+        {
+            return _lastAnswer;
+        }
 
-        public void ChangeWeights(double learnSpeed, double[] anwsersFromPrewLayer)
+        #region Weights changing
+
+        public void ChangeWeightsBProp(double learnSpeed, double[] anwsersFromPrewLayer)
         {
             for (int i = 0; i < _weights.Length; i++)
             {
@@ -114,17 +127,26 @@ namespace NN.Eva.Core
             _offsetWeight = _offsetWeight + learnSpeed * _error;
         }
 
-        public double GetLastAnwser()
+        public void ChangeWeightsRProp(double updateValue)
         {
-            return _lastAnwser;
+            for (int i = 0; i < _weights.Length; i++)
+            {
+                _weights[i] = _weights[i] + updateValue;
+            }
         }
 
-        // SAVE MEMORY:
+        #endregion
+
+        #endregion
+
+        #region Memory operations
 
         public void SaveMemory(FileManager fileManager, int layerNumber, int neuronNumber, string memoryPath)
         {
             fileManager.SaveMemory(layerNumber, neuronNumber, _weights, _offsetValue, _offsetWeight, memoryPath);
         }
+
+        #region Database operations
 
         public void SaveMemoryToDB(Guid layerId, Guid userId, int number, DBInserter dbInserter)
         {
@@ -150,7 +172,9 @@ namespace NN.Eva.Core
             dbDeleter.DeleteFromTableNeurons(layerId);
         }
 
-        // MEMORY:
+        #endregion
+
+        #endregion
 
         public bool IsMemoryEquals(int weightsCount)
         {

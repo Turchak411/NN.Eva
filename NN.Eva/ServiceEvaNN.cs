@@ -26,7 +26,14 @@ namespace NN.Eva
 
             if(_fileManager.IsMemoryLoadCorrect)
             {
-                _networkTeacher = new NetworksTeacher(networkStructure, _fileManager);
+                try
+                {
+                    _networkTeacher = new NetworksTeacher(networkStructure, _fileManager);
+                }
+                catch
+                {
+                    return false;
+                }
 
                 if (testDatasetPath != null)
                 {
@@ -182,7 +189,7 @@ namespace NN.Eva
         /// <summary>
         /// Aborting network's memory from database
         /// </summary>
-        /// <param name="dbConnection"></param>
+        /// <param name="dbConfig"></param>
         /// <returns>State of operation success</returns>
         public bool DBMemoryAbort(DatabaseConfig dbConfig)
         {

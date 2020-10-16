@@ -49,9 +49,7 @@ namespace NN.Eva.Core
             try
             {
                 // Ицициализация сети по одинаковому шаблону:
-                _net = new NeuralNetwork(networkStructure.InputVectorLength,
-                    networkStructure.NeuronsByLayers,
-                        fileManager, "memory.txt");
+                _net = new NeuralNetwork(networkStructure.NeuronsByLayers, fileManager, "memory.txt");
             }
             catch (Exception ex)
             {
@@ -149,7 +147,7 @@ namespace NN.Eva.Core
 
                 if (netResult != null)
                 {
-                    if (IsVectorsRoughlyEquals(outputDataSets[i], netResult, 0.3))
+                    if (IsVectorsRoughlyEquals(outputDataSets[i], netResult, 0.15))
                     {
                         testPassed++;
                     }
@@ -341,6 +339,7 @@ namespace NN.Eva.Core
                 {
                     var trainingConfigItem = new TrainingConfiguration
                     {
+                        TrainingAlgorithmType = trainingConfig.TrainingAlgorithmType,
                         StartIteration = currentIterPosition,
                         EndIteration = currentIterPosition + iterationsToPause,
                         MemoryFolder = trainingConfig.MemoryFolder,
@@ -356,6 +355,7 @@ namespace NN.Eva.Core
                 {
                     var trainingConfigItem = new TrainingConfiguration
                     {
+                        TrainingAlgorithmType = trainingConfig.TrainingAlgorithmType,
                         StartIteration = currentIterPosition,
                         EndIteration = trainingConfig.EndIteration,
                         MemoryFolder = trainingConfig.MemoryFolder,
