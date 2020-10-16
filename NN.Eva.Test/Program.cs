@@ -30,7 +30,7 @@ namespace NN.Eva.Test
 
             if (creatingSucceed)
             {
-                serviceEvaNN.CalculateStatistic(trainConfig);
+                //serviceEvaNN.CalculateStatistic(trainConfig);
                 serviceEvaNN.Train(trainConfig,
                                    true,
                                    ProcessPriorityClass.High,

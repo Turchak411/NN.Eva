@@ -157,7 +157,82 @@ namespace NN.Eva.Core
 
         private void SavedTrainingRProp()
         {
-            // TODO:
+            // 1. Initialization training values:
+            // 1.1. Initialize epoch error:
+            double epochError = 1;
+
+            // 1.2. Initialize gradients list:
+            List<double[]> lastGradientList = InitializeNetworkRPropValues(0);
+            List<double[]> gradientList = new List<double[]>();
+
+            // 1.3. Initialize update-values:
+            List<double[]> updateValues = InitializeNetworkRPropValues(0.1);
+            List<double[]> lastUpdateValues = InitializeNetworkRPropValues(0.1);
+
+            // 1.4. Initialize increasing & decreasing constants:
+            double increasingValue = 1.2;
+            double decreasingValue = 0.5;
+
+            // 2. Training:
+            for (int iteration = TrainingConfiguration.StartIteration; iteration < Iteration; iteration++)
+            {
+                List<double[]> netLastEpochAnswers = new List<double[]>();
+
+                // 2.1. Do one training epoch:
+                for (int k = 0; k < InputDatasets.Count; k++)
+                {
+                    // Handling & saving results:
+                    string handlingErrorText = "";
+
+                    double[] netResult = Network.Handle(InputDatasets[k], ref handlingErrorText);
+
+                    if (netResult == null)
+                    {
+                        Logger.LogError(ErrorType.NonEqualsInputLengths, handlingErrorText);
+                        return;
+                    }
+                    
+                    netLastEpochAnswers.Add(Network.HandleUnsafe(InputDatasets[k]));
+                }
+
+                // 2.2. Teaching:
+                try
+                {
+                    // 2.2.1. Calculate epoch error:
+                    epochError = RecalculateEpochError(netLastEpochAnswers);
+
+                    gradientList = Network.GetGradients(epochError);
+
+                    // 2.2.2. Calculating update-values:
+                    for (int i = 0; i < updateValues.Count; i++)
+                    {
+                        for (int k = 0; k < updateValues[i].Length; k++)
+                        {
+                            updateValues[i][k] = CalculateWeightChangeValue(gradientList,
+                                                                            lastGradientList,
+                                                                            updateValues,
+                                                                            lastUpdateValues,
+                                                                            i, k,
+                                                                            increasingValue,
+                                                                            decreasingValue);
+                            lastUpdateValues[i][k] = updateValues[i][k];
+                        }
+                    }
+
+                    lastGradientList = gradientList;
+
+                    // 2.2.3. Teaching net (changing weights):
+                    Network.TeachRProp(updateValues);
+                }
+                catch (Exception ex)
+                {
+                    Logger.LogError(ErrorType.TrainError, ex);
+                    return;
+                }
+            }
+
+            // Запись события об успешном обучении:
+            LastTrainingSuccess = true;
         }
 
         private void UnsafeTrainingRProp()
@@ -258,7 +333,8 @@ namespace NN.Eva.Core
             {
                 for (int k = 0; k < netResultList[i].Length; k++)
                 {
-                    sum += netResultList[i][k];
+                    double delta = OutputDatasets[i][k] - netResultList[i][k];
+                    sum += delta * delta;
                 }
             }
 
