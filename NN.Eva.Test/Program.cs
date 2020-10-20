@@ -19,8 +19,8 @@ namespace NN.Eva.Test
             TrainingConfiguration trainConfig = new TrainingConfiguration
             {
                 TrainingAlgorithmType = TrainingAlgorithmType.BProp,
-                StartIteration = 0,
-                EndIteration = 5,
+                StartIteration = 250001,
+                EndIteration = 250002,
                 InputDatasetFilename = "TrainingSets//inputSets.txt",
                 OutputDatasetFilename = "TrainingSets//outputSets.txt",
                 MemoryFolder = "Memory"
@@ -30,11 +30,11 @@ namespace NN.Eva.Test
 
             if (creatingSucceed)
             {
-                //serviceEvaNN.CalculateStatistic(trainConfig);
-                serviceEvaNN.Train(trainConfig,
-                                   true,
-                                   ProcessPriorityClass.High,
-                                   true);
+                serviceEvaNN.CalculateStatistic(trainConfig);
+                //serviceEvaNN.Train(trainConfig,
+                //                   true,
+                //                   ProcessPriorityClass.High,
+                //                   true);
                 //serviceEvaNN.CalculateStatistic(trainConfig);
             }
 

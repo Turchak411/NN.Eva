@@ -1,6 +1,8 @@
 ﻿using NN.Eva.Models;
 using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Management;
 
 namespace NN.Eva.Services
 {
@@ -43,6 +45,8 @@ namespace NN.Eva.Services
                 if(elapsedTime != "")
                 {
                     fileWriter.WriteLine("Time spend: " + elapsedTime);
+                    fileWriter.WriteLine("Start iteration: " + trainConfig.StartIteration);
+                    fileWriter.WriteLine("End iteration: " + trainConfig.EndIteration);
                     fileWriter.WriteLine("============================\n");
                 }
 
@@ -50,6 +54,20 @@ namespace NN.Eva.Services
                 fileWriter.WriteLine("System characteristics:");
                 fileWriter.WriteLine("OS Version: {0} {1}", Environment.OSVersion, Environment.Is64BitOperatingSystem ? "64 bit" : "32 bit");
                 fileWriter.WriteLine("Processors count: " + Environment.ProcessorCount);
+
+                ManagementClass myManagementClass = new ManagementClass("Win32_Processor");
+                PropertyDataCollection myProperties = myManagementClass.Properties;
+
+                foreach (var myProperty in myProperties)
+                {
+                    switch (myProperty.Name)
+                    {
+                        case "CurrentClockSpeed":
+                        case "Name":
+                            fileWriter.WriteLine($"{myProperty.Name}: { myProperty.Value ?? "-"}");
+                            break;
+                    }
+                }
             }
 
             Console.WriteLine("Learn statistic logs saved in {0}!", _trainLogsDirectoryName);
