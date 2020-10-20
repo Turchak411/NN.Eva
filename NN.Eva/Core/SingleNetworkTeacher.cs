@@ -308,8 +308,6 @@ namespace NN.Eva.Core
 
         private List<double[]> RecalculateGradientList(List<double[]> gradientList, List<double[]> netErrorsList)
         {
-            // TODO: Отрефакторить! Скорее всего можно просуммировать проще
-
             List<double[]> sumList = new List<double[]>();            
 
             for (int i = 0; i < gradientList.Count; i++)
