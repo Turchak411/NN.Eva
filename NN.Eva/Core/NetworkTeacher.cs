@@ -114,7 +114,7 @@ namespace NN.Eva.Core
         /// </summary>
         /// <param name="trainingConfig"></param>
         /// <param name="withLogging"></param>
-        public void PrintLearningStatistic(TrainingConfiguration trainingConfig, bool withLogging = false)
+        public void PrintLearningStatistic(TrainingConfiguration trainingConfig, bool withLogging = false, string elapsedTime = "")
         {
             Console.WriteLine("Start calculating statistic...");
 
@@ -166,7 +166,7 @@ namespace NN.Eva.Core
             // Logging (optional):
             if (withLogging)
             {
-                _logger.LogTrainResults(testPassed, testFailed, Iteration);
+                _logger.LogTrainingResults(testPassed, testFailed, trainingConfig, elapsedTime);
             }
 
             Console.WriteLine("Test passed: {0}\nTest failed: {1}\nPercent learned: {2:f2}", testPassed,

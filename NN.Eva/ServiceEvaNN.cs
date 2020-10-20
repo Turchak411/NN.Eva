@@ -97,22 +97,23 @@ namespace NN.Eva
             {
                 _networkTeacher.TrainNet(trainingConfiguration, iterationsToPause, unsafeTrainingMode);
 
+                // Stopping timer and print spend time in [HH:MM:SS]:
+                stopWatch.Stop();
+                TimeSpan ts = stopWatch.Elapsed;
+
+                string elapsedTime = String.Format("{0:00}:{1:00}:{2:00}", ts.Hours, ts.Minutes, ts.Seconds);
+                Console.WriteLine("Time spend: " + elapsedTime);
+
                 if (printLearnStatistic)
                 {
-                    _networkTeacher.PrintLearningStatistic(trainingConfiguration, true);
+                    _networkTeacher.PrintLearningStatistic(trainingConfiguration, true, elapsedTime);
                 }
             }
             else
             {
+                stopWatch.Stop();
                 Console.WriteLine("Training failed! Invalid memory!");
             }
-
-            // Stopping timer and print spend time in [HH:MM:SS]:
-            stopWatch.Stop();
-            TimeSpan ts = stopWatch.Elapsed;
-
-            string elapsedTime = String.Format("{0:00}:{1:00}:{2:00}", ts.Hours, ts.Minutes, ts.Seconds);
-            Console.WriteLine("Time spend: " + elapsedTime);
         }
 
         /// <summary>
