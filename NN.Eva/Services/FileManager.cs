@@ -234,12 +234,17 @@ namespace NN.Eva.Services
             }
             catch { }
 
+            WriteNetworkMetadata(networkStructure, path);
+        }
+
+        private void WriteNetworkMetadata(NetworkStructure networkStructure, string path)
+        {
             // Запись мета данных в начало файла памяти:
             using (StreamWriter fileWriter = new StreamWriter(path))
             {
                 fileWriter.Write(networkStructure.InputVectorLength);
 
-                for(int i = 0; i < networkStructure.NeuronsByLayers.Length; i++)
+                for (int i = 0; i < networkStructure.NeuronsByLayers.Length; i++)
                 {
                     fileWriter.Write(" " + networkStructure.NeuronsByLayers[i]);
                 }
@@ -300,13 +305,56 @@ namespace NN.Eva.Services
         /// Saving memory from textList memory-model
         /// </summary>
         /// <param name="memoryInTextList"></param>
-        public void SaveMemoryFromModel(List<string> memoryInTextList, string destinationMemoryFilePath)
+        public void SaveMemoryFromModel(NetworkStructure networkStructure, List<string> memoryInTextList, string destinationMemoryFilePath)
         {
-            using(StreamWriter fileWriter = new StreamWriter(destinationMemoryFilePath))
+            WriteNetworkMetadata(networkStructure, destinationMemoryFilePath);
+
+            using(StreamWriter fileWriter = new StreamWriter(destinationMemoryFilePath, true))
             {
                 for (int i = 0; i < memoryInTextList.Count; i++)
                 {
                     fileWriter.WriteLine(memoryInTextList[i]);
+                }
+            }
+        }
+
+        public void SaveMemoryFromWeightsAndStructure(List<double> weights, NetworkStructure networkStructure)
+        {
+            WriteNetworkMetadata(networkStructure, MemoryFolderPath + "//memory.txt");
+            // TODO: To testing
+            int index = 0;
+
+            using (StreamWriter fileWriter = new StreamWriter(MemoryFolderPath + "//memory.txt", true))
+            {
+                // Save the first layer:
+                for (int i = 0; i < networkStructure.NeuronsByLayers[0]; i++)
+                {
+                    fileWriter.Write("layer_0 neuron_" + i);
+
+                    for (int k = 0; k < networkStructure.InputVectorLength; k++)
+                    {
+                        fileWriter.Write(" " + weights[index]);
+                        index++;
+                    }
+
+                    fileWriter.WriteLine();
+                }
+
+                // Save the other layers:
+                for (int i = 1; i < networkStructure.NeuronsByLayers.Length; i++)
+                {
+                    for (int k = 0; k < networkStructure.NeuronsByLayers[i]; k++)
+                    {
+                        fileWriter.Write("layer_{0} neuron_{1}", i, k);
+
+                        for (int j = 0; j < networkStructure.NeuronsByLayers[i - 1]; j++)
+                        {
+                            fileWriter.Write(" " + weights[index]);
+                            index++;
+                        }
+
+                        fileWriter.WriteLine();
+                    }
                 }
             }
         }

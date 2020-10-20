@@ -1,11 +1,37 @@
 ﻿using System;
 using System.IO;
+using System.Collections.Generic;
 using ConsoleProgressBar;
+using NN.Eva.Models;
 
 namespace NN.Eva.Services.WeightsGenerator
 {
     public class Generator
     {
+        public List<double> GenerateWeightsVector(NetworkStructure networkStructure)
+        {
+            List<double> weightsInVectors = new List<double>();
+
+            Random rnd = new Random(DateTime.Now.Millisecond);
+
+            // Generate input weights:
+            for (int i = 0; i < networkStructure.InputVectorLength; i++)
+            {
+                weightsInVectors.Add(GenerateValue(rnd));
+            }
+
+            // Generate other network neuron's weights:
+            for (int i = 0; i < networkStructure.NeuronsByLayers.Length; i++)
+            {
+                for (int k = 0; k < networkStructure.NeuronsByLayers[i]; k++)
+                {
+                    weightsInVectors.Add(GenerateValue(rnd));
+                }
+            }
+
+            return weightsInVectors;
+        }
+
         public void GenerateMemory(int inputVectorLength, int[] netScheme, string filePath)
         {
             Random rnd = new Random(DateTime.Now.Millisecond);

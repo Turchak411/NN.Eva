@@ -124,7 +124,7 @@ namespace NN.Eva.Core
             return weights;
         }
 
-        public double[] GetErrors()
+        public double[] GetNeuronErrors()
         {
             double[] errors = new double[_neuronList.Count];
 
@@ -134,18 +134,6 @@ namespace NN.Eva.Core
             }
 
             return errors;
-        }
-
-        public double[] GetGradients(double epochError)
-        {
-            double[] gradients = new double[_neuronList.Count];
-
-            for (int i = 0; i < _neuronList.Count; i++)
-            {
-                gradients[i] = epochError * _neuronList[i].GetLastAnswer();
-            }
-
-            return gradients;
         }
 
         #endregion

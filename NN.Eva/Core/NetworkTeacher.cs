@@ -49,7 +49,7 @@ namespace NN.Eva.Core
             try
             {
                 // Ицициализация сети по одинаковому шаблону:
-                _net = new NeuralNetwork(networkStructure.NeuronsByLayers, fileManager, "memory.txt");
+                _net = new NeuralNetwork(networkStructure.NeuronsByLayers, _fileManager, "memory.txt");
             }
             catch (Exception ex)
             {
@@ -306,8 +306,19 @@ namespace NN.Eva.Core
                     CommonTest(true);
                 }
 
-                // Получение данных обученной сети от "подучителя":
-                _net = netSubTeacher.Network;
+                // Проведение завершающих операций после обучения модели:
+                switch (trainingConfig.TrainingAlgorithmType)
+                {
+                    // В случае обучения по генетическому алгоритму - загрузка памяти из файла:
+                    case TrainingAlgorithmType.GeneticAlg:
+                        break;
+                    // В общем случае - получение данных обученной сети от "подучителя":
+                    case TrainingAlgorithmType.BProp:
+                    case TrainingAlgorithmType.RProp:
+                    default:
+                        _net = netSubTeacher.Network;
+                        break;
+                }
 
                 Console.WriteLine("Training success!");
             }
@@ -527,7 +538,7 @@ namespace NN.Eva.Core
                 }
 
                 // Saving memory from textList:
-                _fileManager.SaveMemoryFromModel(memoryInTextList, destinationMemoryFilePath);
+                _fileManager.SaveMemoryFromModel(networkStructure, memoryInTextList, destinationMemoryFilePath);
             }
             catch (Exception ex)
             {

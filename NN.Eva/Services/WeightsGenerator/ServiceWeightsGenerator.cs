@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using NN.Eva.Models;
 
 namespace NN.Eva.Services.WeightsGenerator
 {
@@ -66,6 +68,12 @@ namespace NN.Eva.Services.WeightsGenerator
             }
 
             return netScheme;
+        }
+
+        public List<double> GenerateMemoryWeights(NetworkStructure networkStructure)
+        {
+            Generator generator = new Generator();
+            return generator.GenerateWeightsVector(networkStructure);
         }
     }
 }

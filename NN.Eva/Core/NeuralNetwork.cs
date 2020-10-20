@@ -100,22 +100,22 @@ namespace NN.Eva.Core
             for (int i = _layerList.Count - 2; i >= 0; i--)
             {
                 double[][] nextLayerWeights = _layerList[i + 1].GetWeights();
-                double[] nextLayerErrors = _layerList[i + 1].GetErrors();
+                double[] nextLayerErrors = _layerList[i + 1].GetNeuronErrors();
 
                 _layerList[i].CalcErrorAsHidden(nextLayerWeights, nextLayerErrors);
             }
         }
 
-        public List<double[]> GetGradients(double epochError)
+        public List<double[]> GetNeuronErrors()
         {
-            List<double[]> gradientList = new List<double[]>();
+            List<double[]> errorList = new List<double[]>();
 
             for (int i = 0; i < _layerList.Count; i++)
             {
-                gradientList.Add(_layerList[i].GetGradients(epochError));
+                errorList.Add(_layerList[i].GetNeuronErrors());
             }
 
-            return gradientList;
+            return errorList;
         }
 
         public void TeachBProp(double[] data, double[] rightAnswersSet, double learnSpeed)
