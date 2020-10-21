@@ -12,15 +12,15 @@ namespace NN.Eva.Test
 
             NetworkStructure netStructure = new NetworkStructure
             {
-                InputVectorLength = 10,
+                InputVectorLength = 2,
                 NeuronsByLayers = new[] { 230, 150, 120, 1 }
             };
 
             TrainingConfiguration trainConfig = new TrainingConfiguration
             {
-                TrainingAlgorithmType = TrainingAlgorithmType.RProp,
-                StartIteration = 250001,
-                EndIteration = 250002,
+                TrainingAlgorithmType = TrainingAlgorithmType.GeneticAlg,
+                StartIteration = 0,
+                EndIteration = 250000,
                 InputDatasetFilename = "TrainingSets//inputSets.txt",
                 OutputDatasetFilename = "TrainingSets//outputSets.txt",
                 MemoryFolder = "Memory"
