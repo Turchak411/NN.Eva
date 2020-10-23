@@ -10,8 +10,6 @@ namespace NN.Eva.Core.GeneticAlgorithm
 {
     public class GeneticAlgorithmTeacher
     {
-        public NeuralNetwork Network { get; private set; } = null;
-
         public List<double[]> InputDatasets { get; set; }
 
         public List<double[]> OutputDatasets { get; set; }
@@ -20,7 +18,7 @@ namespace NN.Eva.Core.GeneticAlgorithm
 
         public void StartTraining(int iterationCount)
         {
-            int networkChromosomesCount = 20;
+            int networkChromosomesCount = 5;
 
             List<FitnessFunction> fitnessFuncValues = new List<FitnessFunction>();
 
@@ -28,7 +26,9 @@ namespace NN.Eva.Core.GeneticAlgorithm
             // Chromosome in NN context = Network's weights in row
             List<List<double>> actualGeneration = GeneratePopulation(networkChromosomesCount);
 
-            for (int i = 0; i < iterationCount; i++)
+            int currentIteration = 0;
+
+            do
             {
                 // Selection:
                 actualGeneration = DoSelection(actualGeneration);
@@ -41,24 +41,27 @@ namespace NN.Eva.Core.GeneticAlgorithm
                 // Sorting fitness values by value:
                 fitnessFuncValues = fitnessFuncValues.OrderBy(x => x.Value).ToList();
 
-                 // Sorting generation by already sorted fitness values:
+                // Sorting generation by already sorted fitness values:
                 List<List<double>> tempGenerationList = new List<List<double>>();
 
-                for (int k = 0; k < fitnessFuncValues.Count; k++)
+                // Adding with cutting generation by started generation count:
+                for (int k = 0; k < networkChromosomesCount; k++)
                 {
                     tempGenerationList.Add(actualGeneration[fitnessFuncValues[k].ChromosomeIndex]);
                 }
 
                 actualGeneration = tempGenerationList;
 
-                // Cutting generation to initial count:
-                try
-                {
-                    actualGeneration.RemoveRange(networkChromosomesCount - 1,
-                                                 actualGeneration.Count - networkChromosomesCount);
-                }
-                catch { }
-            }
+                Console.WriteLine("Average generation {0} learning rate: {1}",
+                                    currentIteration,
+                                    fitnessFuncValues.Average(x => x.Value));
+
+                currentIteration++;
+            } 
+            while (currentIteration < iterationCount && fitnessFuncValues.Average(x => x.Value) > 0.01);
+
+            // Saving the best network:
+            CreateNetworkMemoryFileByWeightsVector(actualGeneration[0]);
         }
 
         private List<List<double>> GeneratePopulation(int chromosomesCount)
@@ -67,12 +70,26 @@ namespace NN.Eva.Core.GeneticAlgorithm
 
             ServiceWeightsGenerator serviceWeightsGenerator = new ServiceWeightsGenerator();
 
+            Random rnd = new Random(DateTime.Now.Millisecond);
+
             for (int i = 0; i < chromosomesCount; i++)
             {
-                generation.Add(serviceWeightsGenerator.GenerateMemoryWeights(NetworkStructure));
+                generation.Add(serviceWeightsGenerator.GenerateMemoryWeights(NetworkStructure, rnd));
             }
 
             return generation;
+        }
+
+        private List<List<double>> CloneGeneration(List<List<double>> generation)
+        {
+            List<List<double>> newGeneration = new List<List<double>>();
+
+            for (int i = 0; i < generation.Count; i++)
+            {
+                newGeneration.Add(generation[i]);
+            }
+
+            return newGeneration;
         }
 
         private List<FitnessFunction> CalculateFitnessFunctionValues(List<List<double>> generation)
@@ -82,10 +99,10 @@ namespace NN.Eva.Core.GeneticAlgorithm
             
             for (int i = 0; i < generation.Count; i++)
             {
-                networksList.Add(new HandleOnlyNN(generation[i]));
+                networksList.Add(new HandleOnlyNN(generation[i], NetworkStructure));
             }
 
-            // Calculating values:
+            // Calculating values: // TODO: можно распараллелить
             List<FitnessFunction> fitnessFuncValues = new List<FitnessFunction>();
 
             for (int i = 0; i < networksList.Count; i++)
@@ -105,20 +122,27 @@ namespace NN.Eva.Core.GeneticAlgorithm
 
         private List<List<double>> DoSelection(List<List<double>> generation, double selectionChance = 0.64)
         {
-            List<List<double>> newGeneration = new List<List<double>>();
+            // Cloning generatkion to new generation list:
+            List<List<double>> newGeneration = CloneGeneration(generation);
 
             Random rnd = new Random(DateTime.Now.Millisecond);
 
             for (int i = 0; i < generation.Count; i++)
             {
-                for (int k = 0; k < generation.Count; k++)
+                // Choosing partner for selection:
+                int randomPartnerNumber = 0;
+
+                do
                 {
-                    if(rnd.NextDouble() < selectionChance &&
-                       i != k)
-                    {
-                        // Then do selection >>> crossover operator:
-                        newGeneration.Add(CrossoverOperator(generation[i], generation[k], rnd));
-                    }
+                    randomPartnerNumber = rnd.Next(generation.Count);
+                }
+                while (randomPartnerNumber == i);
+
+                // Probe to selection by selection-chance:
+                if (rnd.NextDouble() < selectionChance)
+                {
+                    // Then do selection >>> crossover operator:
+                    newGeneration.Add(CrossoverOperator(generation[i], generation[randomPartnerNumber], rnd));
                 }
             }
 
@@ -141,10 +165,10 @@ namespace NN.Eva.Core.GeneticAlgorithm
 
             for (int i = 0; i < chromosome0.Count; i++)
             {
-                if (rnd.NextDouble() < localGenSelectionChance)
+                if (rnd.NextDouble() <= localGenSelectionChance)
                 {
                     // Adding gen from parent 0:
-                    newChromosome.Add(chromosome1[i]);
+                    newChromosome.Add(chromosome0[i]);
                 }
                 else
                 {
@@ -158,7 +182,7 @@ namespace NN.Eva.Core.GeneticAlgorithm
 
         private List<List<double>> DoMutation(List<List<double>> generation, double mutationChance = 0.01)
         {
-            List<List<double>> newGeneration = new List<List<double>>();
+            List<List<double>> newGeneration = CloneGeneration(generation);
 
             Random rnd = new Random(DateTime.Now.Millisecond);
 
@@ -182,13 +206,13 @@ namespace NN.Eva.Core.GeneticAlgorithm
             {
                 double changingValue = (double)rnd.Next(-100, 100) / 100.0;
 
-                newChromosome[i] = chromosome[i] + changingValue;
+                newChromosome.Add(chromosome[i] + changingValue);
             }
 
             return newChromosome;
         }
 
-        private void CreateNetworkByWeightsVector(List<double> networksWeightsVector)
+        private void CreateNetworkMemoryFileByWeightsVector(List<double> networksWeightsVector)
         {
             FileManager fileManager = new FileManager(NetworkStructure);
             fileManager.SaveMemoryFromWeightsAndStructure(networksWeightsVector, NetworkStructure);

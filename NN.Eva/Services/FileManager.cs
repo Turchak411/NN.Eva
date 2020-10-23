@@ -324,12 +324,18 @@ namespace NN.Eva.Services
             // TODO: To testing
             int index = 0;
 
+            double offsetValue = 0.5;
+            double offsetWeight = -1;
+
             using (StreamWriter fileWriter = new StreamWriter(MemoryFolderPath + "//memory.txt", true))
             {
                 // Save the first layer:
                 for (int i = 0; i < networkStructure.NeuronsByLayers[0]; i++)
                 {
-                    fileWriter.Write("layer_0 neuron_" + i);
+                    fileWriter.Write("layer_0 neuron_{0} {1} {2}",
+                                                        i,
+                                                        offsetValue.ToString().Replace('.', ','),
+                                                        offsetWeight.ToString().Replace('.', ','));
 
                     for (int k = 0; k < networkStructure.InputVectorLength; k++)
                     {
@@ -345,7 +351,11 @@ namespace NN.Eva.Services
                 {
                     for (int k = 0; k < networkStructure.NeuronsByLayers[i]; k++)
                     {
-                        fileWriter.Write("layer_{0} neuron_{1}", i, k);
+                        fileWriter.Write("layer_{0} neuron_{1} {2} {3}",
+                                                                        i,
+                                                                        k,
+                                                                        offsetValue.ToString().Replace('.', ','),
+                                                                        offsetWeight.ToString().Replace('.', ','));
 
                         for (int j = 0; j < networkStructure.NeuronsByLayers[i - 1]; j++)
                         {

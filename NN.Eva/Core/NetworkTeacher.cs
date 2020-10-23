@@ -311,6 +311,8 @@ namespace NN.Eva.Core
                 {
                     // В случае обучения по генетическому алгоритму - загрузка памяти из файла:
                     case TrainingAlgorithmType.GeneticAlg:
+                        // Загрузка только что сохраненной памяти:
+                        _net = new NeuralNetwork(_networkStructure.NeuronsByLayers, _fileManager, "memory.txt");
                         break;
                     // В общем случае - получение данных обученной сети от "подучителя":
                     case TrainingAlgorithmType.BProp:

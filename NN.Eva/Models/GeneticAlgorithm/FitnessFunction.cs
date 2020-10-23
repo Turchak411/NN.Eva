@@ -17,41 +17,30 @@ namespace NN.Eva.Models.GeneticAlgorithm
 
         public void CalculateValue(HandleOnlyNN network, List<double[]> inputDatasets, List<double[]> outputDatasets)
         {
-            int testPassed = 0;
-            int testFailed = 0;
+            List<double[]> netAnswers = new List<double[]>();
 
             for (int i = 0; i < outputDatasets.Count; i++)
             {
-                if (IsVectorsRoughlyEquals(outputDatasets[i], network.Handle(inputDatasets[i]), 0.15))
-                {
-                    testPassed++;
-                }
-                else
-                {
-                    testFailed++;
-                }
+                netAnswers.Add(network.Handle(inputDatasets[i]));
             }
 
-            Value = (double)testPassed * 100 / (testPassed + testFailed);
+            Value = RecalculateEpochError(netAnswers, outputDatasets);
         }
 
-        private bool IsVectorsRoughlyEquals(double[] sourceVector0, double[] controlVector1, double equalsPercent)
+        private double RecalculateEpochError(List<double[]> netResultList, List<double[]> outputDatasets)
         {
-            // Возвращение неравенства, если длины векторов не совпадают
-            if (sourceVector0.Length != controlVector1.Length)
-            {
-                return false;
-            }
+            double sum = 0;
 
-            for (int i = 0; i < sourceVector0.Length; i++)
+            for (int i = 0; i < netResultList.Count; i++)
             {
-                if (controlVector1[i] < sourceVector0[i] - equalsPercent || controlVector1[i] > sourceVector0[i] + equalsPercent)
+                for (int k = 0; k < netResultList[i].Length; k++)
                 {
-                    return false;
+                    double delta = outputDatasets[i][k] - netResultList[i][k];
+                    sum += delta * delta;
                 }
             }
 
-            return true;
+            return sum / outputDatasets.Count;
         }
     }
 }

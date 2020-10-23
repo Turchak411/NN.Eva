@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using NN.Eva.Core.Database;
 using NN.Eva.Models;
 using NN.Eva.Services;
@@ -18,18 +17,18 @@ namespace NN.Eva.Core
 
         private double _error;
 
-        private ActivationFunction _actFunc;
+        private ActivationFunction _activationFunctionType;
 
         private Neuron() { }
 
-        public Neuron(double[] weightsValues, double offsetValue, double offsetWeight, ActivationFunction actFunc)
+        public Neuron(double[] weightsValues, double offsetValue, double offsetWeight, ActivationFunction activationFunctionType)
         {
             _weights = weightsValues;
             _offsetValue = offsetValue;
             _offsetWeight = offsetWeight;
 
             _error = 1;
-            _actFunc = actFunc;
+            _activationFunctionType = activationFunctionType;
         }
 
         #region Handling
@@ -57,7 +56,7 @@ namespace NN.Eva.Core
 
         private double ActivationFunction(double x)
         {
-            switch (_actFunc)
+            switch (_activationFunctionType)
             {
                 case Models.ActivationFunction.Th:
                     return (Math.Exp(2 * x) - 1) / (Math.Exp(2 * x) + 1);

@@ -8,24 +8,28 @@ namespace NN.Eva.Services.WeightsGenerator
 {
     public class Generator
     {
-        public List<double> GenerateWeightsVector(NetworkStructure networkStructure)
+        public List<double> GenerateWeightsVector(NetworkStructure networkStructure, Random rnd)
         {
             List<double> weightsInVectors = new List<double>();
 
-            Random rnd = new Random(DateTime.Now.Millisecond);
-
             // Generate input weights:
-            for (int i = 0; i < networkStructure.InputVectorLength; i++)
+            for (int i = 0; i < networkStructure.NeuronsByLayers[0]; i++)
             {
-                weightsInVectors.Add(GenerateValue(rnd));
+                for (int k = 0; k < networkStructure.InputVectorLength; k++)
+                {
+                    weightsInVectors.Add(GenerateValue(rnd));
+                }
             }
 
             // Generate other network neuron's weights:
-            for (int i = 0; i < networkStructure.NeuronsByLayers.Length; i++)
+            for (int i = 1; i < networkStructure.NeuronsByLayers.Length; i++)
             {
                 for (int k = 0; k < networkStructure.NeuronsByLayers[i]; k++)
                 {
-                    weightsInVectors.Add(GenerateValue(rnd));
+                    for (int j = 0; j < networkStructure.NeuronsByLayers[i - 1]; j++)
+                    {
+                        weightsInVectors.Add(GenerateValue(rnd));
+                    }
                 }
             }
 

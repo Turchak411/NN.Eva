@@ -224,11 +224,6 @@ namespace NN.Eva.Core
 
                     //gradientList = RecalculateGradientList(gradientList, netErrorsList);
                     tempErrorListOfLists.Add(Network.GetNeuronErrors());
-
-
-                    //var gradientList1 = netErrorsList.SelectMany(netErrors => netErrors.Select(error =>
-                    //    gradientList.SelectMany(gradients => 
-                    //        gradients.Select(gradient => gradient + error)).ToArray())).ToList();
                 }
 
                 // Sum all set errors to gradient object:
@@ -315,11 +310,6 @@ namespace NN.Eva.Core
 
                     //gradientList = RecalculateGradientList(gradientList, netErrorsList);
                     tempErrorListOfLists.Add(Network.GetNeuronErrors());
-
-
-                    //var gradientList1 = netErrorsList.SelectMany(netErrors => netErrors.Select(error =>
-                    //    gradientList.SelectMany(gradients => 
-                    //        gradients.Select(gradient => gradient + error)).ToArray())).ToList();
                 }
 
                 // Sum all set errors to gradient object:
@@ -507,7 +497,8 @@ namespace NN.Eva.Core
 
             geneticAlgTeacher.StartTraining(TrainingConfiguration.EndIteration - TrainingConfiguration.StartIteration);
 
-            Network = geneticAlgTeacher.Network;
+            // Запись события об успешном обучении:
+            LastTrainingSuccess = true;
         }
 
         #endregion

@@ -12,7 +12,7 @@ namespace NN.Eva.Test
 
             NetworkStructure netStructure = new NetworkStructure
             {
-                InputVectorLength = 2,
+                InputVectorLength = 10,
                 NeuronsByLayers = new[] { 230, 150, 120, 1 }
             };
 
@@ -20,7 +20,7 @@ namespace NN.Eva.Test
             {
                 TrainingAlgorithmType = TrainingAlgorithmType.GeneticAlg,
                 StartIteration = 0,
-                EndIteration = 250000,
+                EndIteration = 2585,
                 InputDatasetFilename = "TrainingSets//inputSets.txt",
                 OutputDatasetFilename = "TrainingSets//outputSets.txt",
                 MemoryFolder = "Memory"

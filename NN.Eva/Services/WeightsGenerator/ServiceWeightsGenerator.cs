@@ -70,10 +70,10 @@ namespace NN.Eva.Services.WeightsGenerator
             return netScheme;
         }
 
-        public List<double> GenerateMemoryWeights(NetworkStructure networkStructure)
+        public List<double> GenerateMemoryWeights(NetworkStructure networkStructure, Random rnd)
         {
             Generator generator = new Generator();
-            return generator.GenerateWeightsVector(networkStructure);
+            return generator.GenerateWeightsVector(networkStructure, rnd);
         }
     }
 }
