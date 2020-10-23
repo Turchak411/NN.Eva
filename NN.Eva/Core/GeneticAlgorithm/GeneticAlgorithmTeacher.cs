@@ -80,7 +80,10 @@ namespace NN.Eva.Core.GeneticAlgorithm
 
             Parallel.For(0, chromosomesCount, i =>
             {
-                generation.Add(serviceWeightsGenerator.GenerateMemoryWeights(NetworkStructure, rnd));
+                lock (_sync)
+                {
+                    generation.Add(serviceWeightsGenerator.GenerateMemoryWeights(NetworkStructure, rnd));
+                }
             });
 
             return generation;
