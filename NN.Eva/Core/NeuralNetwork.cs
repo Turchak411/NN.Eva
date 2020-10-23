@@ -187,29 +187,5 @@ namespace NN.Eva.Core
         #endregion
 
         #endregion
-
-        #region Memory checking
-
-        public bool IsMemoryEquals(NetworkStructure netStructure)
-        {
-            // Check for equals count of layers:
-            if (_layerList.Count != netStructure.NeuronsByLayers.Length)
-            {
-                return false;
-            }
-
-            // Check for equals count of neurons on each layer:
-            for (int i = 0; i < _layerList.Count; i++)
-            {
-                if (!_layerList[i].IsMemoryEquals(netStructure, i))
-                {
-                    return false;
-                }
-            }
-
-            return true;
-        }
-
-        #endregion
     }
 }

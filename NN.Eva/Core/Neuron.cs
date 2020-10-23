@@ -171,10 +171,5 @@ namespace NN.Eva.Core
         #endregion
 
         #endregion
-
-        public bool IsMemoryEquals(int weightsCount)
-        {
-            return _weights.Length == weightsCount;
-        }
     }
 }

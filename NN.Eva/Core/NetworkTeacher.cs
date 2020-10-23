@@ -40,7 +40,7 @@ namespace NN.Eva.Core
             _memoryChecker = new MemoryChecker();
             _logger = new Logger();
 
-            if (_memoryChecker.IsValidQuickCheck(_fileManager.MemoryFolderPath, "memory.txt", networkStructure))
+            if (!_memoryChecker.IsValid(_fileManager.MemoryFolderPath + "//memory.txt", networkStructure))
             {
                 _logger.LogError(ErrorType.MemoryInitializeError);
                 return;
