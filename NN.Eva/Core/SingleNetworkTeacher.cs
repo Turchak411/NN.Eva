@@ -1,8 +1,7 @@
-﻿using NN.Eva.Models;
-using NN.Eva.Services;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.Linq;
+using NN.Eva.Models;
+using NN.Eva.Services;
 using NN.Eva.Core.GeneticAlgorithm;
 
 namespace NN.Eva.Core
