@@ -20,20 +20,15 @@ namespace NN.Eva.Core
 
         private ActivationFunction _activationFunctionType;
 
-        public double Error
-        {
-            get { return _error; }
-        }
+        #region Out properties
 
-        public double[] Weights
-        {
-            get { return _weights; }
-        }
+        public double Error => _error;
 
-        public double LastAnswer
-        {
-            get { return _lastAnswer; }
-        }
+        public double[] Weights => _weights;
+
+        public double LastAnswer => _lastAnswer;
+
+        #endregion
 
         private Neuron() { }
 
