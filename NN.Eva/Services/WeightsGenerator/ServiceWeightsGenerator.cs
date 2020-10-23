@@ -75,5 +75,11 @@ namespace NN.Eva.Services.WeightsGenerator
             Generator generator = new Generator();
             return generator.GenerateWeightsVector(networkStructure, rnd);
         }
+
+        public List<double> GenerateEmptyMemoryWeights(NetworkStructure networkStructure)
+        {
+            Generator generator = new Generator();
+            return generator.GenerateEmptyWeightsVector(networkStructure);
+        }
     }
 }

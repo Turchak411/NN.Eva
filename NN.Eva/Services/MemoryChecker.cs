@@ -1,7 +1,9 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
-using NN.Eva.Core;
 using NN.Eva.Models;
+using NN.Eva.Services.WeightsGenerator;
 
 namespace NN.Eva.Services
 {
@@ -89,22 +91,23 @@ namespace NN.Eva.Services
         /// Полноценная проверка файла памяти в соответствии с представленной структурой
         /// </summary>
         /// <param name="memoryPath"></param>
-        /// <param name="netStructure"></param>
+        /// <param name="networkStructure"></param>
         /// <returns>Validity of memory</returns>
         public bool IsValid(string memoryPath, NetworkStructure networkStructure)
         {
             string[] splittedPath = memoryPath.Split(new string[] {"//"}, StringSplitOptions.RemoveEmptyEntries);
             string memoryFolderPath = splittedPath[0];
-            string memoryFileName = splittedPath[splittedPath.Length - 1];
 
             // Если файл не поврежден при прошлой записи, запуск полной проверки в соответствии со структурой:
             if (IsValidQuickCheck(memoryFolderPath, memoryPath, networkStructure))
             {
-                FileManager fileManager = new FileManager(memoryFolderPath);
+                ServiceWeightsGenerator serviceWeightsGenerator = new ServiceWeightsGenerator();
 
-                NeuralNetwork testNet = new NeuralNetwork(networkStructure.NeuronsByLayers, fileManager);
+                List<double> memoryFromStructure = serviceWeightsGenerator.GenerateEmptyMemoryWeights(networkStructure);
+                List<double> memoryFromFile = LoadWholeMemoryFile(memoryPath);
 
-                if(!testNet.IsMemoryEquals(networkStructure))
+                // Проверка количества значений весов по структуре с количеством значений весов, полученной после фактической загрузки:
+                if (memoryFromStructure.Count != memoryFromFile.Count)
                 {
                     return false;
                 }
@@ -115,6 +118,36 @@ namespace NN.Eva.Services
             }
 
             return true;
+        }
+
+        private List<double> LoadWholeMemoryFile(string fullMemoryPath)
+        {
+            List<double> memoryWeights = new List<double>();
+
+            using(StreamReader fileReader = new StreamReader(fullMemoryPath))
+            {
+                try
+                {
+                    // Skip metadata:
+                    fileReader.ReadLine();
+
+                    while(!fileReader.EndOfStream)
+                    {
+                        string[] readedLine = fileReader.ReadLine().Split(' ');
+
+                        for (int i = 4; i < readedLine.Length; i++)
+                        {
+                            memoryWeights.Add(double.Parse(readedLine[i], new CultureInfo("ru-RU")));
+                        }
+                    }
+                }
+                catch
+                {
+                    return new List<double>();
+                }
+            }
+
+            return memoryWeights;
         }
     }
 }

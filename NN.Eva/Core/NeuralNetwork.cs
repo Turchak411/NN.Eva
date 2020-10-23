@@ -11,6 +11,7 @@ namespace NN.Eva.Core
         public Guid Id { get; set; } = Guid.NewGuid();
 
         protected List<Layer> _layerList = new List<Layer>();
+
         private readonly FileManager _fileManager;
 
         protected NeuralNetwork() { }

@@ -321,7 +321,6 @@ namespace NN.Eva.Services
         public void SaveMemoryFromWeightsAndStructure(List<double> weights, NetworkStructure networkStructure)
         {
             WriteNetworkMetadata(networkStructure, MemoryFolderPath + "//memory.txt");
-            // TODO: To testing
             int index = 0;
 
             double offsetValue = 0.5;

@@ -208,8 +208,8 @@ namespace NN.Eva.Core
 
             Console.WriteLine("Start memory cheсking...");
 
-            bool isCurrentNetMemoryValid = _networkStructure == null
-                ? _memoryChecker.IsFileNotCorrupted(memoryFolder + "//memory.txt")
+            bool isCurrentNetMemoryValid = _networkStructure == null ?
+                _memoryChecker.IsFileNotCorrupted(memoryFolder + "//memory.txt")
                 : _memoryChecker.IsValid(memoryFolder + "//memory.txt", _networkStructure) &&
                   _fileManager.IsMemoryEqualsDefault("memory.txt");
 
