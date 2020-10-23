@@ -1,5 +1,5 @@
-﻿using System.Collections.Generic;
-using System.Linq;
+﻿using System;
+using System.Collections.Generic;
 using NN.Eva.Models;
 
 namespace NN.Eva.Core.GeneticAlgorithm
@@ -37,8 +37,34 @@ namespace NN.Eva.Core.GeneticAlgorithm
         /// Handling data
         /// </summary>
         /// <param name="data"></param>
+        /// <param name="errorText"></param>
         /// <returns></returns>
-        public double[] Handle(double[] data)
+        public double[] Handle(double[] data, ref string errorText)
+        {
+            // Check for non equaling of input length of data and network's receptors:
+            if (data.Length != LayerList[0].GetWeights()[0].Length)
+            {
+                errorText = String.Format("Expected by network input-vector length: {0}\nInputed data-vector length: {1}", LayerList[0].GetWeights()[0].Length, data.Length);
+                return null;
+            }
+
+            double[] tempData = data;
+
+            for (int i = 0; i < LayerList.Count; i++)
+            {
+                tempData = LayerList[i].Handle(tempData);
+            }
+
+            // There is one double value at the last handle
+            return tempData;
+        }
+
+        /// <summary>
+        /// Handling data without vector's length check
+        /// </summary>
+        /// <param name="data"></param>
+        /// <returns></returns>
+        public double[] HandleUnsafe(double[] data)
         {
             double[] tempData = data;
 

@@ -76,7 +76,7 @@ namespace NN.Eva.Core
                     SavedTrainingRProp();
                     break;
                 case TrainingAlgorithmType.GeneticAlg:
-                    TrainingGeneticAlg();
+                    TrainingGeneticAlg(false);
                     break;
                 case TrainingAlgorithmType.BProp:
                 default:
@@ -93,7 +93,7 @@ namespace NN.Eva.Core
                     UnsafeTrainingRProp();
                     break;
                 case TrainingAlgorithmType.GeneticAlg:
-                    TrainingGeneticAlg();
+                    TrainingGeneticAlg(true);
                     break;
                 case TrainingAlgorithmType.BProp:
                 default:
@@ -486,16 +486,17 @@ namespace NN.Eva.Core
 
         #region Genetic algorithm
 
-        private void TrainingGeneticAlg()
+        private void TrainingGeneticAlg(bool unsafeMode = false)
         {
             GeneticAlgorithmTeacher geneticAlgTeacher = new GeneticAlgorithmTeacher
             {
                 NetworkStructure = NetworkStructure,
                 InputDatasets = InputDatasets,
-                OutputDatasets = OutputDatasets
+                OutputDatasets = OutputDatasets,
+                Logger = Logger
             };
 
-            geneticAlgTeacher.StartTraining(TrainingConfiguration.EndIteration - TrainingConfiguration.StartIteration);
+            geneticAlgTeacher.StartTraining(TrainingConfiguration.EndIteration - TrainingConfiguration.StartIteration, unsafeMode);
 
             // Запись события об успешном обучении:
             LastTrainingSuccess = true;

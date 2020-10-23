@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using NN.Eva.Core.GeneticAlgorithm;
+using NN.Eva.Services;
 
 namespace NN.Eva.Models.GeneticAlgorithm
 {
@@ -16,9 +17,33 @@ namespace NN.Eva.Models.GeneticAlgorithm
         /// </summary>
         public int ChromosomeIndex { get; set; }
 
-        public void CalculateValue(HandleOnlyNN network, List<double[]> inputDatasets, List<double[]> outputDatasets)
+        public void CalculateValue(HandleOnlyNN network, List<double[]> inputDatasets, List<double[]> outputDatasets, bool unsafeMode, Logger logger)
         {
-            var netAnswers = inputDatasets.Select(network.Handle).ToList();
+            List<double[]> netAnswers = new List<double[]>();
+
+            if(unsafeMode)
+            {
+                netAnswers = inputDatasets.Select(network.HandleUnsafe).ToList();
+            }
+            else
+            {
+                for (int i = 0; i < inputDatasets.Count; i++)
+                {
+                    string handlingErrorText = "";
+
+                    // Handling:
+                    double[] netResult = network.Handle(inputDatasets[i], ref handlingErrorText);
+
+                    if (netResult == null)
+                    {
+                        logger.LogError(ErrorType.NonEqualsInputLengths, handlingErrorText);
+                        return;
+                    }
+
+                    netAnswers.Add(netResult);
+                }
+            }
+
             Value = RecalculateEpochError(netAnswers, outputDatasets);
         }
 

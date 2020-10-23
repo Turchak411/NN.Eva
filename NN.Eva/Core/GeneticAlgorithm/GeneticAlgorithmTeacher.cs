@@ -18,13 +18,15 @@ namespace NN.Eva.Core.GeneticAlgorithm
 
         public NetworkStructure NetworkStructure { get; set; }
 
+        public Logger Logger { get; set; }
+
         #region Synchronization's objects
 
         private object _sync = new object();
 
         #endregion
 
-        public void StartTraining(int iterationCount)
+        public void StartTraining(int iterationCount, bool unsafeMode)
         {
             int networkChromosomesCount = 10;
 
@@ -45,7 +47,7 @@ namespace NN.Eva.Core.GeneticAlgorithm
                 actualGeneration = DoMutation(actualGeneration);
 
                 // Fitness function calculating:
-                fitnessFuncValues = CalculateFitnessFunctionValues(actualGeneration);
+                fitnessFuncValues = CalculateFitnessFunctionValues(actualGeneration, unsafeMode);
                 // Sorting fitness values by value:
                 fitnessFuncValues = fitnessFuncValues.OrderBy(x => x.Value).ToList();
 
@@ -60,11 +62,12 @@ namespace NN.Eva.Core.GeneticAlgorithm
 
                 actualGeneration = tempGenerationList;
 
-                Console.WriteLine("Average generation {0} learning rate: {1}", currentIteration, fitnessFuncValues.Average(x => x.Value));
+                Console.WriteLine("Average generation {0} learning rate: {1}", currentIteration,
+                                                                               fitnessFuncValues.Average(x => x.Value));
 
                 currentIteration++;
             } 
-            while (currentIteration < iterationCount && fitnessFuncValues.Average(x => x.Value) > 0.00001);
+            while (currentIteration < iterationCount); // && fitnessFuncValues.Average(x => x.Value) > 0.00001);
 
             // Saving the best network:
             CreateNetworkMemoryFileByWeightsVector(actualGeneration[0]);
@@ -89,7 +92,7 @@ namespace NN.Eva.Core.GeneticAlgorithm
             return generation;
         }
 
-        private List<FitnessFunction> CalculateFitnessFunctionValues(List<List<double>> generation)
+        private List<FitnessFunction> CalculateFitnessFunctionValues(List<List<double>> generation, bool unsafeMode)
         {
             // Creating real neural networks by weights lists:
             List<HandleOnlyNN> networksList = generation.Select(t => new HandleOnlyNN(t, NetworkStructure)).ToList();
@@ -104,7 +107,7 @@ namespace NN.Eva.Core.GeneticAlgorithm
                     ChromosomeIndex = i
                 };
 
-                fitnessFunction.CalculateValue(networksList[i], InputDatasets, OutputDatasets);
+                fitnessFunction.CalculateValue(networksList[i], InputDatasets, OutputDatasets, unsafeMode, Logger);
 
                 lock (_sync)
                 {
