@@ -106,7 +106,7 @@ namespace NN.Eva.Core
 
             for (int i = 0; i < _neuronList.Count; i++)
             {
-                lastAnswers[i] = _neuronList[i].GetLastAnswer();
+                lastAnswers[i] = _neuronList[i].LastAnswer;
             }
 
             return lastAnswers;
@@ -118,7 +118,7 @@ namespace NN.Eva.Core
 
             for (int i = 0; i < _neuronList.Count; i++)
             {
-                weights[i] = _neuronList[i].GetWeights();
+                weights[i] = _neuronList[i].Weights;
             }
 
             return weights;
@@ -130,7 +130,7 @@ namespace NN.Eva.Core
 
             for (int i = 0; i < _neuronList.Count; i++)
             {
-                errors[i] = _neuronList[i].GetError();
+                errors[i] = _neuronList[i].Error;
             }
 
             return errors;

@@ -10,6 +10,7 @@ namespace NN.Eva.Core
         public Guid Id { get; set; } = Guid.NewGuid();
 
         private double[] _weights;
+
         private double _offsetValue;
         private double _offsetWeight;
 
@@ -18,6 +19,21 @@ namespace NN.Eva.Core
         private double _error;
 
         private ActivationFunction _activationFunctionType;
+
+        public double Error
+        {
+            get { return _error; }
+        }
+
+        public double[] Weights
+        {
+            get { return _weights; }
+        }
+
+        public double LastAnswer
+        {
+            get { return _lastAnswer; }
+        }
 
         private Neuron() { }
 
@@ -98,21 +114,6 @@ namespace NN.Eva.Core
         }
 
         #endregion
-
-        public double[] GetWeights()
-        {
-            return _weights;
-        }
-
-        public double GetError()
-        {
-            return _error;
-        }
-
-        public double GetLastAnswer()
-        {
-            return _lastAnswer;
-        }
 
         #region Weights changing
 
