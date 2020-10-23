@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using NN.Eva.Core.GeneticAlgorithm;
 
 namespace NN.Eva.Models.GeneticAlgorithm
@@ -17,13 +18,7 @@ namespace NN.Eva.Models.GeneticAlgorithm
 
         public void CalculateValue(HandleOnlyNN network, List<double[]> inputDatasets, List<double[]> outputDatasets)
         {
-            List<double[]> netAnswers = new List<double[]>();
-
-            for (int i = 0; i < outputDatasets.Count; i++)
-            {
-                netAnswers.Add(network.Handle(inputDatasets[i]));
-            }
-
+            var netAnswers = inputDatasets.Select(network.Handle).ToList();
             Value = RecalculateEpochError(netAnswers, outputDatasets);
         }
 

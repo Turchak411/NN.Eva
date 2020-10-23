@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
+using NN.Eva.Extensions;
 using NN.Eva.Models;
 using NN.Eva.Models.GeneticAlgorithm;
 using NN.Eva.Services;
@@ -16,9 +18,15 @@ namespace NN.Eva.Core.GeneticAlgorithm
 
         public NetworkStructure NetworkStructure { get; set; }
 
+        #region Synchronization's objects
+
+        private object _sync = new object();
+
+        #endregion
+
         public void StartTraining(int iterationCount)
         {
-            int networkChromosomesCount = 5;
+            int networkChromosomesCount = 10;
 
             List<FitnessFunction> fitnessFuncValues = new List<FitnessFunction>();
 
@@ -52,13 +60,11 @@ namespace NN.Eva.Core.GeneticAlgorithm
 
                 actualGeneration = tempGenerationList;
 
-                Console.WriteLine("Average generation {0} learning rate: {1}",
-                                    currentIteration,
-                                    fitnessFuncValues.Average(x => x.Value));
+                Console.WriteLine("Average generation {0} learning rate: {1}", currentIteration, fitnessFuncValues.Average(x => x.Value));
 
                 currentIteration++;
             } 
-            while (currentIteration < iterationCount && fitnessFuncValues.Average(x => x.Value) > 0.01);
+            while (currentIteration < iterationCount && fitnessFuncValues.Average(x => x.Value) > 0.00001);
 
             // Saving the best network:
             CreateNetworkMemoryFileByWeightsVector(actualGeneration[0]);
@@ -72,40 +78,23 @@ namespace NN.Eva.Core.GeneticAlgorithm
 
             Random rnd = new Random(DateTime.Now.Millisecond);
 
-            for (int i = 0; i < chromosomesCount; i++)
+            Parallel.For(0, chromosomesCount, i =>
             {
                 generation.Add(serviceWeightsGenerator.GenerateMemoryWeights(NetworkStructure, rnd));
-            }
+            });
 
             return generation;
-        }
-
-        private List<List<double>> CloneGeneration(List<List<double>> generation)
-        {
-            List<List<double>> newGeneration = new List<List<double>>();
-
-            for (int i = 0; i < generation.Count; i++)
-            {
-                newGeneration.Add(generation[i]);
-            }
-
-            return newGeneration;
         }
 
         private List<FitnessFunction> CalculateFitnessFunctionValues(List<List<double>> generation)
         {
             // Creating real neural networks by weights lists:
-            List<HandleOnlyNN> networksList = new List<HandleOnlyNN>(); 
-            
-            for (int i = 0; i < generation.Count; i++)
-            {
-                networksList.Add(new HandleOnlyNN(generation[i], NetworkStructure));
-            }
+            List<HandleOnlyNN> networksList = generation.Select(t => new HandleOnlyNN(t, NetworkStructure)).ToList();
 
-            // Calculating values: // TODO: можно распараллелить
+            // Calculating values:
             List<FitnessFunction> fitnessFuncValues = new List<FitnessFunction>();
 
-            for (int i = 0; i < networksList.Count; i++)
+            Parallel.For(0, networksList.Count, i =>
             {
                 FitnessFunction fitnessFunction = new FitnessFunction
                 {
@@ -114,8 +103,12 @@ namespace NN.Eva.Core.GeneticAlgorithm
 
                 fitnessFunction.CalculateValue(networksList[i], InputDatasets, OutputDatasets);
 
-                fitnessFuncValues.Add(fitnessFunction);
-            }
+                lock (_sync)
+                {
+                    fitnessFuncValues.Add(fitnessFunction);
+                }
+               
+            });
 
             return fitnessFuncValues;
         }
@@ -123,14 +116,14 @@ namespace NN.Eva.Core.GeneticAlgorithm
         private List<List<double>> DoSelection(List<List<double>> generation, double selectionChance = 0.64)
         {
             // Cloning generatkion to new generation list:
-            List<List<double>> newGeneration = CloneGeneration(generation);
+            List<List<double>> newGeneration = generation.CloneGeneration();
 
             Random rnd = new Random(DateTime.Now.Millisecond);
 
             for (int i = 0; i < generation.Count; i++)
             {
                 // Choosing partner for selection:
-                int randomPartnerNumber = 0;
+                int randomPartnerNumber;
 
                 do
                 {
@@ -182,34 +175,23 @@ namespace NN.Eva.Core.GeneticAlgorithm
 
         private List<List<double>> DoMutation(List<List<double>> generation, double mutationChance = 0.01)
         {
-            List<List<double>> newGeneration = CloneGeneration(generation);
+            List<List<double>> newGeneration = generation.CloneGeneration();
 
             Random rnd = new Random(DateTime.Now.Millisecond);
 
-            for (int i = 0; i < generation.Count; i++)
-            {
-                if (rnd.NextDouble() < mutationChance)
-                {
-                    // Then do selection >>> crossover operator:
-                    newGeneration.Add(MutationOperator(generation[i], rnd));
-                }
-            }
+            // Do mutation with mutation-chance (1%)
+            newGeneration.AddRange(from t in generation 
+                where rnd.NextDouble() < mutationChance
+                select MutationOperator(t, rnd));
 
             return newGeneration;
         }
 
         private List<double> MutationOperator(List<double> chromosome, Random rnd)
         {
-            List<double> newChromosome = new List<double>();
-
-            for (int i = 0; i < chromosome.Count; i++)
-            {
-                double changingValue = (double)rnd.Next(-100, 100) / 100.0;
-
-                newChromosome.Add(chromosome[i] + changingValue);
-            }
-
-            return newChromosome;
+            return (from t in chromosome 
+                let changingValue = (double) rnd.Next(-100, 100) / 100.0
+                select t + changingValue).ToList();
         }
 
         private void CreateNetworkMemoryFileByWeightsVector(List<double> networksWeightsVector)
