@@ -34,9 +34,7 @@ namespace NN.Eva.Services
                 {
                     while (!fileReader.EndOfStream)
                     {
-                        string[] readedLine = fileReader.ReadLine().Split(' ');
-
-                        if (readedLine.Length < 2)
+                        if (fileReader.ReadLine().Split(' ').Length < 2)
                         {
                             return false;
                         }

@@ -12,15 +12,15 @@ namespace NN.Eva.Test
 
             NetworkStructure netStructure = new NetworkStructure
             {
-                InputVectorLength = 10,
-                NeuronsByLayers = new[] { 230, 150, 120, 1 }
+                InputVectorLength = 2,
+                NeuronsByLayers = new[] { 2, 3, 1 }
             };
 
             TrainingConfiguration trainConfig = new TrainingConfiguration
             {
-                TrainingAlgorithmType = TrainingAlgorithmType.BProp,
+                TrainingAlgorithmType = TrainingAlgorithmType.RProp,
                 StartIteration = 0,
-                EndIteration = 1,
+                EndIteration = 2000,
                 InputDatasetFilename = "TrainingSets//inputSets.txt",
                 OutputDatasetFilename = "TrainingSets//outputSets.txt",
                 MemoryFolder = "Memory"
@@ -31,10 +31,10 @@ namespace NN.Eva.Test
             if (creatingSucceed)
             {
                 //serviceEvaNN.CalculateStatistic(trainConfig);
-                //serviceEvaNN.Train(trainConfig,
-                //                   true,
-                //                   ProcessPriorityClass.Normal,
-                //                   true);
+                serviceEvaNN.Train(trainConfig,
+                                   true,
+                                   ProcessPriorityClass.Normal,
+                                   true);
                 //serviceEvaNN.CalculateStatistic(trainConfig);
             }
 

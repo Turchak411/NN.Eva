@@ -119,6 +119,18 @@ namespace NN.Eva.Core
             return errorList;
         }
 
+        public List<double[]> GetLastNeuronAnswers()
+        {
+            List<double[]> answersList = new List<double[]>();
+
+            for (int i = 0; i < _layerList.Count; i++)
+            {
+                answersList.Add(_layerList[i].GetLastAnswers());
+            }
+
+            return answersList;
+        }
+
         public void TeachBProp(double[] data, double[] rightAnswersSet, double learnSpeed)
         {
             // Подсчет ошибки (внутреннее изменение):
