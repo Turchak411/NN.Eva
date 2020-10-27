@@ -19,7 +19,7 @@ namespace NN.Eva.Test
             TrainingConfiguration trainConfig = new TrainingConfiguration
             {
                 TrainingAlgorithmType = TrainingAlgorithmType.GeneticAlg,
-                StartIteration = 2000,
+                StartIteration = 0,
                 EndIteration = 20000,
                 InputDatasetFilename = "TrainingSets//inputSets.txt",
                 OutputDatasetFilename = "TrainingSets//outputSets.txt",

@@ -43,12 +43,6 @@ namespace NN.Eva.Core.GeneticAlgorithm
 
             do
             {
-                // Cataclysm:
-                if (IsPopulationDegenerated(fitnessValuesTrace))
-                {
-                    actualGeneration = DoCataclysm(actualGeneration);
-                }
-
                 // Selection:
                 actualGeneration = DoSelection(actualGeneration);
 
@@ -75,9 +69,23 @@ namespace NN.Eva.Core.GeneticAlgorithm
 
                 // Add avg fitness value to trace:
                 fitnessValuesTrace.Add(avgFitnessValue);
+                //Remove trace tail if exist one:
+                if (fitnessValuesTrace.Count > 100)
+                {
+                    fitnessValuesTrace.RemoveAt(0);
+                }
 
                 Console.WriteLine("Average generation {0} learning rate: {1}", currentIteration,
                                                                                avgFitnessValue);
+
+                // Cataclysm:
+                if (fitnessValuesTrace.Count == 100 && IsPopulationDegenerated(fitnessValuesTrace))
+                {
+                    actualGeneration = DoCataclysm(actualGeneration, 0.6);
+
+                    // Clear values trace for avoid multiple cataclysms by old data:
+                    fitnessValuesTrace.Clear();
+                }
 
                 currentIteration++;
             } 
@@ -215,18 +223,14 @@ namespace NN.Eva.Core.GeneticAlgorithm
 
         private bool IsPopulationDegenerated(List<double> fitnessValuesTrace, int valueRoundCount = 6, double overwhelmingMajorityPercent = 0.7)
         {
-            var val = fitnessValuesTrace.GroupBy(x => Math.Round(x, valueRoundCount)).Any(g => g.Count() > fitnessValuesTrace.Count * overwhelmingMajorityPercent);
-
-            return val;
+            return fitnessValuesTrace.GroupBy(x => Math.Round(x, valueRoundCount)).Any(g => g.Count() > fitnessValuesTrace.Count * overwhelmingMajorityPercent);
         }
 
         private List<List<double>> DoCataclysm(List<List<double>> generation, double removingPercent = 0.5)
         {
-            // TODO:
             // Thanos snap:
             int generationRemovedResultCount = (int)(generation.Count * removingPercent);
 
-            // TODO: test values
             ShuffleList(generation);
 
             // Creating queue by generation list:
