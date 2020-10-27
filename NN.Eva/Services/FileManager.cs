@@ -255,6 +255,11 @@ namespace NN.Eva.Services
             }
         }
 
+        /// <summary>
+        /// Saving memory from network's weights and structure
+        /// </summary>
+        /// <param name="weights"></param>
+        /// <param name="networkStructure"></param>
         public void SaveMemoryFromWeightsAndStructure(List<double> weights, NetworkStructure networkStructure)
         {
             WriteNetworkMetadata(networkStructure, MemoryFolderPath + "//memory.txt");
@@ -303,6 +308,36 @@ namespace NN.Eva.Services
                     }
                 }
             }
+        }
+
+        public List<double> LoadWholeMemoryFile(string fullMemoryPath)
+        {
+            List<double> memoryWeights = new List<double>();
+
+            using (StreamReader fileReader = new StreamReader(fullMemoryPath))
+            {
+                try
+                {
+                    // Skip metadata:
+                    fileReader.ReadLine();
+
+                    while (!fileReader.EndOfStream)
+                    {
+                        string[] readedLine = fileReader.ReadLine().Split(' ');
+
+                        for (int i = 4; i < readedLine.Length; i++)
+                        {
+                            memoryWeights.Add(double.Parse(readedLine[i], new CultureInfo("ru-RU")));
+                        }
+                    }
+                }
+                catch
+                {
+                    return new List<double>();
+                }
+            }
+
+            return memoryWeights;
         }
 
         /// <summary>

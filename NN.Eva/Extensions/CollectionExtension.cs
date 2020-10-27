@@ -22,6 +22,23 @@ namespace NN.Eva.Extensions
         }
 
         /// <summary>
+        /// Cloning chromosome in genetic algorithm
+        /// </summary>
+        /// <param name="chromosome"></param>
+        /// <returns></returns>
+        public static List<double> CloneChromosome(this List<double> chromosome)
+        {
+            List<double> newChromosome = new List<double>();
+
+            for (int i = 0; i < chromosome.Count; i++)
+            {
+                newChromosome.Add(chromosome[i]);
+            }
+
+            return newChromosome;
+        }
+
+        /// <summary>
         /// Swapping items in list in genetic algorithm
         /// </summary>
         /// <param name="list"></param>

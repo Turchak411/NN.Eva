@@ -434,7 +434,9 @@ namespace NN.Eva.Core
                 Logger = Logger
             };
 
-            geneticAlgTeacher.StartTraining(TrainingConfiguration.EndIteration - TrainingConfiguration.StartIteration, unsafeMode);
+            geneticAlgTeacher.StartTraining(TrainingConfiguration.EndIteration - TrainingConfiguration.StartIteration,
+                                            unsafeMode,
+                                            TrainingConfiguration.MemoryFolder + "//memory.txt");
 
             // Запись события об успешном обучении:
             LastTrainingSuccess = true;

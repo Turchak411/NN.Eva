@@ -1,9 +1,7 @@
 ﻿using System;
-using System.CodeDom.Compiler;
-using System.Collections;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Collections.Generic;
 using NN.Eva.Extensions;
 using NN.Eva.Models;
 using NN.Eva.Models.GeneticAlgorithm;
@@ -22,21 +20,25 @@ namespace NN.Eva.Core.GeneticAlgorithm
 
         public Logger Logger { get; set; }
 
+        private FileManager _fileManager;
+
         #region Synchronization's objects
 
         private object _sync = new object();
 
         #endregion
 
-        public void StartTraining(int iterationCount, bool unsafeMode)
+        public void StartTraining(int iterationCount, bool unsafeMode, string memoryPath)
         {
             int networkChromosomesCount = 10;
+
+            _fileManager = new FileManager(NetworkStructure);
 
             List<FitnessFunction> fitnessFuncValues = new List<FitnessFunction>();
 
             // Generations list (actual and previously):
             // Chromosome in NN context = Network's weights in row
-            List<List<double>> actualGeneration = GeneratePopulation(networkChromosomesCount);
+            List<List<double>> actualGeneration = GenerateExistentPopulation(networkChromosomesCount, memoryPath);
 
             int currentIteration = 0;
             List<double> fitnessValuesTrace = new List<double>();
@@ -81,6 +83,11 @@ namespace NN.Eva.Core.GeneticAlgorithm
                 // Cataclysm:
                 if (fitnessValuesTrace.Count == 100 && IsPopulationDegenerated(fitnessValuesTrace))
                 {
+                    Console.WriteLine("=========================\n" +
+                                      "Corrective \"cataclysm\"!\n" +
+                                      $"Removed: {actualGeneration.Count * 0.6}\n" +
+                                      "=========================");
+
                     actualGeneration = DoCataclysm(actualGeneration, 0.6);
 
                     // Clear values trace for avoid multiple cataclysms by old data:
@@ -95,6 +102,11 @@ namespace NN.Eva.Core.GeneticAlgorithm
             CreateNetworkMemoryFileByWeightsVector(actualGeneration[0]);
         }
 
+        /// <summary>
+        /// Generate new random population
+        /// </summary>
+        /// <param name="chromosomesCount"></param>
+        /// <returns></returns>
         private List<List<double>> GeneratePopulation(int chromosomesCount)
         {
             List<List<double>> generation = new List<List<double>>();
@@ -109,6 +121,20 @@ namespace NN.Eva.Core.GeneticAlgorithm
                     generation.Add(serviceWeightsGenerator.GenerateMemoryWeights(NetworkStructure, rnd));
                 }
             });
+
+            return generation;
+        }
+
+        private List<List<double>> GenerateExistentPopulation(int chromosomesCount, string memoryPath)
+        {
+            List<List<double>> generation = new List<List<double>>();
+
+            List<double> networkFromFile = _fileManager.LoadWholeMemoryFile(memoryPath);
+
+            for(int i = 0; i < chromosomesCount; i++)
+            {
+                generation.Add(networkFromFile.CloneChromosome());
+            }
 
             return generation;
         }
@@ -140,6 +166,12 @@ namespace NN.Eva.Core.GeneticAlgorithm
             return fitnessFuncValues;
         }
 
+        /// <summary>
+        /// Selection operation
+        /// </summary>
+        /// <param name="generation"></param>
+        /// <param name="selectionChance"></param>
+        /// <returns></returns>
         private List<List<double>> DoSelection(List<List<double>> generation, double selectionChance = 0.64)
         {
             // Cloning generatkion to new generation list:
@@ -261,8 +293,7 @@ namespace NN.Eva.Core.GeneticAlgorithm
 
         private void CreateNetworkMemoryFileByWeightsVector(List<double> networksWeightsVector)
         {
-            FileManager fileManager = new FileManager(NetworkStructure);
-            fileManager.SaveMemoryFromWeightsAndStructure(networksWeightsVector, NetworkStructure);
+        _fileManager.SaveMemoryFromWeightsAndStructure(networksWeightsVector, NetworkStructure);
         }
     }
 }
