@@ -31,7 +31,7 @@ namespace NN.Eva.Core.GeneticAlgorithm
         public void StartTraining(int iterationCount, bool unsafeMode, string memoryPath)
         {
             int networkChromosomesCount = 10;
-            
+            int newChromosomeCount = 5;
 
             _fileManager = new FileManager(NetworkStructure);
 
@@ -39,7 +39,7 @@ namespace NN.Eva.Core.GeneticAlgorithm
 
             // Generations list (actual and previously):
             // Chromosome in NN context = Network's weights in row
-            List<List<double>> actualGeneration = GenerateExistentPopulation(networkChromosomesCount, memoryPath, 4);
+            List<List<double>> actualGeneration = GenerateExistentPopulation(networkChromosomesCount, memoryPath, newChromosomeCount);
 
             int currentIteration = 0;
             List<double> fitnessValuesTrace = new List<double>();
@@ -126,19 +126,24 @@ namespace NN.Eva.Core.GeneticAlgorithm
             return generation;
         }
 
-        private List<List<double>> GenerateExistentPopulation(int chromosomesCount, string memoryPath, int randomChromosomesCount)
+        private List<List<double>> GenerateExistentPopulation(int chromosomesCount, string memoryPath, int newChromosomesCount)
         {
+            if(chromosomesCount < newChromosomesCount)
+            {
+                return new List<List<double>>();
+            }
+
             List<List<double>> generation = new List<List<double>>();
 
             List<double> networkFromFile = _fileManager.LoadWholeMemoryFile(memoryPath);
 
-            for(int i = 0; i < chromosomesCount - randomChromosomesCount; i++)
+            for(int i = 0; i < chromosomesCount - newChromosomesCount; i++)
             {
                 generation.Add(networkFromFile.CloneChromosome());
             }
 
             // Added random chromosomes:
-            generation.AddRange(GeneratePopulation(randomChromosomesCount));
+            generation.AddRange(GeneratePopulation(newChromosomesCount));
 
             return generation;
         }
