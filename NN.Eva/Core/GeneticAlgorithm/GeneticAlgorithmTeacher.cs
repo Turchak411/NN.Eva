@@ -126,6 +126,13 @@ namespace NN.Eva.Core.GeneticAlgorithm
             return generation;
         }
 
+        /// <summary>
+        /// Generate whole population with items from memory and random
+        /// </summary>
+        /// <param name="chromosomesCount"></param>
+        /// <param name="memoryPath"></param>
+        /// <param name="newChromosomesCount"></param>
+        /// <returns></returns>
         private List<List<double>> GenerateExistentPopulation(int chromosomesCount, string memoryPath, int newChromosomesCount)
         {
             if(chromosomesCount < newChromosomesCount)
@@ -148,6 +155,12 @@ namespace NN.Eva.Core.GeneticAlgorithm
             return generation;
         }
 
+        /// <summary>
+        /// Fitness function calculating
+        /// </summary>
+        /// <param name="generation"></param>
+        /// <param name="unsafeMode"></param>
+        /// <returns></returns>
         private List<FitnessFunction> CalculateFitnessFunctionValues(List<List<double>> generation, bool unsafeMode)
         {
             // Creating real neural networks by weights lists:
@@ -241,6 +254,12 @@ namespace NN.Eva.Core.GeneticAlgorithm
             return newChromosome;
         }
 
+        /// <summary>
+        /// Mutation operation
+        /// </summary>
+        /// <param name="generation"></param>
+        /// <param name="mutationChance"></param>
+        /// <returns></returns>
         private List<List<double>> DoMutation(List<List<double>> generation, double mutationChance = 0.01)
         {
             List<List<double>> newGeneration = generation.CloneGeneration();
@@ -255,6 +274,12 @@ namespace NN.Eva.Core.GeneticAlgorithm
             return newGeneration;
         }
 
+        /// <summary>
+        /// Mutation operator
+        /// </summary>
+        /// <param name="chromosome"></param>
+        /// <param name="rnd"></param>
+        /// <returns></returns>
         private List<double> MutationOperator(List<double> chromosome, Random rnd)
         {
             return (from t in chromosome 
@@ -262,11 +287,24 @@ namespace NN.Eva.Core.GeneticAlgorithm
                 select t + changingValue).ToList();
         }
 
+        /// <summary>
+        /// Check for degenerated population
+        /// </summary>
+        /// <param name="fitnessValuesTrace"></param>
+        /// <param name="valueRoundCount"></param>
+        /// <param name="overwhelmingMajorityPercent"></param>
+        /// <returns></returns>
         private bool IsPopulationDegenerated(List<double> fitnessValuesTrace, int valueRoundCount = 6, double overwhelmingMajorityPercent = 0.7)
         {
             return fitnessValuesTrace.GroupBy(x => Math.Round(x, valueRoundCount)).Any(g => g.Count() > fitnessValuesTrace.Count * overwhelmingMajorityPercent);
         }
 
+        /// <summary>
+        /// Cataclysm operation
+        /// </summary>
+        /// <param name="generation"></param>
+        /// <param name="removingPercent"></param>
+        /// <returns></returns>
         private List<List<double>> DoCataclysm(List<List<double>> generation, double removingPercent = 0.5)
         {
             // Thanos snap:
@@ -289,6 +327,10 @@ namespace NN.Eva.Core.GeneticAlgorithm
             return generationInQueue.ToList();
         }
 
+        /// <summary>
+        /// Shuffling list
+        /// </summary>
+        /// <param name="generation"></param>
         private void ShuffleList(List<List<double>> generation)
         {
             Random rnd = new Random(DateTime.Now.Millisecond);
@@ -300,6 +342,10 @@ namespace NN.Eva.Core.GeneticAlgorithm
             }
         }
 
+        /// <summary>
+        /// Creating network memory by chromosome
+        /// </summary>
+        /// <param name="networksWeightsVector"></param>
         private void CreateNetworkMemoryFileByWeightsVector(List<double> networksWeightsVector)
         {
         _fileManager.SaveMemoryFromWeightsAndStructure(networksWeightsVector, NetworkStructure);
