@@ -106,7 +106,7 @@ namespace NN.Eva.Core
 
             for (int i = 0; i < _neuronList.Count; i++)
             {
-                lastAnswers[i] = _neuronList[i].GetLastAnswer();
+                lastAnswers[i] = _neuronList[i].LastAnswer;
             }
 
             return lastAnswers;
@@ -118,7 +118,7 @@ namespace NN.Eva.Core
 
             for (int i = 0; i < _neuronList.Count; i++)
             {
-                weights[i] = _neuronList[i].GetWeights();
+                weights[i] = _neuronList[i].Weights;
             }
 
             return weights;
@@ -130,7 +130,7 @@ namespace NN.Eva.Core
 
             for (int i = 0; i < _neuronList.Count; i++)
             {
-                errors[i] = _neuronList[i].GetError();
+                errors[i] = _neuronList[i].Error;
             }
 
             return errors;
@@ -177,39 +177,5 @@ namespace NN.Eva.Core
         #endregion
 
         #endregion
-
-        public bool IsMemoryEquals(NetworkStructure netStructure, int currentLayerNumber)
-        {
-            // Check for equals count of neurons:
-            if (_neuronList.Count != netStructure.NeuronsByLayers[currentLayerNumber])
-            {
-                return false;
-            }
-
-            // Check for correct count of weights on each neuron:
-            // *If this is first layer check equals with input vector:
-            if (currentLayerNumber == 0)
-            {
-                for (int i = 0; i < _neuronList.Count; i++)
-                {
-                    if (!_neuronList[i].IsMemoryEquals(netStructure.InputVectorLength))
-                    {
-                        return false;
-                    }
-                }
-            }
-            else
-            {
-                for (int i = 0; i < _neuronList.Count; i++)
-                {
-                    if (!_neuronList[i].IsMemoryEquals(netStructure.NeuronsByLayers[currentLayerNumber - 1]))
-                    {
-                        return false;
-                    }
-                }
-            }
-
-            return true;
-        }
     }
 }

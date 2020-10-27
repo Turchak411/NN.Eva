@@ -10,6 +10,7 @@ namespace NN.Eva
     public class ServiceEvaNN
     {
         private FileManager _fileManager;
+
         private NetworksTeacher _networkTeacher = null;
 
         /// <summary>

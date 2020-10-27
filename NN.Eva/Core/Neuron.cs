@@ -10,6 +10,7 @@ namespace NN.Eva.Core
         public Guid Id { get; set; } = Guid.NewGuid();
 
         private double[] _weights;
+
         private double _offsetValue;
         private double _offsetWeight;
 
@@ -18,6 +19,16 @@ namespace NN.Eva.Core
         private double _error;
 
         private ActivationFunction _activationFunctionType;
+
+        #region Out properties
+
+        public double Error => _error;
+
+        public double[] Weights => _weights;
+
+        public double LastAnswer => _lastAnswer;
+
+        #endregion
 
         private Neuron() { }
 
@@ -99,28 +110,13 @@ namespace NN.Eva.Core
 
         #endregion
 
-        public double[] GetWeights()
-        {
-            return _weights;
-        }
-
-        public double GetError()
-        {
-            return _error;
-        }
-
-        public double GetLastAnswer()
-        {
-            return _lastAnswer;
-        }
-
         #region Weights changing
 
-        public void ChangeWeightsBProp(double learnSpeed, double[] anwsersFromPrewLayer)
+        public void ChangeWeightsBProp(double learnSpeed, double[] answersFromPrevLayer)
         {
             for (int i = 0; i < _weights.Length; i++)
             {
-                _weights[i] = _weights[i] + learnSpeed * _error * anwsersFromPrewLayer[i];
+                _weights[i] = _weights[i] + learnSpeed * _error * answersFromPrevLayer[i];
             }
 
             // Изменение величины смещения:
@@ -175,10 +171,5 @@ namespace NN.Eva.Core
         #endregion
 
         #endregion
-
-        public bool IsMemoryEquals(int weightsCount)
-        {
-            return _weights.Length == weightsCount;
-        }
     }
 }

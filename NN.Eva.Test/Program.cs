@@ -20,7 +20,7 @@ namespace NN.Eva.Test
             {
                 TrainingAlgorithmType = TrainingAlgorithmType.GeneticAlg,
                 StartIteration = 0,
-                EndIteration = 2,
+                EndIteration = 500,
                 InputDatasetFilename = "TrainingSets//inputSets.txt",
                 OutputDatasetFilename = "TrainingSets//outputSets.txt",
                 MemoryFolder = "Memory"
@@ -30,10 +30,10 @@ namespace NN.Eva.Test
 
             if (creatingSucceed)
             {
-                serviceEvaNN.CalculateStatistic(trainConfig);
+                //serviceEvaNN.CalculateStatistic(trainConfig);
                 serviceEvaNN.Train(trainConfig,
                                    true,
-                                   ProcessPriorityClass.Normal,
+                                   ProcessPriorityClass.High,
                                    true);
                 //serviceEvaNN.CalculateStatistic(trainConfig);
             }

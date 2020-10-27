@@ -11,6 +11,7 @@ namespace NN.Eva.Core
         public Guid Id { get; set; } = Guid.NewGuid();
 
         protected List<Layer> _layerList = new List<Layer>();
+
         private readonly FileManager _fileManager;
 
         protected NeuralNetwork() { }
@@ -118,6 +119,18 @@ namespace NN.Eva.Core
             return errorList;
         }
 
+        public List<double[]> GetLastNeuronAnswers()
+        {
+            List<double[]> answersList = new List<double[]>();
+
+            for (int i = 0; i < _layerList.Count; i++)
+            {
+                answersList.Add(_layerList[i].GetLastAnswers());
+            }
+
+            return answersList;
+        }
+
         public void TeachBProp(double[] data, double[] rightAnswersSet, double learnSpeed)
         {
             // Подсчет ошибки (внутреннее изменение):
@@ -184,30 +197,6 @@ namespace NN.Eva.Core
         }
 
         #endregion
-
-        #endregion
-
-        #region Memory checking
-
-        public bool IsMemoryEquals(NetworkStructure netStructure)
-        {
-            // Check for equals count of layers:
-            if (_layerList.Count != netStructure.NeuronsByLayers.Length)
-            {
-                return false;
-            }
-
-            // Check for equals count of neurons on each layer:
-            for (int i = 0; i < _layerList.Count; i++)
-            {
-                if (!_layerList[i].IsMemoryEquals(netStructure, i))
-                {
-                    return false;
-                }
-            }
-
-            return true;
-        }
 
         #endregion
     }

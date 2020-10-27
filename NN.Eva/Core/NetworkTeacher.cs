@@ -40,7 +40,7 @@ namespace NN.Eva.Core
             _memoryChecker = new MemoryChecker();
             _logger = new Logger();
 
-            if (_memoryChecker.IsValidQuickCheck(_fileManager.MemoryFolderPath, "memory.txt", networkStructure))
+            if (!_memoryChecker.IsValid(_fileManager.MemoryFolderPath + "//.clear//memoryClear.txt", networkStructure))
             {
                 _logger.LogError(ErrorType.MemoryInitializeError);
                 return;
@@ -208,8 +208,8 @@ namespace NN.Eva.Core
 
             Console.WriteLine("Start memory cheсking...");
 
-            bool isCurrentNetMemoryValid = _networkStructure == null
-                ? _memoryChecker.IsFileNotCorrupted(memoryFolder + "//memory.txt")
+            bool isCurrentNetMemoryValid = _networkStructure == null ?
+                _memoryChecker.IsFileNotCorrupted(memoryFolder + "//memory.txt")
                 : _memoryChecker.IsValid(memoryFolder + "//memory.txt", _networkStructure) &&
                   _fileManager.IsMemoryEqualsDefault("memory.txt");
 
