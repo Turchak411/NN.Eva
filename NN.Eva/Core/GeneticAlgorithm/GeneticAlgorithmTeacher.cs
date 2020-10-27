@@ -1,5 +1,6 @@
 ﻿using System;
 using System.CodeDom.Compiler;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -91,7 +92,6 @@ namespace NN.Eva.Core.GeneticAlgorithm
             List<List<double>> generation = new List<List<double>>();
 
             ServiceWeightsGenerator serviceWeightsGenerator = new ServiceWeightsGenerator();
-
             Random rnd = new Random(DateTime.Now.Millisecond);
 
             Parallel.For(0, chromosomesCount, i =>
@@ -229,10 +229,19 @@ namespace NN.Eva.Core.GeneticAlgorithm
             // TODO: test values
             ShuffleList(generation);
 
-            for(int i = 0; i < generationRemovedResultCount; i++)
-            {
+            // Creating queue by generation list:
+            Queue<List<double>> generationInQueue = new Queue<List<double>>(generation);
 
+            ServiceWeightsGenerator serviceWeightsGenerator = new ServiceWeightsGenerator();
+            Random rnd = new Random(DateTime.Now.Millisecond);
+
+            for (int i = 0; i < generationRemovedResultCount; i++)
+            {
+                generationInQueue.Dequeue();
+                generationInQueue.Enqueue(serviceWeightsGenerator.GenerateMemoryWeights(NetworkStructure, rnd));
             }
+
+            return generationInQueue.ToList();
         }
 
         private void ShuffleList(List<List<double>> generation)
