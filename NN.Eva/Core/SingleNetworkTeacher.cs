@@ -175,7 +175,101 @@ namespace NN.Eva.Core
 
         private void SavedTrainingRProp()
         {
-            // TODO: 
+            // 1. Initialization training values:
+            // 1.1. Initialize epoch error:
+            double epochError = 1;
+
+            // 1.2. Initialize gradients list:
+            List<double[]> lastGradientList = InitializeNetworkRPropValues(0);
+            List<double[]> gradientList = new List<double[]>();
+
+            // 1.3. Initialize update-values:
+            List<double[]> updateValues = InitializeNetworkRPropValues(0.1);
+            List<double[]> lastUpdateValues = InitializeNetworkRPropValues(0.1);
+
+            // 1.4. Initialize increasing & decreasing constants:
+            double increasingValue = 1.2;
+            double decreasingValue = 0.5;
+            //gradientList = InitializeNetworkRPropValues(0);
+            // 2. Training:
+            for (int iteration = TrainingConfiguration.StartIteration; iteration < Iteration; iteration++)
+            {
+                List<double[]> netLastEpochAnswers = new List<double[]>();
+
+                // Clear the general gradient list:
+                gradientList = InitializeNetworkRPropValues(0);
+
+                List<List<double[]>> tempErrorListOfListsErrors = new List<List<double[]>>();
+                List<List<double[]>> tempErrorListOfListsAnswers = new List<List<double[]>>();
+
+                // 2.1. Do one training epoch:
+                for (int k = 0; k < InputDatasets.Count; k++)
+                {
+                    string handlingErrorText = "";
+
+                    // Handling & saving results:
+                    double[] netResult = Network.Handle(InputDatasets[k], ref handlingErrorText);
+
+                    if (netResult == null)
+                    {
+                        Logger.LogError(ErrorType.NonEqualsInputLengths, handlingErrorText);
+                        return;
+                    }
+
+                    netLastEpochAnswers.Add(netResult);
+
+                    // Writing set-error aka gradient:
+                    Network.CalculateErrors(OutputDatasets[k]);
+
+                    //gradientList = RecalculateGradientList(gradientList, netErrorsList);
+
+                    tempErrorListOfListsAnswers.Add(Network.GetLastNeuronAnswers());
+                    tempErrorListOfListsErrors.Add(Network.GetNeuronErrors());
+                }
+
+                // Sum all set errors to gradient object:
+                for (int i = 0; i < tempErrorListOfListsErrors.Count; i++)
+                {
+                    gradientList = RecalculateGradientList(gradientList, tempErrorListOfListsErrors[i], tempErrorListOfListsAnswers[i], InputDatasets[i]);
+                }
+
+                // 2.2. Teaching:
+                try
+                {
+                    // 2.2.1. Calculate epoch error for print training error:
+                    epochError = RecalculateEpochError(netLastEpochAnswers);
+                    Console.WriteLine("Error: {0:f10}", epochError);
+
+                    // 2.2.2. Calculating update-values:
+                    for (int i = 0; i < updateValues.Count; i++)
+                    {
+                        for (int k = 0; k < updateValues[i].Length; k++)
+                        {
+                            updateValues[i][k] = CalculateWeightChangeValue(gradientList,
+                                                                            lastGradientList,
+                                                                            updateValues,
+                                                                            lastUpdateValues,
+                                                                            i, k,
+                                                                            increasingValue,
+                                                                            decreasingValue);
+                            lastUpdateValues[i][k] = updateValues[i][k];
+                        }
+                    }
+
+                    //lastGradientList = gradientList;
+
+                    // 2.2.3. Teaching net (changing weights):
+                    Network.TeachRProp(updateValues);
+                }
+                catch (Exception ex)
+                {
+                    Logger.LogError(ErrorType.TrainError, ex);
+                    return;
+                }
+            }
+
+            // Запись события об успешном обучении:
+            LastTrainingSuccess = true;
         }
 
         private void UnsafeTrainingRProp()
