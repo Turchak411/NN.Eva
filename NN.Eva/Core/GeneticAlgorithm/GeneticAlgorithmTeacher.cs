@@ -1,4 +1,5 @@
 ﻿using System;
+using System.CodeDom.Compiler;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -219,9 +220,30 @@ namespace NN.Eva.Core.GeneticAlgorithm
             return val;
         }
 
-        private List<List<double>> DoCataclysm(List<double> generation)
+        private List<List<double>> DoCataclysm(List<List<double>> generation, double removingPercent = 0.5)
         {
             // TODO:
+            // Thanos snap:
+            int generationRemovedResultCount = (int)(generation.Count * removingPercent);
+
+            // TODO: test values
+            ShuffleList(generation);
+
+            for(int i = 0; i < generationRemovedResultCount; i++)
+            {
+
+            }
+        }
+
+        private void ShuffleList(List<List<double>> generation)
+        {
+            Random rnd = new Random(DateTime.Now.Millisecond);
+
+            for(int i = generation.Count; i > 0; i--)
+            {
+                // Swapping:
+                generation.SwapItems(0, rnd.Next(0, i));
+            }
         }
 
         private void CreateNetworkMemoryFileByWeightsVector(List<double> networksWeightsVector)
