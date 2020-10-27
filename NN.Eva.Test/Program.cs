@@ -13,14 +13,14 @@ namespace NN.Eva.Test
             NetworkStructure netStructure = new NetworkStructure
             {
                 InputVectorLength = 2,
-                NeuronsByLayers = new[] { 2, 3, 1 }
+                NeuronsByLayers = new[] { 10, 10, 20, 1 }
             };
 
             TrainingConfiguration trainConfig = new TrainingConfiguration
             {
-                TrainingAlgorithmType = TrainingAlgorithmType.RProp,
-                StartIteration = 0,
-                EndIteration = 2000,
+                TrainingAlgorithmType = TrainingAlgorithmType.GeneticAlg,
+                StartIteration = 2000,
+                EndIteration = 20000,
                 InputDatasetFilename = "TrainingSets//inputSets.txt",
                 OutputDatasetFilename = "TrainingSets//outputSets.txt",
                 MemoryFolder = "Memory"

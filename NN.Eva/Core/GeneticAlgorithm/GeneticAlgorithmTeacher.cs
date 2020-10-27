@@ -37,9 +37,16 @@ namespace NN.Eva.Core.GeneticAlgorithm
             List<List<double>> actualGeneration = GeneratePopulation(networkChromosomesCount);
 
             int currentIteration = 0;
+            List<double> fitnessValuesTrace = new List<double>();
 
             do
             {
+                // Cataclysm:
+                if (IsPopulationDegenerated(fitnessValuesTrace))
+                {
+                    actualGeneration = DoCataclysm(actualGeneration);
+                }
+
                 // Selection:
                 actualGeneration = DoSelection(actualGeneration);
 
@@ -62,8 +69,13 @@ namespace NN.Eva.Core.GeneticAlgorithm
 
                 actualGeneration = tempGenerationList;
 
+                double avgFitnessValue = fitnessFuncValues.Average(x => x.Value);
+
+                // Add avg fitness value to trace:
+                fitnessValuesTrace.Add(avgFitnessValue);
+
                 Console.WriteLine("Average generation {0} learning rate: {1}", currentIteration,
-                                                                               fitnessFuncValues.Average(x => x.Value));
+                                                                               avgFitnessValue);
 
                 currentIteration++;
             } 
@@ -198,6 +210,18 @@ namespace NN.Eva.Core.GeneticAlgorithm
             return (from t in chromosome 
                 let changingValue = (double) rnd.Next(-100, 100) / 100.0
                 select t + changingValue).ToList();
+        }
+
+        private bool IsPopulationDegenerated(List<double> fitnessValuesTrace, int valueRoundCount = 6, double overwhelmingMajorityPercent = 0.7)
+        {
+            var val = fitnessValuesTrace.GroupBy(x => Math.Round(x, valueRoundCount)).Any(g => g.Count() > fitnessValuesTrace.Count * overwhelmingMajorityPercent);
+
+            return val;
+        }
+
+        private List<List<double>> DoCataclysm(List<double> generation)
+        {
+            // TODO:
         }
 
         private void CreateNetworkMemoryFileByWeightsVector(List<double> networksWeightsVector)

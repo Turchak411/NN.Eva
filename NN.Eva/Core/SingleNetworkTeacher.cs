@@ -315,7 +315,7 @@ namespace NN.Eva.Core
 
             for (int k = 0; k < gradientList[0].Length; k++)
             {
-                sumRowFirstLayer[k] = gradientList[0][k] + netErrorsList[0][k]; //inputSet[k];
+                sumRowFirstLayer[k] = gradientList[0][k] + netErrorsList[0][k];
             }
 
             sumList.Add(sumRowFirstLayer);
@@ -327,17 +327,17 @@ namespace NN.Eva.Core
 
                 for (int k = 0; k < gradientList[i].Length; k++)
                 {
-                    sumRow[k] = gradientList[i][k] + netErrorsList[i][k]; //* netAnswersList[i][k];
+                    sumRow[k] = gradientList[i][k] + netErrorsList[i][k];
                 }
 
                 sumList.Add(sumRow);
             }
 
             // Multipling:
-            for (int k = 0; k < sumList[0].Length; k++)
-            {
-                sumList[0][k] = sumList[0][k] * inputSet[k];
-            }
+            //for (int k = 0; k < sumList[0].Length; k++)
+            //{
+            //    sumList[0][k] = sumList[0][k] * inputSet[k];
+            //}
 
             for (int i = 1; i < sumList.Count; i++)
             {
