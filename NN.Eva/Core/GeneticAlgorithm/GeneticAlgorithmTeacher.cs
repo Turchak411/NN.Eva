@@ -31,6 +31,7 @@ namespace NN.Eva.Core.GeneticAlgorithm
         public void StartTraining(int iterationCount, bool unsafeMode, string memoryPath)
         {
             int networkChromosomesCount = 10;
+            
 
             _fileManager = new FileManager(NetworkStructure);
 
@@ -38,7 +39,7 @@ namespace NN.Eva.Core.GeneticAlgorithm
 
             // Generations list (actual and previously):
             // Chromosome in NN context = Network's weights in row
-            List<List<double>> actualGeneration = GenerateExistentPopulation(networkChromosomesCount, memoryPath);
+            List<List<double>> actualGeneration = GenerateExistentPopulation(networkChromosomesCount, memoryPath, 4);
 
             int currentIteration = 0;
             List<double> fitnessValuesTrace = new List<double>();
@@ -125,16 +126,19 @@ namespace NN.Eva.Core.GeneticAlgorithm
             return generation;
         }
 
-        private List<List<double>> GenerateExistentPopulation(int chromosomesCount, string memoryPath)
+        private List<List<double>> GenerateExistentPopulation(int chromosomesCount, string memoryPath, int randomChromosomesCount)
         {
             List<List<double>> generation = new List<List<double>>();
 
             List<double> networkFromFile = _fileManager.LoadWholeMemoryFile(memoryPath);
 
-            for(int i = 0; i < chromosomesCount; i++)
+            for(int i = 0; i < chromosomesCount - randomChromosomesCount; i++)
             {
                 generation.Add(networkFromFile.CloneChromosome());
             }
+
+            // Added random chromosomes:
+            generation.AddRange(GeneratePopulation(randomChromosomesCount));
 
             return generation;
         }
