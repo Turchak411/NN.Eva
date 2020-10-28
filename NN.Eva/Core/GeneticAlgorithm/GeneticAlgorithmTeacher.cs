@@ -196,7 +196,7 @@ namespace NN.Eva.Core.GeneticAlgorithm
         /// <returns></returns>
         private List<List<double>> DoSelection(List<List<double>> generation, double selectionChance = 0.64)
         {
-            // Cloning generatkion to new generation list:
+            // Cloning generation to new generation list:
             List<List<double>> newGeneration = generation.CloneGeneration();
 
             Random rnd = new Random(DateTime.Now.Millisecond);
@@ -348,7 +348,7 @@ namespace NN.Eva.Core.GeneticAlgorithm
         /// <param name="networksWeightsVector"></param>
         private void CreateNetworkMemoryFileByWeightsVector(List<double> networksWeightsVector)
         {
-        _fileManager.SaveMemoryFromWeightsAndStructure(networksWeightsVector, NetworkStructure);
+            _fileManager.SaveMemoryFromWeightsAndStructure(networksWeightsVector, NetworkStructure);
         }
     }
 }
