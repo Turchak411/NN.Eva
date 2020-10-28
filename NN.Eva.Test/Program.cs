@@ -20,7 +20,7 @@ namespace NN.Eva.Test
             {
                 TrainingAlgorithmType = TrainingAlgorithmType.GeneticAlg,
                 StartIteration = 0,
-                EndIteration = 500,
+                EndIteration = 3000,
                 InputDatasetFilename = "TrainingSets//inputSets.txt",
                 OutputDatasetFilename = "TrainingSets//outputSets.txt",
                 MemoryFolder = "Memory"

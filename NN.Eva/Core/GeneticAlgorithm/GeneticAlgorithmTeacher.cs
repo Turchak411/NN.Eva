@@ -283,7 +283,7 @@ namespace NN.Eva.Core.GeneticAlgorithm
         private List<double> MutationOperator(List<double> chromosome, Random rnd)
         {
             return (from t in chromosome 
-                let changingValue = (double) rnd.Next(-100, 100) / 100.0
+                let changingValue = (double) rnd.Next(-1000, 1000) / 100.0
                 select t + changingValue).ToList();
         }
 
