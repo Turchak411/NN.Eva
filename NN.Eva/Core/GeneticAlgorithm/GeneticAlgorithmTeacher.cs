@@ -32,8 +32,11 @@ namespace NN.Eva.Core.GeneticAlgorithm
         {
             int networkChromosomesCount = 10;
             int newChromosomeCount = 5;
+            int luckerCount = 3;
 
             _fileManager = new FileManager(NetworkStructure);
+
+            Random rnd = new Random(DateTime.Now.Millisecond);
 
             List<FitnessFunction> fitnessFuncValues = new List<FitnessFunction>();
 
@@ -61,9 +64,16 @@ namespace NN.Eva.Core.GeneticAlgorithm
                 List<List<double>> tempGenerationList = new List<List<double>>();
 
                 // Adding with cutting generation by started generation count:
-                for (int k = 0; k < networkChromosomesCount; k++)
+                for (int k = 0; k < networkChromosomesCount - luckerCount; k++)
                 {
                     tempGenerationList.Add(actualGeneration[fitnessFuncValues[k].ChromosomeIndex]);
+                }
+
+                // Add "luckers":
+                for (int i = 0; i < luckerCount; i++)
+                {
+                    int luckerIndex = rnd.Next(networkChromosomesCount - luckerCount - 1, fitnessFuncValues.Count);
+                    tempGenerationList.Add(actualGeneration[fitnessFuncValues[luckerIndex].ChromosomeIndex]);
                 }
 
                 actualGeneration = tempGenerationList;
