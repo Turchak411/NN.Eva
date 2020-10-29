@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using NN.Eva.Core.ResilientPropagation.ActivationFunctions;
+using NN.Eva.Services;
 
 namespace NN.Eva.Core.ResilientPropagation
 {
@@ -26,7 +27,11 @@ namespace NN.Eva.Core.ResilientPropagation
 
         public double Output => _output;
 
-        public double[] Weights => _weights;
+        public double[] Weights
+        {
+            get => _weights;
+            internal set => _weights = value;
+        } 
 
         protected IActivationFunction _function = null;
 
@@ -77,6 +82,14 @@ namespace NN.Eva.Core.ResilientPropagation
             _output = output;
 
             return output;
+        }
+
+
+        public void SaveMemory(FileManager fileManager, int layerNumber, int neuronNumber, string memoryPath)
+        {
+            //TODO Check offsetValue and offsetWeight
+            double offsetValue = 0.5, offsetWeight = -1;
+            fileManager.SaveMemory(layerNumber, neuronNumber, _weights, offsetValue, offsetWeight, memoryPath);
         }
 
     }

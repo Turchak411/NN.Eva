@@ -2,6 +2,8 @@
 using System.Linq;
 using NN.Eva.Core.ResilientPropagation.ActivationFunctions;
 using NN.Eva.Core.ResilientPropagation.Layers;
+using NN.Eva.Models;
+using NN.Eva.Services;
 
 namespace NN.Eva.Core.ResilientPropagation
 {
@@ -11,6 +13,8 @@ namespace NN.Eva.Core.ResilientPropagation
 
         private int _inputsCount;
         private double[] _output;
+
+        private readonly FileManager _fileManager;
 
         private const double DeltaMax = 50.0;
         private const double DeltaMin = 1e-6;
@@ -34,21 +38,28 @@ namespace NN.Eva.Core.ResilientPropagation
         private double[][] _thresholdsPreviousDerivatives;
 
 
-        public NeuralNetworkRProp(IActivationFunction function, int inputsCount, params int[] neuronsCount) 
-            : this(inputsCount, neuronsCount.Length)
+        public NeuralNetworkRProp(FileManager fileManager, IActivationFunction function, NetworkStructure networkStructure) 
+            : this(networkStructure.InputVectorLength, networkStructure.NeuronsByLayers.Length, fileManager)
         {
+         
             for (int i = 0; i < _layers.Length; i++)
             {
-                _layers[i] = new ActivationLayerRProp(neuronsCount[i],
-                    i == 0 ? inputsCount : neuronsCount[i - 1], function);
+                _layers[i] = new ActivationLayerRProp(networkStructure.NeuronsByLayers[i],
+                    i == 0 ? networkStructure.InputVectorLength : networkStructure.NeuronsByLayers[i - 1], function);
             }
+
+            for (int i = 0; i < _layers.Length; i++)
+            {
+                _layers[i].LoadMemoryLayerRProp(fileManager, i);
+            }
+            InitializationNetwork(_layers.Length);
         }
 
-        private NeuralNetworkRProp(int inputsCount, int layersCount)
+        private NeuralNetworkRProp(int inputsCount, int layersCount, FileManager fileManager)
         {
+            _fileManager = fileManager;
             _inputsCount = inputsCount;
             _layers = new LayerRProp[layersCount];
-            InitializationNetwork(_layers.Length);
         }
 
         private void InitializationNetwork(int layersCount)
@@ -342,6 +353,26 @@ namespace NN.Eva.Core.ResilientPropagation
                     }
                     layerThresholdDerivatives[i] += weightErrors[i];
                 }
+            }
+        }
+
+        public void LoadMemory(int[] neuronsNumberByLayers, FileManager fileManager)
+        {
+            for (int i = 1; i < neuronsNumberByLayers.Length; i++)
+            {
+                _layers[i].LoadMemoryLayerRProp(fileManager, i);
+            }
+        }
+
+        public void SaveMemory(string path, NetworkStructure networkStructure)
+        {
+            // Deleting old memory file:
+            _fileManager.PrepareToSaveMemory(path, networkStructure);
+
+            // Saving
+            for (int i = 0; i < _layers.Length; i++)
+            {
+                _layers[i].SaveMemory(_fileManager, i, path);
             }
         }
 
