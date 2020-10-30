@@ -20,8 +20,6 @@ namespace NN.Eva.Core
 
         public List<double[]> OutputDatasets { get; set; }
 
-        public Logger Logger { get; set; }
-
         public bool LastTrainingSuccess { get; set; } = false;
 
         /// <summary>
@@ -214,8 +212,7 @@ namespace NN.Eva.Core
             {
                 NetworkStructure = NetworkStructure,
                 InputDatasets = InputDatasets,
-                OutputDatasets = OutputDatasets,
-                Logger = Logger
+                OutputDatasets = OutputDatasets
             };
 
             geneticAlgTeacher.StartTraining(TrainingConfiguration.EndIteration - TrainingConfiguration.StartIteration,

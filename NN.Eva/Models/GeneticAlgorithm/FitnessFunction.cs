@@ -17,7 +17,7 @@ namespace NN.Eva.Models.GeneticAlgorithm
         /// </summary>
         public int ChromosomeIndex { get; set; }
 
-        public void CalculateValue(NeuralNetworkGeneticAlg network, List<double[]> inputDatasets, List<double[]> outputDatasets, bool unsafeMode, Logger logger)
+        public void CalculateValue(NeuralNetworkGeneticAlg network, List<double[]> inputDatasets, List<double[]> outputDatasets, bool unsafeMode)
         {
             List<double[]> netAnswers = new List<double[]>();
 
@@ -36,7 +36,7 @@ namespace NN.Eva.Models.GeneticAlgorithm
 
                     if (netResult == null)
                     {
-                        logger.LogError(ErrorType.NonEqualsInputLengths, handlingErrorText);
+                        Logger.LogError(ErrorType.NonEqualsInputLengths, handlingErrorText);
                         return;
                     }
 

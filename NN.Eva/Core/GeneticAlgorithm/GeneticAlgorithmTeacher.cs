@@ -18,8 +18,6 @@ namespace NN.Eva.Core.GeneticAlgorithm
 
         public NetworkStructure NetworkStructure { get; set; }
 
-        public Logger Logger { get; set; }
-
         #region Synchronization's objects
 
         private object _sync = new object();
@@ -182,7 +180,7 @@ namespace NN.Eva.Core.GeneticAlgorithm
                     ChromosomeIndex = i
                 };
 
-                fitnessFunction.CalculateValue(networksList[i], InputDatasets, OutputDatasets, unsafeMode, Logger);
+                fitnessFunction.CalculateValue(networksList[i], InputDatasets, OutputDatasets, unsafeMode);
 
                 lock (_sync)
                 {
