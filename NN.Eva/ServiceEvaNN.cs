@@ -62,8 +62,7 @@ namespace NN.Eva
             // Check for unexistent network:
             if (_networkTeacher == null)
             {
-                Logger localLogger = new Logger();
-                localLogger.LogError(ErrorType.OperationWithNonexistentNetwork, "Training failed!");
+                Logger.LogError(ErrorType.OperationWithNonexistentNetwork, "Training failed!");
                 return;
             }
 
@@ -76,8 +75,7 @@ namespace NN.Eva
             // Print warning about using unsafe mode:
             if (unsafeTrainingMode)
             {
-                Logger localLogger = new Logger();
-                localLogger.LogWarning(WarningType.UsingUnsafeTrainingMode);
+                Logger.LogWarning(WarningType.UsingUnsafeTrainingMode);
             }
 
             trainingConfiguration.MemoryFolder = trainingConfiguration.MemoryFolder == "" ? "Memory" : trainingConfiguration.MemoryFolder;
@@ -122,8 +120,7 @@ namespace NN.Eva
         {
             if (_networkTeacher == null)
             {
-                Logger localLogger = new Logger();
-                localLogger.LogError(ErrorType.TrainError, "Training failed! Please, create the Network first!");
+                Logger.LogError(ErrorType.TrainError, "Training failed! Please, create the Network first!");
                 return null;
             }
 
@@ -141,8 +138,7 @@ namespace NN.Eva
         {
             if (_networkTeacher == null)
             {
-                Logger localLogger = new Logger();
-                localLogger.LogError(ErrorType.OperationWithNonexistentNetwork, "Calculate statistic failed!");
+                Logger.LogError(ErrorType.OperationWithNonexistentNetwork, "Calculate statistic failed!");
                 return;
             }
 
@@ -160,8 +156,7 @@ namespace NN.Eva
         {
             if (_networkTeacher == null)
             {
-                Logger localLogger = new Logger();
-                localLogger.LogError(ErrorType.OperationWithNonexistentNetwork, "Database memory backuping failed!");
+                Logger.LogError(ErrorType.OperationWithNonexistentNetwork, "Database memory backuping failed!");
                 return false;
             }
 
@@ -193,8 +188,7 @@ namespace NN.Eva
         {
             if (_networkTeacher == null)
             {
-                Logger localLogger = new Logger();
-                localLogger.LogError(ErrorType.OperationWithNonexistentNetwork, "Database memory aborting failed!");
+                Logger.LogError(ErrorType.OperationWithNonexistentNetwork, "Database memory aborting failed!");
                 return false;
             }
 
@@ -221,8 +215,7 @@ namespace NN.Eva
         {
             if (_networkTeacher == null)
             {
-                Logger localLogger = new Logger();
-                localLogger.LogError(ErrorType.OperationWithNonexistentNetwork, "Database memory loading failed!");
+                Logger.LogError(ErrorType.OperationWithNonexistentNetwork, "Database memory loading failed!");
                 return false;
             }
 
