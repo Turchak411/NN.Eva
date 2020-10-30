@@ -20,7 +20,7 @@ namespace NN.Eva.Test
             {
                 TrainingAlgorithmType = TrainingAlgorithmType.RProp,
                 StartIteration = 0,
-                EndIteration = 1000,
+                EndIteration = 10,
                 InputDatasetFilename = "TrainingSets//inputSets.txt",
                 OutputDatasetFilename = "TrainingSets//outputSets.txt",
                 MemoryFolder = "Memory"

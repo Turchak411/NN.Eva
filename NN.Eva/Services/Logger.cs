@@ -7,9 +7,9 @@ namespace NN.Eva.Services
 {
     public static class Logger
     {
-        private static string TrainLogsDirectoryName { get; set; }
+        private static string TrainLogsDirectoryName { get; set; } = ".logs\\trainingLogs";
 
-        private static string ErrorLogsDirectoryName { get; set; }
+        private static string ErrorLogsDirectoryName { get; set; } = ".logs\\errorLogs";
 
         public static void LogTrainingResults(int testPassed, int testFailed, TrainingConfiguration trainConfig, string elapsedTime)
         {

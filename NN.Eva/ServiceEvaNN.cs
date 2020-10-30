@@ -11,6 +11,8 @@ namespace NN.Eva
     {
         private NetworksTeacher _networkTeacher = null;
 
+        private NetworkStructure _networkStructure = null;
+
         /// <summary>
         /// Creating FeedForward - Neural Network
         /// </summary>
@@ -18,10 +20,13 @@ namespace NN.Eva
         /// <param name="networkStructure"></param>
         /// <param name="testDatasetPath"></param>
         /// <returns>Returns success result of network creating</returns>
-        public bool CreateNetwork(string memoryFolderName, NetworkStructure networkStructure,
-                                    string testDatasetPath = null)
+        public bool CreateNetwork(string memoryFolderName,
+                                  NetworkStructure networkStructure,
+                                  string testDatasetPath = null)
         {
-            if(FileManager.CheckMemoryIntegrity(networkStructure, memoryFolderName))
+            _networkStructure = networkStructure;
+
+            if (FileManager.CheckMemoryIntegrity(networkStructure, memoryFolderName))
             {
                 try
                 {
@@ -88,7 +93,7 @@ namespace NN.Eva
             Process thisProc = Process.GetCurrentProcess();
             thisProc.PriorityClass = processPriorityClass;
 
-            if (_networkTeacher.CheckMemory(trainingConfiguration.MemoryFolder))
+            if (_networkTeacher.CheckMemory(trainingConfiguration.MemoryFolder) && _networkTeacher.CheckDatasets(trainingConfiguration.InputDatasetFilename, trainingConfiguration.OutputDatasetFilename, _networkStructure))
             {
                 _networkTeacher.TrainNet(trainingConfiguration, iterationsToPause, unsafeTrainingMode);
 
@@ -107,7 +112,7 @@ namespace NN.Eva
             else
             {
                 stopWatch.Stop();
-                Console.WriteLine("Training failed! Invalid memory!");
+                Console.WriteLine("Training failed!");
             }
         }
 
