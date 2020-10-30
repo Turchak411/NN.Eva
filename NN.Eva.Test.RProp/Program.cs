@@ -19,7 +19,6 @@ namespace NN.Eva.Test.RProp
             var inputDataSets = FileManager.LoadTrainingDataset("TrainingSets//inputSets.txt").ToArray();
             var outputDataSets = FileManager.LoadTrainingDataset("TrainingSets//outputSets.txt").ToArray();
 
-
             var neuralNetworkRProp = new NeuralNetworkRProp(new ActivationSigmoid(), netStructure);
             
             double count = 0;
