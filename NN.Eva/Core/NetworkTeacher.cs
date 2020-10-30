@@ -228,6 +228,47 @@ namespace NN.Eva.Core
 
         #endregion
 
+        #region Datasets checking
+
+        public bool CheckDatasets(string inputDatasetFilename, string outputDatasetFilename, NetworkStructure networkStructure)
+        {
+            Console.WriteLine("Start datasets cheсking...");
+
+            DatasetChecker datasetChecker = new DatasetChecker();
+
+            return CheckSingleDataset(inputDatasetFilename, datasetChecker, networkStructure, true) &&
+                   CheckSingleDataset(outputDatasetFilename, datasetChecker, networkStructure, false);
+        }
+
+        public bool CheckSingleDataset(string datasetFilename, DatasetChecker datasetChecker, NetworkStructure networkStructure, bool isItInputDataset)
+        {
+            bool isValid = true;
+
+            Console.WriteLine($"Start dataset \"{datasetFilename}\" cheсking...");
+
+            bool isCurrentDatasetValid = isItInputDataset ? 
+                                         datasetChecker.CheckInputDataset(datasetFilename, networkStructure) :
+                                         datasetChecker.CheckOutputDataset(datasetFilename, networkStructure);
+
+            if (isCurrentDatasetValid)
+            {
+                Console.ForegroundColor = ConsoleColor.Green;
+                Console.WriteLine($"\"{datasetFilename}\" is valid.");
+            }
+            else
+            {
+                isValid = false;
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine($"\"{datasetFilename}\" - is invalid!");
+            }
+
+            Console.ForegroundColor = ConsoleColor.Gray;
+
+            return isValid;
+        }
+
+        #endregion
+
         #region Training
 
         /// <summary>
