@@ -1,11 +1,69 @@
 ﻿using System;
 using System.IO;
+using System.Collections.Generic;
 using ConsoleProgressBar;
+using NN.Eva.Models;
 
 namespace NN.Eva.Services.WeightsGenerator
 {
     public class Generator
     {
+        public List<double> GenerateWeightsVector(NetworkStructure networkStructure, Random rnd)
+        {
+            List<double> weightsInVectors = new List<double>();
+
+            // Generate input weights:
+            for (int i = 0; i < networkStructure.NeuronsByLayers[0]; i++)
+            {
+                for (int k = 0; k < networkStructure.InputVectorLength; k++)
+                {
+                    weightsInVectors.Add(GenerateValue(rnd));
+                }
+            }
+
+            // Generate other network neuron's weights:
+            for (int i = 1; i < networkStructure.NeuronsByLayers.Length; i++)
+            {
+                for (int k = 0; k < networkStructure.NeuronsByLayers[i]; k++)
+                {
+                    for (int j = 0; j < networkStructure.NeuronsByLayers[i - 1]; j++)
+                    {
+                        weightsInVectors.Add(GenerateValue(rnd));
+                    }
+                }
+            }
+
+            return weightsInVectors;
+        }
+
+        public List<double> GenerateEmptyWeightsVector(NetworkStructure networkStructure)
+        {
+            List<double> weightsInVectors = new List<double>();
+
+            // Generate input weights:
+            for (int i = 0; i < networkStructure.NeuronsByLayers[0]; i++)
+            {
+                for (int k = 0; k < networkStructure.InputVectorLength; k++)
+                {
+                    weightsInVectors.Add(0);
+                }
+            }
+
+            // Generate other network neuron's weights:
+            for (int i = 1; i < networkStructure.NeuronsByLayers.Length; i++)
+            {
+                for (int k = 0; k < networkStructure.NeuronsByLayers[i]; k++)
+                {
+                    for (int j = 0; j < networkStructure.NeuronsByLayers[i - 1]; j++)
+                    {
+                        weightsInVectors.Add(0);
+                    }
+                }
+            }
+
+            return weightsInVectors;
+        }
+
         public void GenerateMemory(int inputVectorLength, int[] netScheme, string filePath)
         {
             Random rnd = new Random(DateTime.Now.Millisecond);

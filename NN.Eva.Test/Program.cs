@@ -18,9 +18,9 @@ namespace NN.Eva.Test
 
             TrainingConfiguration trainConfig = new TrainingConfiguration
             {
-                TrainingAlgorithmType = TrainingAlgorithmType.BProp,
+                TrainingAlgorithmType = TrainingAlgorithmType.GeneticAlg,
                 StartIteration = 0,
-                EndIteration = 10,
+                EndIteration = 3000,
                 InputDatasetFilename = "TrainingSets//inputSets.txt",
                 OutputDatasetFilename = "TrainingSets//outputSets.txt",
                 MemoryFolder = "Memory"

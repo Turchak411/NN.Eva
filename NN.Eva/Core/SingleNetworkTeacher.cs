@@ -1,7 +1,8 @@
-﻿using NN.Eva.Models;
-using NN.Eva.Services;
-using System;
+﻿using System;
 using System.Collections.Generic;
+using NN.Eva.Models;
+using NN.Eva.Services;
+using NN.Eva.Core.GeneticAlgorithm;
 
 namespace NN.Eva.Core
 {
@@ -51,17 +52,31 @@ namespace NN.Eva.Core
                 StartUnsafeTraining(TrainingConfiguration.TrainingAlgorithmType);
             }
 
-            // Сохранение памяти сети:
-            Network.SaveMemory(TrainingConfiguration.MemoryFolder + "//memory.txt", NetworkStructure);
+            // Проведение завершающих операций после обучения модели:
+            switch (TrainingConfiguration.TrainingAlgorithmType)
+            {
+                // В случае обучения по генетическому алгоритму - поскольку он сохраняет память сам - бездействие
+                case TrainingAlgorithmType.GeneticAlg:
+                    break;
+                // В общем случае - сохранение памяти сети:
+                case TrainingAlgorithmType.BProp:
+                case TrainingAlgorithmType.RProp:
+                default:
+                    Network.SaveMemory(TrainingConfiguration.MemoryFolder + "//memory.txt", NetworkStructure);
+                    break;
+            }
         }
 
         private void StartSavedTraining(TrainingAlgorithmType trainingAlgorithm)
         {
             switch (trainingAlgorithm)
             {
-                //case TrainingAlgorithmType.RProp:
-                //    SavedTrainingRProp();
-                //    break;
+                case TrainingAlgorithmType.RProp:
+                    SavedTrainingRProp();
+                    break;
+                case TrainingAlgorithmType.GeneticAlg:
+                    TrainingGeneticAlg(false);
+                    break;
                 case TrainingAlgorithmType.BProp:
                 default:
                     SavedTrainingBProp();
@@ -73,9 +88,12 @@ namespace NN.Eva.Core
         {
             switch (trainingAlgorithm)
             {
-                //case TrainingAlgorithmType.RProp:
-                //    UnsafeTrainingRProp();
-                //    break;
+                case TrainingAlgorithmType.RProp:
+                    UnsafeTrainingRProp();
+                    break;
+                case TrainingAlgorithmType.GeneticAlg:
+                    TrainingGeneticAlg(true);
+                    break;
                 case TrainingAlgorithmType.BProp:
                 default:
                     UnsafeTrainingBProp();
@@ -172,18 +190,24 @@ namespace NN.Eva.Core
             // 1.4. Initialize increasing & decreasing constants:
             double increasingValue = 1.2;
             double decreasingValue = 0.5;
-
+            //gradientList = InitializeNetworkRPropValues(0);
             // 2. Training:
             for (int iteration = TrainingConfiguration.StartIteration; iteration < Iteration; iteration++)
             {
                 List<double[]> netLastEpochAnswers = new List<double[]>();
 
+                // Clear the general gradient list:
+                gradientList = InitializeNetworkRPropValues(0);
+
+                List<List<double[]>> tempErrorListOfListsErrors = new List<List<double[]>>();
+                List<List<double[]>> tempErrorListOfListsAnswers = new List<List<double[]>>();
+
                 // 2.1. Do one training epoch:
                 for (int k = 0; k < InputDatasets.Count; k++)
                 {
-                    // Handling & saving results:
                     string handlingErrorText = "";
 
+                    // Handling & saving results:
                     double[] netResult = Network.Handle(InputDatasets[k], ref handlingErrorText);
 
                     if (netResult == null)
@@ -191,17 +215,30 @@ namespace NN.Eva.Core
                         Logger.LogError(ErrorType.NonEqualsInputLengths, handlingErrorText);
                         return;
                     }
-                    
-                    netLastEpochAnswers.Add(Network.HandleUnsafe(InputDatasets[k]));
+
+                    netLastEpochAnswers.Add(netResult);
+
+                    // Writing set-error aka gradient:
+                    Network.CalculateErrors(OutputDatasets[k]);
+
+                    //gradientList = RecalculateGradientList(gradientList, netErrorsList);
+
+                    tempErrorListOfListsAnswers.Add(Network.GetLastNeuronAnswers());
+                    tempErrorListOfListsErrors.Add(Network.GetNeuronErrors());
+                }
+
+                // Sum all set errors to gradient object:
+                for (int i = 0; i < tempErrorListOfListsErrors.Count; i++)
+                {
+                    gradientList = RecalculateGradientList(gradientList, tempErrorListOfListsErrors[i], tempErrorListOfListsAnswers[i], InputDatasets[i]);
                 }
 
                 // 2.2. Teaching:
                 try
                 {
-                    // 2.2.1. Calculate epoch error:
+                    // 2.2.1. Calculate epoch error for print training error:
                     epochError = RecalculateEpochError(netLastEpochAnswers);
-
-                    gradientList = Network.GetGradients(epochError);
+                    Console.WriteLine("Error: {0:f10}", epochError);
 
                     // 2.2.2. Calculating update-values:
                     for (int i = 0; i < updateValues.Count; i++)
@@ -219,7 +256,7 @@ namespace NN.Eva.Core
                         }
                     }
 
-                    lastGradientList = gradientList;
+                    //lastGradientList = gradientList;
 
                     // 2.2.3. Teaching net (changing weights):
                     Network.TeachRProp(updateValues);
@@ -252,26 +289,45 @@ namespace NN.Eva.Core
             // 1.4. Initialize increasing & decreasing constants:
             double increasingValue = 1.2;
             double decreasingValue = 0.5;
-
+            //gradientList = InitializeNetworkRPropValues(0);
             // 2. Training:
             for (int iteration = TrainingConfiguration.StartIteration; iteration < Iteration; iteration++)
             {
                 List<double[]> netLastEpochAnswers = new List<double[]>();
+
+                // Clear the general gradient list:
+                gradientList = InitializeNetworkRPropValues(0);
+
+                List<List<double[]>> tempErrorListOfListsErrors = new List<List<double[]>>();
+                List<List<double[]>> tempErrorListOfListsAnswers = new List<List<double[]>>();
 
                 // 2.1. Do one training epoch:
                 for (int k = 0; k < InputDatasets.Count; k++)
                 {
                     // Handling & saving results:
                     netLastEpochAnswers.Add(Network.HandleUnsafe(InputDatasets[k]));
+
+                    // Writing set-error aka gradient:
+                    Network.CalculateErrors(OutputDatasets[k]);
+
+                    //gradientList = RecalculateGradientList(gradientList, netErrorsList);
+
+                    tempErrorListOfListsAnswers.Add(Network.GetLastNeuronAnswers());
+                    tempErrorListOfListsErrors.Add(Network.GetNeuronErrors());
+                }
+
+                // Sum all set errors to gradient object:
+                for (int i = 0; i < tempErrorListOfListsErrors.Count; i++)
+                {
+                    gradientList = RecalculateGradientList(gradientList, tempErrorListOfListsErrors[i], tempErrorListOfListsAnswers[i], InputDatasets[i]);
                 }
 
                 // 2.2. Teaching:
                 try
                 {
-                    // 2.2.1. Calculate epoch error:
+                    // 2.2.1. Calculate epoch error for print training error:
                     epochError = RecalculateEpochError(netLastEpochAnswers);
-
-                    gradientList = Network.GetGradients(epochError);
+                    Console.WriteLine("Error: {0:f10}", epochError);
 
                     // 2.2.2. Calculating update-values:
                     for (int i = 0; i < updateValues.Count; i++)
@@ -289,7 +345,7 @@ namespace NN.Eva.Core
                         }
                     }
 
-                    lastGradientList = gradientList;
+                    //lastGradientList = gradientList;
 
                     // 2.2.3. Teaching net (changing weights):
                     Network.TeachRProp(updateValues);
@@ -341,6 +397,53 @@ namespace NN.Eva.Core
             return sum / InputDatasets.Count;
         }
 
+        private List<double[]> RecalculateGradientList(List<double[]> gradientList,
+                                                       List<double[]> netErrorsList,
+                                                       List<double[]> netAnswersList,
+                                                       double[] inputSet)
+        {
+            List<double[]> sumList = new List<double[]>();
+
+            // Sum gradients for input layer:
+            double[] sumRowFirstLayer = new double[gradientList[0].Length];
+
+            for (int k = 0; k < gradientList[0].Length; k++)
+            {
+                sumRowFirstLayer[k] = gradientList[0][k] + netErrorsList[0][k];
+            }
+
+            sumList.Add(sumRowFirstLayer);
+
+            // Sum gradients for other layers: 
+            for (int i = 1; i < gradientList.Count; i++)
+            {
+                double[] sumRow = new double[gradientList[i].Length];
+
+                for (int k = 0; k < gradientList[i].Length; k++)
+                {
+                    sumRow[k] = gradientList[i][k] + netErrorsList[i][k];
+                }
+
+                sumList.Add(sumRow);
+            }
+
+            // Multipling:
+            //for (int k = 0; k < sumList[0].Length; k++)
+            //{
+            //    sumList[0][k] = sumList[0][k] * inputSet[k];
+            //}
+
+            for (int i = 1; i < sumList.Count; i++)
+            {
+                for (int k = 0; k < sumList[i].Length; k++)
+                {
+                    sumList[i][k] = sumList[i][k] * netAnswersList[i][k];
+                }
+            }
+
+            return sumList;
+        }
+
         private double CalculateWeightChangeValue(List<double[]> gradientList,
                                                   List<double[]> lastGradientList,
                                                   List<double[]> updateValues,
@@ -368,8 +471,7 @@ namespace NN.Eva.Core
 
                 lastGradientList[indexI][indexK] = gradientList[indexI][indexK];
             }
-
-            if (gradientChanging < 0)
+            else if (gradientChanging < 0)
             {
                 double deltaValue = updateValues[indexI][indexK] * decreasingValue;
 
@@ -380,8 +482,7 @@ namespace NN.Eva.Core
 
                 lastGradientList[indexI][indexK] = 0;
             }
-            
-            if(gradientChanging == 0)
+            else if (gradientChanging == 0)
             {
                 double deltaValue = updateValues[indexI][indexK];
 
@@ -400,7 +501,7 @@ namespace NN.Eva.Core
         /// <returns></returns>
         private int GetSign(double value)
         {
-            if (Math.Abs(value) < 0.000001)
+            if (Math.Abs(value) < 0.00000000000000001)
             {
                 return 0;
             }
@@ -411,6 +512,28 @@ namespace NN.Eva.Core
             }
 
             return -1;
+        }
+
+        #endregion
+
+        #region Genetic algorithm
+
+        private void TrainingGeneticAlg(bool unsafeMode = false)
+        {
+            GeneticAlgorithmTeacher geneticAlgTeacher = new GeneticAlgorithmTeacher
+            {
+                NetworkStructure = NetworkStructure,
+                InputDatasets = InputDatasets,
+                OutputDatasets = OutputDatasets,
+                Logger = Logger
+            };
+
+            geneticAlgTeacher.StartTraining(TrainingConfiguration.EndIteration - TrainingConfiguration.StartIteration,
+                                            unsafeMode,
+                                            TrainingConfiguration.MemoryFolder + "//memory.txt");
+
+            // Запись события об успешном обучении:
+            LastTrainingSuccess = true;
         }
 
         #endregion

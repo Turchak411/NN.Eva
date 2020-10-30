@@ -1,6 +1,8 @@
 ﻿using NN.Eva.Models;
 using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Management;
 
 namespace NN.Eva.Services
 {
@@ -21,7 +23,7 @@ namespace NN.Eva.Services
             _errorLogsDirectoryName = errorLogsDirectoryName;
         }
 
-        public void LogTrainResults(int testPassed, int testFailed, int iteration)
+        public void LogTrainingResults(int testPassed, int testFailed, TrainingConfiguration trainConfig, string elapsedTime)
         {
             // Check for existing this logs-directory:
             if (!Directory.Exists(_trainLogsDirectoryName))
@@ -30,11 +32,42 @@ namespace NN.Eva.Services
             }
 
             // Save log:
-            using (StreamWriter fileWriter = new StreamWriter(_trainLogsDirectoryName + "/" + iteration + ".txt"))
+            using (StreamWriter fileWriter = new StreamWriter(_trainLogsDirectoryName + "/" + trainConfig.EndIteration + ".txt"))
             {
                 fileWriter.WriteLine("Test passed: " + testPassed);
                 fileWriter.WriteLine("Test failed: " + testFailed);
                 fileWriter.WriteLine("Percent learned: {0:f2}", (double)testPassed * 100 / (testPassed + testFailed));
+                
+                // Writing additional training data:
+                fileWriter.WriteLine("\n============================\n");
+
+                // Writing elapsed time: 
+                if(elapsedTime != "")
+                {
+                    fileWriter.WriteLine("Time spend: " + elapsedTime);
+                    fileWriter.WriteLine("Start iteration: " + trainConfig.StartIteration);
+                    fileWriter.WriteLine("End iteration: " + trainConfig.EndIteration);
+                    fileWriter.WriteLine("============================\n");
+                }
+
+                // Writing system characteristics:
+                fileWriter.WriteLine("System characteristics:");
+                fileWriter.WriteLine("OS Version: {0} {1}", Environment.OSVersion, Environment.Is64BitOperatingSystem ? "64 bit" : "32 bit");
+                fileWriter.WriteLine("Processors count: " + Environment.ProcessorCount);
+
+                ManagementClass myManagementClass = new ManagementClass("Win32_Processor");
+                PropertyDataCollection myProperties = myManagementClass.Properties;
+
+                foreach (var myProperty in myProperties)
+                {
+                    switch (myProperty.Name)
+                    {
+                        case "CurrentClockSpeed":
+                        case "Name":
+                            fileWriter.WriteLine($"{myProperty.Name}: { myProperty.Value ?? "-"}");
+                            break;
+                    }
+                }
             }
 
             Console.WriteLine("Learn statistic logs saved in {0}!", _trainLogsDirectoryName);
