@@ -232,7 +232,7 @@ namespace NN.Eva.Core
 
         public bool CheckDatasets(string inputDatasetFilename, string outputDatasetFilename, NetworkStructure networkStructure)
         {
-            Console.WriteLine("Start memory cheсking...");
+            Console.WriteLine("Start datasets cheсking...");
 
             DatasetChecker datasetChecker = new DatasetChecker();
 
@@ -246,11 +246,11 @@ namespace NN.Eva.Core
 
             Console.WriteLine($"Start dataset \"{datasetFilename}\" cheсking...");
 
-            bool isCurrentNetMemoryValid = isItInputDataset ? 
-                                           datasetChecker.CheckInputDataset(datasetFilename, networkStructure) :
-                                           datasetChecker.CheckOutputDataset(datasetFilename, networkStructure);
+            bool isCurrentDatasetValid = isItInputDataset ? 
+                                         datasetChecker.CheckInputDataset(datasetFilename, networkStructure) :
+                                         datasetChecker.CheckOutputDataset(datasetFilename, networkStructure);
 
-            if (isCurrentNetMemoryValid)
+            if (isCurrentDatasetValid)
             {
                 Console.ForegroundColor = ConsoleColor.Green;
                 Console.WriteLine($"\"{datasetFilename}\" is valid.");
