@@ -1,8 +1,10 @@
-﻿using NN.Eva.Models;
-using NN.Eva.Services;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.Dynamic;
+using NN.Eva.Models;
+using NN.Eva.Services;
+using NN.Eva.Core.GeneticAlgorithm;
+using NN.Eva.Core.ResilientPropagation;
+using NN.Eva.Core.ResilientPropagation.ActivationFunctions;
 
 namespace NN.Eva.Core
 {
@@ -45,18 +47,65 @@ namespace NN.Eva.Core
 
             if(SafeTrainingMode)
             {
-                SavedTraining();
+                StartSavedTraining(TrainingConfiguration.TrainingAlgorithmType);
             }
             else
             {
-                UnsafeTraining();
+                StartUnsafeTraining(TrainingConfiguration.TrainingAlgorithmType);
             }
 
-            // Сохранение памяти сети:
-            Network.SaveMemory(TrainingConfiguration.MemoryFolder + "//memory.txt", NetworkStructure);
+            // Проведение завершающих операций после обучения модели:
+            switch (TrainingConfiguration.TrainingAlgorithmType)
+            {
+                // В случае обучения по генетическому алгоритму - поскольку он сохраняет память сам - бездействие
+                case TrainingAlgorithmType.GeneticAlg:
+                case TrainingAlgorithmType.RProp:
+                    break;
+                // В общем случае - сохранение памяти сети:
+                case TrainingAlgorithmType.BProp:
+                default:
+                    Network.SaveMemory(TrainingConfiguration.MemoryFolder + "//memory.txt", NetworkStructure);
+                    break;
+            }
         }
 
-        private void SavedTraining()
+        private void StartSavedTraining(TrainingAlgorithmType trainingAlgorithm)
+        {
+            switch (trainingAlgorithm)
+            {
+                case TrainingAlgorithmType.RProp:
+                    TrainingRProp();
+                    break;
+                case TrainingAlgorithmType.GeneticAlg:
+                    TrainingGeneticAlg(false);
+                    break;
+                case TrainingAlgorithmType.BProp:
+                default:
+                    SavedTrainingBProp();
+                    break;
+            }
+        }
+
+        private void StartUnsafeTraining(TrainingAlgorithmType trainingAlgorithm)
+        {
+            switch (trainingAlgorithm)
+            {
+                case TrainingAlgorithmType.RProp:
+                    TrainingRProp();
+                    break;
+                case TrainingAlgorithmType.GeneticAlg:
+                    TrainingGeneticAlg(true);
+                    break;
+                case TrainingAlgorithmType.BProp:
+                default:
+                    UnsafeTrainingBProp();
+                    break;
+            }
+        }
+
+        #region Back propagation algorithm training
+
+        private void SavedTrainingBProp()
         {
             for (int iteration = TrainingConfiguration.StartIteration; iteration < Iteration; iteration++)
             {
@@ -79,7 +128,7 @@ namespace NN.Eva.Core
                     // Teaching:
                     try
                     {
-                        Network.Teach(InputDatasets[k], OutputDatasets[k], learningSpeed);
+                        Network.TeachBProp(InputDatasets[k], OutputDatasets[k], learningSpeed);
                     }
                     catch (Exception ex)
                     {
@@ -93,7 +142,7 @@ namespace NN.Eva.Core
             LastTrainingSuccess = true;
         }
 
-        private void UnsafeTraining()
+        private void UnsafeTrainingBProp()
         {
             for (int iteration = TrainingConfiguration.StartIteration; iteration < Iteration; iteration++)
             {
@@ -108,7 +157,7 @@ namespace NN.Eva.Core
                     // Teaching:
                     try
                     {
-                        Network.Teach(InputDatasets[k], OutputDatasets[k], learningSpeed);
+                        Network.TeachBProp(InputDatasets[k], OutputDatasets[k], learningSpeed);
                     }
                     catch (Exception ex)
                     {
@@ -121,5 +170,62 @@ namespace NN.Eva.Core
             // Запись события об успешном обучении:
             LastTrainingSuccess = true;
         }
+
+        #endregion
+
+        #region Resilient propagation 
+
+        private void TrainingRProp()
+        {
+            var neuralNetworkRProp = new NeuralNetworkRProp(new ActivationSigmoid(), NetworkStructure);
+
+            var inputSets = InputDatasets.ToArray();
+            var outputSets = OutputDatasets.ToArray();
+
+            double count = 0;
+            double error = 0.0;
+            double iteration = 0.0;
+            while (iteration < TrainingConfiguration.EndIteration - TrainingConfiguration.StartIteration)
+            {
+                error = neuralNetworkRProp.Train(inputSets, outputSets);
+                if (count > 500)
+                {
+                    count = 0;
+                    Console.WriteLine($"Iteration: {iteration}\t Error: {error}");
+                }
+                Console.WriteLine($"Iteration: {iteration}\t Error: {error}");
+                count++;
+                iteration++;
+            }
+
+            neuralNetworkRProp.SaveMemory(FileManager.MemoryFolderPath + "\\memory.txt", NetworkStructure);
+
+            // Запись события об успешном обучении:
+            LastTrainingSuccess = true;
+        }
+
+        #endregion
+
+        #region Genetic algorithm
+
+        private void TrainingGeneticAlg(bool unsafeMode = false)
+        {
+            GeneticAlgorithmTeacher geneticAlgTeacher = new GeneticAlgorithmTeacher
+            {
+                NetworkStructure = NetworkStructure,
+                InputDatasets = InputDatasets,
+                OutputDatasets = OutputDatasets,
+                Logger = Logger
+            };
+
+            geneticAlgTeacher.StartTraining(TrainingConfiguration.EndIteration - TrainingConfiguration.StartIteration,
+                                            unsafeMode,
+                                            TrainingConfiguration.MemoryFolder + "//memory.txt");
+
+            // Запись события об успешном обучении:
+            LastTrainingSuccess = true;
+        }
+
+        #endregion
     }
 }

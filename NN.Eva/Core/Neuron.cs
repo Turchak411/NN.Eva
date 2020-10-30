@@ -10,33 +10,46 @@ namespace NN.Eva.Core
         public Guid Id { get; set; } = Guid.NewGuid();
 
         private double[] _weights;
+
         private double _offsetValue;
         private double _offsetWeight;
 
-        private double _lastAnwser;
+        private double _lastAnswer;
 
         private double _error;
 
-        private ActivationFunction _actFunc;
+        private ActivationFunction _activationFunctionType;
+
+        #region Out properties
+
+        public double Error => _error;
+
+        public double[] Weights => _weights;
+
+        public double LastAnswer => _lastAnswer;
+
+        #endregion
 
         private Neuron() { }
 
-        public Neuron(double[] weightsValues, double offsetValue, double offsetWeight, ActivationFunction actFunc)
+        public Neuron(double[] weightsValues, double offsetValue, double offsetWeight, ActivationFunction activationFunctionType)
         {
             _weights = weightsValues;
             _offsetValue = offsetValue;
             _offsetWeight = offsetWeight;
 
             _error = 1;
-            _actFunc = actFunc;
+            _activationFunctionType = activationFunctionType;
         }
+
+        #region Handling
 
         public double Handle(double[] data)
         {
             double x = CalcSum(data);
             double actFunc = ActivationFunction(x);
 
-            _lastAnwser = actFunc;
+            _lastAnswer = actFunc;
             return actFunc;
         }
 
@@ -54,7 +67,7 @@ namespace NN.Eva.Core
 
         private double ActivationFunction(double x)
         {
-            switch (_actFunc)
+            switch (_activationFunctionType)
             {
                 case Models.ActivationFunction.Th:
                     return (Math.Exp(2 * x) - 1) / (Math.Exp(2 * x) + 1);
@@ -66,17 +79,21 @@ namespace NN.Eva.Core
             }
         }
 
-        // CALCULATING ERRORS:
+        #endregion
 
-        public void CalcErrorForOutNeuron(double rightAnwser)
+        #region Teaching
+
+        #region Error calculating
+
+        public void CalcErrorForOutNeuron(double rightAnswer)
         {
-            _error = (rightAnwser - _lastAnwser) * _lastAnwser * (1 - _lastAnwser);
+            _error = (rightAnswer - _lastAnswer) * _lastAnswer * (1 - _lastAnswer);
         }
 
         public double CalcErrorForHiddenNeuron(int neuronIndex, double[][] nextLayerWeights, double[] nextLayerErrors)
         {
             // Вычисление производной активационной функции:
-            _error = _lastAnwser * (1 - _lastAnwser);
+            _error = _lastAnswer * (1 - _lastAnswer);
 
             // Суммирование ошибок со следующего слоя:
             double sum = 0;
@@ -91,40 +108,41 @@ namespace NN.Eva.Core
             return _error;
         }
 
-        public double[] GetWeights()
-        {
-            return _weights;
-        }
+        #endregion
 
-        public double GetError()
-        {
-            return _error;
-        }
+        #region Weights changing
 
-        // CHANGE WEIGHTS:
-
-        public void ChangeWeights(double learnSpeed, double[] anwsersFromPrewLayer)
+        public void ChangeWeightsBProp(double learnSpeed, double[] answersFromPrevLayer)
         {
             for (int i = 0; i < _weights.Length; i++)
             {
-                _weights[i] = _weights[i] + learnSpeed * _error * anwsersFromPrewLayer[i];
+                _weights[i] = _weights[i] + learnSpeed * _error * answersFromPrevLayer[i];
             }
 
             // Изменение величины смещения:
             _offsetWeight = _offsetWeight + learnSpeed * _error;
         }
 
-        public double GetLastAnwser()
+        public void ChangeWeightsRProp(double updateValue)
         {
-            return _lastAnwser;
+            for (int i = 0; i < _weights.Length; i++)
+            {
+                _weights[i] = _weights[i] + updateValue;
+            }
         }
 
-        // SAVE MEMORY:
+        #endregion
 
-        public void SaveMemory(FileManager fileManager, int layerNumber, int neuronNumber, string memoryPath)
+        #endregion
+
+        #region Memory operations
+
+        public void SaveMemory(int layerNumber, int neuronNumber, string memoryPath)
         {
-            fileManager.SaveMemory(layerNumber, neuronNumber, _weights, _offsetValue, _offsetWeight, memoryPath);
+            FileManager.SaveMemory(layerNumber, neuronNumber, _weights, _offsetValue, _offsetWeight, memoryPath);
         }
+
+        #region Database operations
 
         public void SaveMemoryToDB(Guid layerId, Guid userId, int number, DBInserter dbInserter)
         {
@@ -150,11 +168,8 @@ namespace NN.Eva.Core
             dbDeleter.DeleteFromTableNeurons(layerId);
         }
 
-        // MEMORY:
+        #endregion
 
-        public bool IsMemoryEquals(int weightsCount)
-        {
-            return _weights.Length == weightsCount;
-        }
+        #endregion
     }
 }

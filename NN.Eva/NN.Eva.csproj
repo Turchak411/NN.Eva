@@ -3,17 +3,19 @@
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <Version>1.0.2.2</Version>
+    <Version>1.0.3.0</Version>
     <Description>Library of FeedForward - Neural Network named Eva.</Description>
     <Authors>Turchak Alexander</Authors>
     <PackageProjectUrl>https://github.com/Turchak411/NN.Eva</PackageProjectUrl>
     <PackageTags>AI, Artificial Intelligence, ML, MachineLearning, NN, NeuralNetworks, FeedForwad NeuralNetwork</PackageTags>
     <RepositoryUrl>https://github.com/Turchak411/NN.Eva</RepositoryUrl>
+    <AssemblyVersion>1.0.3.0</AssemblyVersion>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="Incubis.ProgressBar" Version="0.1.1" />
     <PackageReference Include="MySql.Data" Version="8.0.21" />
+    <PackageReference Include="System.Management" Version="4.7.0" />
   </ItemGroup>
 
 </Project>

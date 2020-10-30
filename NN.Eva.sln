@@ -5,7 +5,7 @@ VisualStudioVersion = 16.0.29728.190
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NN.Eva", "NN.Eva\NN.Eva.csproj", "{16256A69-49A3-4490-AAA8-DB26EB9AA98C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NN.Eva.Test", "NN.Eva.Test\NN.Eva.Test.csproj", "{81A5C827-2007-4936-8405-43C9F675D608}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NN.Eva.Test", "NN.Eva.Test\NN.Eva.Test.csproj", "{81A5C827-2007-4936-8405-43C9F675D608}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

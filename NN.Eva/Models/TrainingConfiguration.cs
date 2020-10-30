@@ -3,6 +3,8 @@ namespace NN.Eva.Models
 {
     public class TrainingConfiguration
     {
+        public TrainingAlgorithmType TrainingAlgorithmType { get; set; }
+
         public int StartIteration { get; set; }
 
         public int EndIteration { get; set; }

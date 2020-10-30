@@ -9,7 +9,6 @@ namespace NN.Eva
 {
     public class ServiceEvaNN
     {
-        private FileManager _fileManager;
         private NetworksTeacher _networkTeacher = null;
 
         /// <summary>
@@ -22,15 +21,20 @@ namespace NN.Eva
         public bool CreateNetwork(string memoryFolderName, NetworkStructure networkStructure,
                                     string testDatasetPath = null)
         {
-            _fileManager = new FileManager(networkStructure, memoryFolderName);
-
-            if(_fileManager.IsMemoryLoadCorrect)
+            if(FileManager.CheckMemoryIntegrity(networkStructure, memoryFolderName))
             {
-                _networkTeacher = new NetworksTeacher(networkStructure, _fileManager);
+                try
+                {
+                    _networkTeacher = new NetworksTeacher(networkStructure);
+                }
+                catch
+                {
+                    return false;
+                }
 
                 if (testDatasetPath != null)
                 {
-                    _networkTeacher.TestVectors = _fileManager.LoadTestDataset(testDatasetPath);
+                    _networkTeacher.TestVectors = FileManager.LoadTestDataset(testDatasetPath);
                 }
 
                 return true;
@@ -90,22 +94,23 @@ namespace NN.Eva
             {
                 _networkTeacher.TrainNet(trainingConfiguration, iterationsToPause, unsafeTrainingMode);
 
+                // Stopping timer and print spend time in [HH:MM:SS]:
+                stopWatch.Stop();
+                TimeSpan ts = stopWatch.Elapsed;
+
+                string elapsedTime = String.Format("{0:00}:{1:00}:{2:00}", ts.Hours, ts.Minutes, ts.Seconds);
+                Console.WriteLine("Time spend: " + elapsedTime);
+
                 if (printLearnStatistic)
                 {
-                    _networkTeacher.PrintLearningStatistic(trainingConfiguration, true);
+                    _networkTeacher.PrintLearningStatistic(trainingConfiguration, true, elapsedTime);
                 }
             }
             else
             {
+                stopWatch.Stop();
                 Console.WriteLine("Training failed! Invalid memory!");
             }
-
-            // Stopping timer and print spend time in [HH:MM:SS]:
-            stopWatch.Stop();
-            TimeSpan ts = stopWatch.Elapsed;
-
-            string elapsedTime = String.Format("{0:00}:{1:00}:{2:00}", ts.Hours, ts.Minutes, ts.Seconds);
-            Console.WriteLine("Time spend: " + elapsedTime);
         }
 
         /// <summary>
@@ -182,7 +187,7 @@ namespace NN.Eva
         /// <summary>
         /// Aborting network's memory from database
         /// </summary>
-        /// <param name="dbConnection"></param>
+        /// <param name="dbConfig"></param>
         /// <returns>State of operation success</returns>
         public bool DBMemoryAbort(DatabaseConfig dbConfig)
         {

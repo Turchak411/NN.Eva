@@ -1,7 +1,9 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
-using NN.Eva.Core;
 using NN.Eva.Models;
+using NN.Eva.Services.WeightsGenerator;
 
 namespace NN.Eva.Services
 {
@@ -11,13 +13,12 @@ namespace NN.Eva.Services
         /// Быстрая проверка памяти на отсутсвие повреждений при прошлой записи
         /// и соответствия метадаты памяти загружаемойструктуре
         /// </summary>
-        /// <param name="memoryFolderPath"></param>
         /// <param name="memoryPath"></param>
         /// <param name="networkStructure"></param>
         /// <returns>Validity of memory after quick check</returns>
-        public bool IsValidQuickCheck(string memoryFolderPath, string memoryPath, NetworkStructure networkStructure)
+        public bool IsValidQuickCheck(string memoryPath, NetworkStructure networkStructure)
         {
-            return IsFileNotCorrupted(memoryPath) && IsMetaDataEquals(memoryFolderPath, memoryPath, networkStructure);
+            return IsFileNotCorrupted(memoryPath) && IsMetaDataEquals(memoryPath, networkStructure);
         }
 
         /// <summary>
@@ -33,9 +34,7 @@ namespace NN.Eva.Services
                 {
                     while (!fileReader.EndOfStream)
                     {
-                        string[] readedLine = fileReader.ReadLine().Split(' ');
-
-                        if (readedLine.Length < 2)
+                        if (fileReader.ReadLine().Split(' ').Length < 2)
                         {
                             return false;
                         }
@@ -50,13 +49,35 @@ namespace NN.Eva.Services
             return true;
         }
 
-        private bool IsMetaDataEquals(string memoryFolderPath, string memoryPath, NetworkStructure networkStructure)
+        private bool IsMetaDataEquals(string memoryPath, NetworkStructure networkStructure)
         {
-            FileManager fileManager = new FileManager(memoryFolderPath);
-
-            NetworkStructure readedNetworkStructure = fileManager.ReadNetworkMetadata(memoryPath);
+            NetworkStructure readedNetworkStructure = ReadNetworkMetadata(memoryPath);
 
             return NetworkStructureModelsEquals(readedNetworkStructure, networkStructure);
+        }
+
+        /// <summary>
+        /// Read the network's metadata
+        /// </summary>
+        /// <param name="path"></param>
+        /// <returns></returns>
+        public NetworkStructure ReadNetworkMetadata(string path)
+        {
+            using (StreamReader fileReader = new StreamReader(path))
+            {
+                string[] readedLine = fileReader.ReadLine().Split(' ');
+
+                NetworkStructure networkStructure = new NetworkStructure();
+                networkStructure.InputVectorLength = Int32.Parse(readedLine[0]);
+                networkStructure.NeuronsByLayers = new int[readedLine.Length - 1];
+
+                for (int i = 1; i < readedLine.Length; i++)
+                {
+                    networkStructure.NeuronsByLayers[i - 1] = Int32.Parse(readedLine[i]);
+                }
+
+                return networkStructure;
+            }
         }
 
         private bool NetworkStructureModelsEquals(NetworkStructure networkStructure0,
@@ -89,24 +110,20 @@ namespace NN.Eva.Services
         /// Полноценная проверка файла памяти в соответствии с представленной структурой
         /// </summary>
         /// <param name="memoryPath"></param>
-        /// <param name="netStructure"></param>
+        /// <param name="networkStructure"></param>
         /// <returns>Validity of memory</returns>
         public bool IsValid(string memoryPath, NetworkStructure networkStructure)
         {
-            string[] splittedPath = memoryPath.Split(new string[] {"//"}, StringSplitOptions.RemoveEmptyEntries);
-            string memoryFolderPath = splittedPath[0];
-            string memoryFileName = splittedPath[splittedPath.Length - 1];
-
             // Если файл не поврежден при прошлой записи, запуск полной проверки в соответствии со структурой:
-            if (IsValidQuickCheck(memoryFolderPath, memoryPath, networkStructure))
+            if (IsValidQuickCheck(memoryPath, networkStructure))
             {
-                FileManager fileManager = new FileManager(memoryFolderPath);
+                ServiceWeightsGenerator serviceWeightsGenerator = new ServiceWeightsGenerator();
 
-                NeuralNetwork testNet = new NeuralNetwork(networkStructure.InputVectorLength,
-                                                          networkStructure.NeuronsByLayers,
-                                                          fileManager);
+                List<double> memoryFromStructure = serviceWeightsGenerator.GenerateEmptyMemoryWeights(networkStructure);
+                List<double> memoryFromFile = LoadWholeMemoryFile(memoryPath);
 
-                if(!testNet.IsMemoryEquals(networkStructure))
+                // Проверка количества значений весов по структуре с количеством значений весов, полученной после фактической загрузки:
+                if (memoryFromStructure.Count != memoryFromFile.Count)
                 {
                     return false;
                 }
@@ -117,6 +134,36 @@ namespace NN.Eva.Services
             }
 
             return true;
+        }
+
+        private List<double> LoadWholeMemoryFile(string fullMemoryPath)
+        {
+            List<double> memoryWeights = new List<double>();
+
+            using(StreamReader fileReader = new StreamReader(fullMemoryPath))
+            {
+                try
+                {
+                    // Skip metadata:
+                    fileReader.ReadLine();
+
+                    while(!fileReader.EndOfStream)
+                    {
+                        string[] readedLine = fileReader.ReadLine().Split(' ');
+
+                        for (int i = 4; i < readedLine.Length; i++)
+                        {
+                            memoryWeights.Add(double.Parse(readedLine[i], new CultureInfo("ru-RU")));
+                        }
+                    }
+                }
+                catch
+                {
+                    return new List<double>();
+                }
+            }
+
+            return memoryWeights;
         }
     }
 }
