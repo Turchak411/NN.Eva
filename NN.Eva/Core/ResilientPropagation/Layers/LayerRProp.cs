@@ -43,23 +43,23 @@ namespace NN.Eva.Core.ResilientPropagation.Layers
             return output;
         }
 
-        public void LoadMemoryLayerRProp(FileManager fileManager, int layerNumber)
+        public void LoadMemoryLayerRProp(int layerNumber)
         {
             double offsetValue = 0.5;
             double offsetWeight = -1;
 
             for (int i = 0; i < _neurons.Length; i++)
             {
-                double[] weights = fileManager.LoadMemory(layerNumber, i, ref offsetValue, ref offsetWeight);
+                double[] weights = FileManager.LoadMemory(layerNumber, i,"memory.txt", ref offsetValue, ref offsetWeight);
                 _neurons[i].Weights = weights;
             }
         }
 
-        public void SaveMemory(FileManager fileManager, int layerNumber, string path)
+        public void SaveMemory(int layerNumber, string path)
         {
             for (int i = 0; i < _neurons.Length; i++)
             {
-                _neurons[i].SaveMemory(fileManager, layerNumber, i, path);
+                _neurons[i].SaveMemory(layerNumber, i, path);
             }
         }
     }

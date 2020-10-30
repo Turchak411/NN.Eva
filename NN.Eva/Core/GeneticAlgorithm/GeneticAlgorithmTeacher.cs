@@ -20,8 +20,6 @@ namespace NN.Eva.Core.GeneticAlgorithm
 
         public Logger Logger { get; set; }
 
-        private FileManager _fileManager;
-
         #region Synchronization's objects
 
         private object _sync = new object();
@@ -33,8 +31,6 @@ namespace NN.Eva.Core.GeneticAlgorithm
             int networkChromosomesCount = 10;
             int newChromosomeCount = 5;
             int luckerCount = 3;
-
-            _fileManager = new FileManager(NetworkStructure);
 
             Random rnd = new Random(DateTime.Now.Millisecond);
 
@@ -152,7 +148,7 @@ namespace NN.Eva.Core.GeneticAlgorithm
 
             List<List<double>> generation = new List<List<double>>();
 
-            List<double> networkFromFile = _fileManager.LoadWholeMemoryFile(memoryPath);
+            List<double> networkFromFile = FileManager.LoadWholeMemoryFile(memoryPath);
 
             for(int i = 0; i < chromosomesCount - newChromosomesCount; i++)
             {
@@ -358,7 +354,7 @@ namespace NN.Eva.Core.GeneticAlgorithm
         /// <param name="networksWeightsVector"></param>
         private void CreateNetworkMemoryFileByWeightsVector(List<double> networksWeightsVector)
         {
-            _fileManager.SaveMemoryFromWeightsAndStructure(networksWeightsVector, NetworkStructure);
+            FileManager.SaveMemoryFromWeightsAndStructure(networksWeightsVector, NetworkStructure);
         }
     }
 }

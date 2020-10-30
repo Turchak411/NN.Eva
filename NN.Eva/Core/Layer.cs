@@ -14,28 +14,28 @@ namespace NN.Eva.Core
 
         private Layer() { }
 
-        public Layer(int neuronCount, int layerNumber, FileManager fileManager)
+        public Layer(int neuronCount, int layerNumber)
         {
             double offsetValue = 0.5;
             double offsetWeight = -1;
 
             for (int i = 0; i < neuronCount; i++)
             {
-                double[] weights = fileManager.LoadMemory(layerNumber, i, ref offsetValue, ref offsetWeight);
+                double[] weights = FileManager.LoadMemory(layerNumber, i, ref offsetValue, ref offsetWeight);
                 Neuron neuron = new Neuron(weights, offsetValue, offsetWeight, ActivationFunction.Sigmoid);
 
                 _neuronList.Add(neuron);
             }
         }
 
-        public Layer(int neuronCount, int layerNumber, FileManager fileManager, string memoryPath)
+        public Layer(int neuronCount, int layerNumber, string memoryPath)
         {
             double offsetValue = 0.5;
             double offsetWeight = -1;
 
             for (int i = 0; i < neuronCount; i++)
             {
-                double[] weights = fileManager.LoadMemory(layerNumber, i, memoryPath, ref offsetValue, ref offsetWeight);
+                double[] weights = FileManager.LoadMemory(layerNumber, i, memoryPath, ref offsetValue, ref offsetWeight);
                 Neuron neuron = new Neuron(weights, offsetValue, offsetWeight, ActivationFunction.Sigmoid);
 
                 _neuronList.Add(neuron);
@@ -140,11 +140,11 @@ namespace NN.Eva.Core
 
         #region Memory operations
 
-        public void SaveMemory(FileManager fileManager, int layerNumber, string path)
+        public void SaveMemory(int layerNumber, string path)
         {
             for (int i = 0; i < _neuronList.Count; i++)
             {
-                _neuronList[i].SaveMemory(fileManager, layerNumber, i, path);
+                _neuronList[i].SaveMemory(layerNumber, i, path);
             }
         }
 

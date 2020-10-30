@@ -14,8 +14,6 @@ namespace NN.Eva.Core.ResilientPropagation
         private int _inputsCount;
         private double[] _output;
 
-        private readonly FileManager _fileManager;
-
         private const double DeltaMax = 50.0;
         private const double DeltaMin = 1e-6;
 
@@ -38,26 +36,24 @@ namespace NN.Eva.Core.ResilientPropagation
         private double[][] _thresholdsPreviousDerivatives;
 
 
-        public NeuralNetworkRProp(FileManager fileManager, IActivationFunction function, NetworkStructure networkStructure) 
-            : this(networkStructure.InputVectorLength, networkStructure.NeuronsByLayers.Length, fileManager)
+        public NeuralNetworkRProp(IActivationFunction function,
+                                  NetworkStructure networkStructure) 
+                : this(networkStructure.InputVectorLength,
+                                  networkStructure.NeuronsByLayers.Length)
         {
          
             for (int i = 0; i < _layers.Length; i++)
             {
                 _layers[i] = new ActivationLayerRProp(networkStructure.NeuronsByLayers[i],
                     i == 0 ? networkStructure.InputVectorLength : networkStructure.NeuronsByLayers[i - 1], function);
+                _layers[i].LoadMemoryLayerRProp(i);
             }
 
-            for (int i = 0; i < _layers.Length; i++)
-            {
-                _layers[i].LoadMemoryLayerRProp(fileManager, i);
-            }
             InitializationNetwork(_layers.Length);
         }
 
-        private NeuralNetworkRProp(int inputsCount, int layersCount, FileManager fileManager)
+        private NeuralNetworkRProp(int inputsCount, int layersCount)
         {
-            _fileManager = fileManager;
             _inputsCount = inputsCount;
             _layers = new LayerRProp[layersCount];
         }
@@ -173,7 +169,6 @@ namespace NN.Eva.Core.ResilientPropagation
                 Array.Clear(threshold, 0, threshold.Length);
             }
         }
-
 
         private double CalculateError(double[] input, double[] desiredOutput)
         {
@@ -308,7 +303,6 @@ namespace NN.Eva.Core.ResilientPropagation
             }
         }
 
-
         private void CalculateGradient(double[] input)
         {
             // 1. calculate updates for the first layer
@@ -356,23 +350,15 @@ namespace NN.Eva.Core.ResilientPropagation
             }
         }
 
-        public void LoadMemory(int[] neuronsNumberByLayers, FileManager fileManager)
-        {
-            for (int i = 1; i < neuronsNumberByLayers.Length; i++)
-            {
-                _layers[i].LoadMemoryLayerRProp(fileManager, i);
-            }
-        }
-
         public void SaveMemory(string path, NetworkStructure networkStructure)
         {
             // Deleting old memory file:
-            _fileManager.PrepareToSaveMemory(path, networkStructure);
+            FileManager.PrepareToSaveMemory(path, networkStructure);
 
             // Saving
             for (int i = 0; i < _layers.Length; i++)
             {
-                _layers[i].SaveMemory(_fileManager, i, path);
+                _layers[i].SaveMemory(i, path);
             }
         }
 

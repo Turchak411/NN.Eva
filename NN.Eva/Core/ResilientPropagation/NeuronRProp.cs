@@ -85,11 +85,11 @@ namespace NN.Eva.Core.ResilientPropagation
         }
 
 
-        public void SaveMemory(FileManager fileManager, int layerNumber, int neuronNumber, string memoryPath)
+        public void SaveMemory(int layerNumber, int neuronNumber, string memoryPath)
         {
             //TODO Check offsetValue and offsetWeight
             double offsetValue = 0.5, offsetWeight = -1;
-            fileManager.SaveMemory(layerNumber, neuronNumber, _weights, offsetValue, offsetWeight, memoryPath);
+            FileManager.SaveMemory(layerNumber, neuronNumber, _weights, offsetValue, offsetWeight, memoryPath);
         }
 
     }
