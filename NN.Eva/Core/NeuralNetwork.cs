@@ -12,34 +12,28 @@ namespace NN.Eva.Core
 
         protected List<Layer> _layerList = new List<Layer>();
 
-        private readonly FileManager _fileManager;
-
         protected NeuralNetwork() { }
 
-        public NeuralNetwork(int[] neuronsNumberByLayers, FileManager fileManager)
+        public NeuralNetwork(int[] neuronsNumberByLayers)
         {
-            _fileManager = fileManager;
-
-            Layer firstLayer = new Layer(neuronsNumberByLayers[0], 0, fileManager);
+            Layer firstLayer = new Layer(neuronsNumberByLayers[0], 0);
             _layerList.Add(firstLayer);
 
             for (int i = 1; i < neuronsNumberByLayers.Length; i++)
             {
-                Layer layer = new Layer(neuronsNumberByLayers[i], i, fileManager);
+                Layer layer = new Layer(neuronsNumberByLayers[i], i);
                 _layerList.Add(layer);
             }
         }
 
-        public NeuralNetwork(int[] neuronsNumberByLayers, FileManager fileManager, string memoryPath)
+        public NeuralNetwork(int[] neuronsNumberByLayers, string memoryPath)
         {
-            _fileManager = fileManager;
-
-            Layer firstLayer = new Layer(neuronsNumberByLayers[0], 0, fileManager, memoryPath);
+            Layer firstLayer = new Layer(neuronsNumberByLayers[0], 0, memoryPath);
             _layerList.Add(firstLayer);
 
             for (int i = 1; i < neuronsNumberByLayers.Length; i++)
             {
-                Layer layer = new Layer(neuronsNumberByLayers[i], i, fileManager, memoryPath);
+                Layer layer = new Layer(neuronsNumberByLayers[i], i, memoryPath);
                 _layerList.Add(layer);
             }
         }
@@ -161,12 +155,12 @@ namespace NN.Eva.Core
         public void SaveMemory(string path, NetworkStructure networkStructure)
         {
             // Deleting old memory file:
-            _fileManager.PrepareToSaveMemory(path, networkStructure);
+            FileManager.PrepareToSaveMemory(path, networkStructure);
 
             // Saving
             for (int i = 0; i < _layerList.Count; i++)
             {
-                _layerList[i].SaveMemory(_fileManager, i, path);
+                _layerList[i].SaveMemory(i, path);
             }
         }
 

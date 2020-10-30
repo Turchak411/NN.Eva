@@ -16,15 +16,14 @@ namespace NN.Eva.Test.RProp
                 NeuronsByLayers = new[] { 230, 150, 120, 1 }
             };
 
-            var fileManager = new FileManager(netStructure);
-            var inputDataSets = fileManager.LoadTrainingDataset("TrainingSets//inputSets.txt").ToArray();
-            var outputDataSets = fileManager.LoadTrainingDataset("TrainingSets//outputSets.txt").ToArray();
+            var inputDataSets = FileManager.LoadTrainingDataset("TrainingSets//inputSets.txt").ToArray();
+            var outputDataSets = FileManager.LoadTrainingDataset("TrainingSets//outputSets.txt").ToArray();
 
-
-            var neuralNetworkRProp = new NeuralNetworkRProp(fileManager, new ActivationSigmoid(), netStructure);
+            var neuralNetworkRProp = new NeuralNetworkRProp(new ActivationSigmoid(), netStructure);
             
             double count = 0;
-            double error = 0.0, iteration = 0.0;
+            double error = 0.0;
+            double iteration = 0.0;
             while (iteration < 1000)
             {
                 error = neuralNetworkRProp.Train(inputDataSets, outputDataSets);

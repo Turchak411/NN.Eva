@@ -9,8 +9,6 @@ namespace NN.Eva
 {
     public class ServiceEvaNN
     {
-        private FileManager _fileManager;
-
         private NetworksTeacher _networkTeacher = null;
 
         /// <summary>
@@ -23,13 +21,11 @@ namespace NN.Eva
         public bool CreateNetwork(string memoryFolderName, NetworkStructure networkStructure,
                                     string testDatasetPath = null)
         {
-            _fileManager = new FileManager(networkStructure, memoryFolderName);
-
-            if(_fileManager.IsMemoryLoadCorrect)
+            if(FileManager.CheckMemoryIntegrity(networkStructure, memoryFolderName))
             {
                 try
                 {
-                    _networkTeacher = new NetworksTeacher(networkStructure, _fileManager);
+                    _networkTeacher = new NetworksTeacher(networkStructure);
                 }
                 catch
                 {
@@ -38,7 +34,7 @@ namespace NN.Eva
 
                 if (testDatasetPath != null)
                 {
-                    _networkTeacher.TestVectors = _fileManager.LoadTestDataset(testDatasetPath);
+                    _networkTeacher.TestVectors = FileManager.LoadTestDataset(testDatasetPath);
                 }
 
                 return true;

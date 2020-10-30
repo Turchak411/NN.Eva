@@ -18,7 +18,6 @@ namespace NN.Eva.Core
         /// <summary>
         /// Services
         /// </summary>
-        private FileManager _fileManager;
         private MemoryChecker _memoryChecker;
         private Logger _logger;
 
@@ -32,15 +31,14 @@ namespace NN.Eva.Core
         /// </summary>
         public List<TrainObject> TestVectors { get; set; }
 
-        public NetworksTeacher(NetworkStructure networkStructure, FileManager fileManager)
+        public NetworksTeacher(NetworkStructure networkStructure)
         {
             _networkStructure = networkStructure;
 
-            _fileManager = fileManager;
             _memoryChecker = new MemoryChecker();
             _logger = new Logger();
 
-            if (!_memoryChecker.IsValid(_fileManager.MemoryFolderPath + "//.clear//memoryClear.txt", networkStructure))
+            if (!_memoryChecker.IsValid(FileManager.MemoryFolderPath + "//.clear//memoryClear.txt", networkStructure))
             {
                 _logger.LogError(ErrorType.MemoryInitializeError);
                 return;
@@ -49,7 +47,7 @@ namespace NN.Eva.Core
             try
             {
                 // Ицициализация сети по одинаковому шаблону:
-                _net = new NeuralNetwork(networkStructure.NeuronsByLayers, _fileManager, "memory.txt");
+                _net = new NeuralNetwork(networkStructure.NeuronsByLayers, "memory.txt");
             }
             catch (Exception ex)
             {
@@ -128,8 +126,8 @@ namespace NN.Eva.Core
 
             try
             {
-                inputDataSets = _fileManager.LoadTrainingDataset(trainingConfig.InputDatasetFilename);
-                outputDataSets = _fileManager.LoadTrainingDataset(trainingConfig.OutputDatasetFilename);
+                inputDataSets = FileManager.LoadTrainingDataset(trainingConfig.InputDatasetFilename);
+                outputDataSets = FileManager.LoadTrainingDataset(trainingConfig.OutputDatasetFilename);
             }
             catch (Exception ex)
             {
@@ -211,7 +209,7 @@ namespace NN.Eva.Core
             bool isCurrentNetMemoryValid = _networkStructure == null ?
                 _memoryChecker.IsFileNotCorrupted(memoryFolder + "//memory.txt")
                 : _memoryChecker.IsValid(memoryFolder + "//memory.txt", _networkStructure) &&
-                  _fileManager.IsMemoryEqualsDefault("memory.txt");
+                  FileManager.IsMemoryEqualsDefault("memory.txt");
 
             if (isCurrentNetMemoryValid)
             {
@@ -251,8 +249,8 @@ namespace NN.Eva.Core
 
             try
             {
-                inputDataSets = _fileManager.LoadTrainingDataset(trainingConfig.InputDatasetFilename);
-                outputDataSets = _fileManager.LoadTrainingDataset(trainingConfig.OutputDatasetFilename);
+                inputDataSets = FileManager.LoadTrainingDataset(trainingConfig.InputDatasetFilename);
+                outputDataSets = FileManager.LoadTrainingDataset(trainingConfig.OutputDatasetFilename);
             }
             catch (Exception ex)
             {
@@ -311,12 +309,12 @@ namespace NN.Eva.Core
                 {
                     // В случае обучения по генетическому алгоритму - загрузка памяти из файла:
                     case TrainingAlgorithmType.GeneticAlg:
+                    case TrainingAlgorithmType.RProp:
                         // Загрузка только что сохраненной памяти:
-                        _net = new NeuralNetwork(_networkStructure.NeuronsByLayers, _fileManager, "memory.txt");
+                        _net = new NeuralNetwork(_networkStructure.NeuronsByLayers, "memory.txt");
                         break;
                     // В общем случае - получение данных обученной сети от "подучителя":
                     case TrainingAlgorithmType.BProp:
-                    case TrainingAlgorithmType.RProp:
                     default:
                         _net = netSubTeacher.Network;
                         break;
@@ -540,7 +538,7 @@ namespace NN.Eva.Core
                 }
 
                 // Saving memory from textList:
-                _fileManager.SaveMemoryFromModel(networkStructure, memoryInTextList, destinationMemoryFilePath);
+                FileManager.SaveMemoryFromModel(networkStructure, memoryInTextList, destinationMemoryFilePath);
             }
             catch (Exception ex)
             {

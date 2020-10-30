@@ -137,9 +137,9 @@ namespace NN.Eva.Core
 
         #region Memory operations
 
-        public void SaveMemory(FileManager fileManager, int layerNumber, int neuronNumber, string memoryPath)
+        public void SaveMemory(int layerNumber, int neuronNumber, string memoryPath)
         {
-            fileManager.SaveMemory(layerNumber, neuronNumber, _weights, _offsetValue, _offsetWeight, memoryPath);
+            FileManager.SaveMemory(layerNumber, neuronNumber, _weights, _offsetValue, _offsetWeight, memoryPath);
         }
 
         #region Database operations

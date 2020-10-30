@@ -3,7 +3,7 @@ using NN.Eva.Models;
 
 namespace NN.Eva.Core.GeneticAlgorithm
 {
-    public class HandleOnlyNeuron
+    public class NeuronGeneticAlg
     {
         public double[] Weights { get; set; }
 

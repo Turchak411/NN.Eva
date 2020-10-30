@@ -4,11 +4,11 @@ using NN.Eva.Models;
 
 namespace NN.Eva.Core.GeneticAlgorithm
 {
-    public class HandleOnlyNN
+    public class NeuralNetworkGeneticAlg
     {
-        public List<HandleOnlyLayer> LayerList { get; set; } = new List<HandleOnlyLayer>();
+        public List<LayerGeneticAlg> LayerList { get; set; } = new List<LayerGeneticAlg>();
 
-        public HandleOnlyNN(List<double> weights, NetworkStructure networkStructure)
+        public NeuralNetworkGeneticAlg(List<double> weights, NetworkStructure networkStructure)
         {
             List<(int, int)> weightOnLayers = new List<(int, int)>();
 
@@ -29,7 +29,7 @@ namespace NN.Eva.Core.GeneticAlgorithm
 
             for (int i = 0; i < networkStructure.NeuronsByLayers.Length; i++)
             {
-                LayerList.Add(new HandleOnlyLayer(weightOnLayers[i], weights, networkStructure.NeuronsByLayers[i]));
+                LayerList.Add(new LayerGeneticAlg(weightOnLayers[i], weights, networkStructure.NeuronsByLayers[i]));
             }
         }
 
