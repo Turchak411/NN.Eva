@@ -174,7 +174,7 @@ namespace NN.Eva.Core.GeneticAlgorithm
         private List<FitnessFunction> CalculateFitnessFunctionValues(List<List<double>> generation, bool unsafeMode)
         {
             // Creating real neural networks by weights lists:
-            List<HandleOnlyNN> networksList = generation.Select(t => new HandleOnlyNN(t, NetworkStructure)).ToList();
+            List<NeuralNetworkGeneticAlg> networksList = generation.Select(t => new NeuralNetworkGeneticAlg(t, NetworkStructure)).ToList();
 
             // Calculating values:
             List<FitnessFunction> fitnessFuncValues = new List<FitnessFunction>();

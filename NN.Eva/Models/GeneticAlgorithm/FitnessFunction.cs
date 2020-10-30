@@ -17,7 +17,7 @@ namespace NN.Eva.Models.GeneticAlgorithm
         /// </summary>
         public int ChromosomeIndex { get; set; }
 
-        public void CalculateValue(HandleOnlyNN network, List<double[]> inputDatasets, List<double[]> outputDatasets, bool unsafeMode, Logger logger)
+        public void CalculateValue(NeuralNetworkGeneticAlg network, List<double[]> inputDatasets, List<double[]> outputDatasets, bool unsafeMode, Logger logger)
         {
             List<double[]> netAnswers = new List<double[]>();
 

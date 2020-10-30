@@ -4,11 +4,11 @@ using NN.Eva.Models;
 
 namespace NN.Eva.Core.GeneticAlgorithm
 {
-    public class HandleOnlyLayer
+    public class LayerGeneticAlg
     {
-        public List<HandleOnlyNeuron> NeuronList { get; set; } = new List<HandleOnlyNeuron>();
+        public List<NeuronGeneticAlg> NeuronList { get; set; } = new List<NeuronGeneticAlg>();
 
-        public HandleOnlyLayer((int, int) weightsOnLayer, List<double> weights, int neuronsCount)
+        public LayerGeneticAlg((int, int) weightsOnLayer, List<double> weights, int neuronsCount)
         {
             int indexIntWeightList = weightsOnLayer.Item1;
 
@@ -16,7 +16,7 @@ namespace NN.Eva.Core.GeneticAlgorithm
             {
                 int countOfNeuronWeight = weightsOnLayer.Item2 / neuronsCount;
 
-                HandleOnlyNeuron neuron = new HandleOnlyNeuron
+                NeuronGeneticAlg neuron = new NeuronGeneticAlg
                 {
                     OffsetValue = 0.5,
                     OffsetWeight = -1,
