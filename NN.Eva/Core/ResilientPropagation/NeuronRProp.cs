@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Linq;
 using NN.Eva.Core.ResilientPropagation.ActivationFunctions;
 using NN.Eva.Services;
 
@@ -70,7 +69,12 @@ namespace NN.Eva.Core.ResilientPropagation
                 throw new ArgumentException("Wrong length of the input vector.");
 
             // initial sum value
-            double sum = _weights.Select((weight, i) => weight * input[i]).Sum();
+            double sum = 0.0; int index = 0;
+            foreach (var weight in _weights)
+            {
+                sum += weight * input[index];
+                index++;
+            }
 
             // compute weighted sum of inputs
             sum += _threshold;
