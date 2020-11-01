@@ -21,26 +21,31 @@ namespace NN.Eva.Core.ResilientPropagation.Layers
 
         public double[] Output => _output;
 
+        private readonly object _lockLayer = new object();
+
         protected LayerRProp(int neuronsCount, int inputsCount)
         {
             _inputsCount = Math.Max(1, inputsCount);
             _neuronsCount = Math.Max(1, neuronsCount);
             _neurons = new NeuronRProp[_neuronsCount];
         }
-
+        
         public double[] Compute(double[] input)
         {
-            // local variable to avoid mutlithread conflicts
-            double[] output = new double[_neuronsCount];
+            lock (_lockLayer)
+            {
+                // local variable to avoid mutlithread conflicts
+                double[] output = new double[_neuronsCount];
 
-            // compute each neuron
-            for (int i = 0; i < _neurons.Length; i++)
-                output[i] = _neurons[i].Compute(input);
+                // compute each neuron
+                for (int i = 0; i < _neurons.Length; i++)
+                    output[i] = _neurons[i].Compute(input);
 
-            // assign output property as well (works correctly for single threaded usage)
-            _output = output;
+                // assign output property as well (works correctly for single threaded usage)
+                _output = output;
 
-            return output;
+                return output;
+            }
         }
 
         public void LoadMemoryLayerRProp(int layerNumber)
@@ -52,6 +57,7 @@ namespace NN.Eva.Core.ResilientPropagation.Layers
             {
                 double[] weights = FileManager.LoadMemory(layerNumber, i,"memory.txt", ref offsetValue, ref offsetWeight);
                 _neurons[i].Weights = weights;
+                _neurons[i].Threshold = offsetWeight;
             }
         }
 
