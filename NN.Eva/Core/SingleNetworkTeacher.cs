@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 using NN.Eva.Models;
 using NN.Eva.Services;
 using NN.Eva.Core.GeneticAlgorithm;
@@ -74,6 +76,9 @@ namespace NN.Eva.Core
                 case TrainingAlgorithmType.RProp:
                     TrainingRProp();
                     break;
+                case TrainingAlgorithmType.ParallelRProp:
+                    ParallelTrainingRProp();
+                    break;
                 case TrainingAlgorithmType.GeneticAlg:
                     TrainingGeneticAlg(false);
                     break;
@@ -90,6 +95,9 @@ namespace NN.Eva.Core
             {
                 case TrainingAlgorithmType.RProp:
                     TrainingRProp();
+                    break;
+                case TrainingAlgorithmType.ParallelRProp:
+                    ParallelTrainingRProp();
                     break;
                 case TrainingAlgorithmType.GeneticAlg:
                     TrainingGeneticAlg(true);
@@ -180,18 +188,38 @@ namespace NN.Eva.Core
             var inputSets = InputDatasets.ToArray();
             var outputSets = OutputDatasets.ToArray();
 
-            double count = 0;
-            double error = 0.0;
             double iteration = 0.0;
             while (iteration < TrainingConfiguration.EndIteration - TrainingConfiguration.StartIteration)
             {
-                error = neuralNetworkRProp.Train(inputSets, outputSets);
-                if (count > 500)
+                var error = neuralNetworkRProp.Train(inputSets, outputSets);
+                Console.WriteLine($"Iteration: {iteration}\t Error: {error}");
+                iteration++;
+            }
+
+            neuralNetworkRProp.SaveMemory(FileManager.MemoryFolderPath + "\\memory.txt", NetworkStructure);
+
+            // Запись события об успешном обучении:
+            LastTrainingSuccess = true;
+        }
+
+
+        private void ParallelTrainingRProp()
+        {
+            var neuralNetworkRProp = new MultiThreadNeuralNetworkRProp(new ActivationSigmoid(), NetworkStructure);
+
+            var inputSets = InputDatasets.ToArray();
+            var outputSets = OutputDatasets.ToArray();
+
+            double count = 0;
+            double iteration = 0.0;
+            while (iteration < TrainingConfiguration.EndIteration - TrainingConfiguration.StartIteration)
+            {
+                var error = neuralNetworkRProp.Train(inputSets, outputSets);
+                if (count >= 50)
                 {
                     count = 0;
                     Console.WriteLine($"Iteration: {iteration}\t Error: {error}");
                 }
-                Console.WriteLine($"Iteration: {iteration}\t Error: {error}");
                 count++;
                 iteration++;
             }
