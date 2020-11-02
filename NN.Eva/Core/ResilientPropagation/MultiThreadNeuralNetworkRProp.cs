@@ -45,14 +45,7 @@ namespace NN.Eva.Core.ResilientPropagation
                 (i, loopState, partialSum) =>
                 {
                     TeacherNetwork(input, i);
-
-                    // Copy network outputs to local thread
-                    var networkOutputs = _networkOutputs.Value;
-                    for (int j = 0; j < networkOutputs.Length; j++)
-                        networkOutputs[j] = Layers[j].Output;
-
                     partialSum += CalculateError(output[i]);
-
                     CalculateGradient(input[i]);
                     return partialSum;
                 },
@@ -69,14 +62,19 @@ namespace NN.Eva.Core.ResilientPropagation
 
         private void TeacherNetwork(double[][] input, int index)
         {
+            double[] output = input[index];
+            // compute each layer
+            for (int i = 0; i < Layers.Length; i++)
+            {
+                output = Layers[i].Compute(output);
+            }
+
             lock (_lockNetwork)
             {
-                double[] output = input[index];
-                // compute each layer
-                for (int i = 0; i < Layers.Length; i++)
-                {
-                    output = Layers[i].Compute(output);
-                }
+                // Copy network outputs to local thread
+                var networkOutputs = _networkOutputs.Value;
+                for (int j = 0; j < networkOutputs.Length; j++)
+                    networkOutputs[j] = Layers[j].Output;
             }
         }
 

@@ -39,7 +39,7 @@ namespace NN.Eva.Core.ResilientPropagation
         public double Threshold
         {
             get => _threshold;
-            set => _threshold = value;
+            internal set => _threshold = value;
         }
 
         /// <summary>
@@ -91,9 +91,8 @@ namespace NN.Eva.Core.ResilientPropagation
 
         public void SaveMemory(int layerNumber, int neuronNumber, string memoryPath)
         {
-            //TODO Check offsetValue and offsetWeight
-            double offsetValue = 0.5, offsetWeight = -1;
-            FileManager.SaveMemory(layerNumber, neuronNumber, _weights, offsetValue, offsetWeight, memoryPath);
+            double offsetValue = 1.0;
+            FileManager.SaveMemory(layerNumber, neuronNumber, _weights, offsetValue, _threshold, memoryPath);
         }
 
     }
