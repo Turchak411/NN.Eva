@@ -35,7 +35,7 @@ namespace NN.Eva.Test
                                    true,
                                    ProcessPriorityClass.Normal,
                                    true);
-                //serviceEvaNN.CalculateStatistic(trainConfig);
+                serviceEvaNN.CalculateStatistic(trainConfig);
             }
 
             Console.WriteLine("Done!");

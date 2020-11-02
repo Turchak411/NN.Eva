@@ -114,6 +114,17 @@ namespace NN.Eva.Core
         {
             Console.WriteLine("Start calculating statistic...");
 
+            // Loading memory:
+            try
+            {
+                _net = new NeuralNetwork(_networkStructure.NeuronsByLayers, "memory.txt");
+            }
+            catch (Exception ex)
+            {
+                Logger.LogError(ErrorType.MemoryInitializeError, ex);
+            }
+
+            // Testing:
             int testPassed = 0;
             int testFailed = 0;
 
