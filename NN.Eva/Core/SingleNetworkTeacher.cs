@@ -20,8 +20,6 @@ namespace NN.Eva.Core
 
         public List<double[]> OutputDatasets { get; set; }
 
-        public Logger Logger { get; set; }
-
         public bool LastTrainingSuccess { get; set; } = false;
 
         /// <summary>
@@ -60,6 +58,7 @@ namespace NN.Eva.Core
                 // В случае обучения по генетическому алгоритму - поскольку он сохраняет память сам - бездействие
                 case TrainingAlgorithmType.GeneticAlg:
                 case TrainingAlgorithmType.RProp:
+                case TrainingAlgorithmType.ParallelRProp:
                     break;
                 // В общем случае - сохранение памяти сети:
                 case TrainingAlgorithmType.BProp:
@@ -75,6 +74,9 @@ namespace NN.Eva.Core
             {
                 case TrainingAlgorithmType.RProp:
                     TrainingRProp();
+                    break;
+                case TrainingAlgorithmType.ParallelRProp:
+                    ParallelTrainingRProp();
                     break;
                 case TrainingAlgorithmType.GeneticAlg:
                     TrainingGeneticAlg(false);
@@ -92,6 +94,9 @@ namespace NN.Eva.Core
             {
                 case TrainingAlgorithmType.RProp:
                     TrainingRProp();
+                    break;
+                case TrainingAlgorithmType.ParallelRProp:
+                    ParallelTrainingRProp();
                     break;
                 case TrainingAlgorithmType.GeneticAlg:
                     TrainingGeneticAlg(true);
@@ -182,18 +187,39 @@ namespace NN.Eva.Core
             var inputSets = InputDatasets.ToArray();
             var outputSets = OutputDatasets.ToArray();
 
-            double count = 0;
-            double error = 0.0;
             double iteration = 0.0;
             while (iteration < TrainingConfiguration.EndIteration - TrainingConfiguration.StartIteration)
             {
-                error = neuralNetworkRProp.Train(inputSets, outputSets);
-                if (count > 500)
+                var error = neuralNetworkRProp.Train(inputSets, outputSets);
+                Console.WriteLine($"Iteration: {iteration}\t Error: {error}");
+                iteration++;
+            }
+
+            neuralNetworkRProp.SaveMemory(FileManager.MemoryFolderPath + "\\memory.txt", NetworkStructure);
+
+            // Запись события об успешном обучении:
+            LastTrainingSuccess = true;
+        }
+
+
+        private void ParallelTrainingRProp()
+        {
+            var neuralNetworkRProp = new MultiThreadNeuralNetworkRProp(new ActivationSigmoid {Alpha = 1}, NetworkStructure);
+
+            var inputSets = InputDatasets.ToArray();
+            var outputSets = OutputDatasets.ToArray();
+
+            double count = 0;
+            double iteration = 0.0;
+            while (iteration < TrainingConfiguration.EndIteration - TrainingConfiguration.StartIteration)
+            {
+                var error = neuralNetworkRProp.Train(inputSets, outputSets);
+                if (count >= 500)
                 {
                     count = 0;
                     Console.WriteLine($"Iteration: {iteration}\t Error: {error}");
                 }
-                Console.WriteLine($"Iteration: {iteration}\t Error: {error}");
+
                 count++;
                 iteration++;
             }
@@ -214,8 +240,7 @@ namespace NN.Eva.Core
             {
                 NetworkStructure = NetworkStructure,
                 InputDatasets = InputDatasets,
-                OutputDatasets = OutputDatasets,
-                Logger = Logger
+                OutputDatasets = OutputDatasets
             };
 
             geneticAlgTeacher.StartTraining(TrainingConfiguration.EndIteration - TrainingConfiguration.StartIteration,

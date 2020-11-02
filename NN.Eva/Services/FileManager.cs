@@ -20,9 +20,6 @@ namespace NN.Eva.Services
         /// </summary>
         public static string MemoryFolderPath;
 
-        private static Logger _logger;
-
-        
         /// <summary>
         /// Chack for correct memory at all
         /// </summary>
@@ -37,8 +34,6 @@ namespace NN.Eva.Services
                 return false;
             }
 
-            _logger = new Logger();
-
             DefaultMemoryFilePath = defaultMemoryFilePath;
             MemoryFolderPath = memoryFolderPath;
 
@@ -51,7 +46,7 @@ namespace NN.Eva.Services
             // Запуск процесса генерации памяти в случае ее отсутствия:
             if (!File.Exists(MemoryFolderPath + "//.clear//" + DefaultMemoryFilePath))
             {
-                _logger.LogError(ErrorType.MemoryMissing);
+                Logger.LogError(ErrorType.MemoryMissing);
 
                 Directory.CreateDirectory(MemoryFolderPath + "//.clear");
 
@@ -76,7 +71,7 @@ namespace NN.Eva.Services
                 
                 if (!memoryChecker.IsValid(MemoryFolderPath + "//.clear//" + DefaultMemoryFilePath, netStructure))
                 {
-                    _logger.LogError(ErrorType.MemoryInitializeError);
+                    Logger.LogError(ErrorType.MemoryInitializeError);
                     return false;
                 }
 
@@ -347,7 +342,7 @@ namespace NN.Eva.Services
         {
             if (!File.Exists(filePath))
             {
-                _logger.LogError(ErrorType.SetMissing, filePath + "is missing!");
+                Logger.LogError(ErrorType.SetMissing, filePath + "is missing!");
                 return null;
             }
 

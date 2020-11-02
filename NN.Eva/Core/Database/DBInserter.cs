@@ -10,16 +10,12 @@ namespace NN.Eva.Core.Database
     public class DBInserter
     {
         /// <summary>
-        /// Database configuarion
+        /// Database configuration
         /// </summary>
         public DatabaseConfig DatabaseConfiguration { get; set; }
 
-        private Logger _logger;
-
-        public DBInserter(Logger logger, DatabaseConfig databaseConfiguration)
+        public DBInserter(DatabaseConfig databaseConfiguration)
         {
-            _logger = logger;
-
             DatabaseConfiguration = databaseConfiguration;
         }
 
@@ -35,9 +31,8 @@ namespace NN.Eva.Core.Database
             string savingDate = DateTime.Now.Year + "-" + DateTime.Now.Month + "-" + DateTime.Now.Day + " " +
                                         +DateTime.Now.Hour + ":" + DateTime.Now.Minute + ":" + DateTime.Now.Second;
 
-            string query =
-                        $"INSERT INTO {DatabaseConfiguration.Database}.networks VALUES(\'{id}\',\'{userId}\',\'{savingDate}\'," +
-                        $"\'{networkStructure}\',\'{iterations}\');";
+            string query = $"INSERT INTO {DatabaseConfiguration.Database}.networks VALUES(\'{id}\',\'{userId}\',\'{savingDate}\'," +
+                           $"\'{networkStructure}\',\'{iterations}\');";
 
             InsertInTable(query, "networks");
         }
@@ -109,7 +104,7 @@ namespace NN.Eva.Core.Database
             catch (Exception ex)
             {
                 Console.WriteLine("Error in connection to Database!");
-                _logger.LogError(ErrorType.DBConnectionError, ex);
+                Logger.LogError(ErrorType.DBConnectionError, ex);
             }
 
             try
@@ -127,7 +122,7 @@ namespace NN.Eva.Core.Database
             catch (Exception ex)
             {
                 Console.WriteLine($"Insert-error in table \"{tableName}\"!");
-                _logger.LogError(ErrorType.DBInsertError, $"Table '{tableName}'.\n" + ex);
+                Logger.LogError(ErrorType.DBInsertError, $"Table '{tableName}'.\n" + ex);
             }
         }
 
@@ -148,7 +143,7 @@ namespace NN.Eva.Core.Database
             catch (Exception ex)
             {
                 Console.WriteLine($"{DateTime.Now }\nException: {ex}");
-                _logger.LogError(ErrorType.DBConnectionError, ex);
+                Logger.LogError(ErrorType.DBConnectionError, ex);
             }
 
             return connection;

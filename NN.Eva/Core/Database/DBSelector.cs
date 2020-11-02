@@ -15,12 +15,8 @@ namespace NN.Eva.Core.Database
         /// </summary>
         public DatabaseConfig DatabaseConfiguration { get; set; }
 
-        private Logger _logger;
-
-        public DBSelector(Logger logger, DatabaseConfig databaseConfiguration)
+        public DBSelector(DatabaseConfig databaseConfiguration)
         {
-            _logger = logger;
-
             DatabaseConfiguration = databaseConfiguration;
         }
 
@@ -127,7 +123,7 @@ namespace NN.Eva.Core.Database
             catch (Exception ex)
             {
                 Console.WriteLine($"{DateTime.Now}\nException: {ex}");
-                _logger.LogError(ErrorType.DBConnectionError, ex);
+                Logger.LogError(ErrorType.DBConnectionError, ex);
             }
 
             return connection;

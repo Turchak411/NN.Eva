@@ -14,12 +14,8 @@ namespace NN.Eva.Core.Database
         /// </summary>
         public DatabaseConfig DatabaseConfiguration { get; set; }
 
-        private Logger _logger;
-
-        public DBDeleter(Logger logger, DatabaseConfig databaseConfiguration)
+        public DBDeleter(DatabaseConfig databaseConfiguration)
         {
-            _logger = logger;
-
             DatabaseConfiguration = databaseConfiguration;
         }
 
@@ -56,7 +52,7 @@ namespace NN.Eva.Core.Database
             }
             catch (Exception ex)
             {
-                _logger.LogError(ErrorType.DBDeleteError, "Delete-error in table \"" + tableName + "\"!\nID: " + id + "\n" + ex);
+                Logger.LogError(ErrorType.DBDeleteError, "Delete-error in table \"" + tableName + "\"!\nID: " + id + "\n" + ex);
             }
         }
 
@@ -73,7 +69,7 @@ namespace NN.Eva.Core.Database
             catch (Exception ex)
             {
                 Console.WriteLine($"{DateTime.Now }\nException: {ex}");
-                _logger.LogError(ErrorType.DBConnectionError, ex);
+                Logger.LogError(ErrorType.DBConnectionError, ex);
             }
 
             return connection;

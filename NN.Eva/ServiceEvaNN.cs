@@ -11,6 +11,8 @@ namespace NN.Eva
     {
         private NetworksTeacher _networkTeacher = null;
 
+        private NetworkStructure _networkStructure = null;
+
         /// <summary>
         /// Creating FeedForward - Neural Network
         /// </summary>
@@ -18,10 +20,13 @@ namespace NN.Eva
         /// <param name="networkStructure"></param>
         /// <param name="testDatasetPath"></param>
         /// <returns>Returns success result of network creating</returns>
-        public bool CreateNetwork(string memoryFolderName, NetworkStructure networkStructure,
-                                    string testDatasetPath = null)
+        public bool CreateNetwork(string memoryFolderName,
+                                  NetworkStructure networkStructure,
+                                  string testDatasetPath = null)
         {
-            if(FileManager.CheckMemoryIntegrity(networkStructure, memoryFolderName))
+            _networkStructure = networkStructure;
+
+            if (FileManager.CheckMemoryIntegrity(networkStructure, memoryFolderName))
             {
                 try
                 {
@@ -62,8 +67,7 @@ namespace NN.Eva
             // Check for unexistent network:
             if (_networkTeacher == null)
             {
-                Logger localLogger = new Logger();
-                localLogger.LogError(ErrorType.OperationWithNonexistentNetwork, "Training failed!");
+                Logger.LogError(ErrorType.OperationWithNonexistentNetwork, "Training failed!");
                 return;
             }
 
@@ -76,8 +80,7 @@ namespace NN.Eva
             // Print warning about using unsafe mode:
             if (unsafeTrainingMode)
             {
-                Logger localLogger = new Logger();
-                localLogger.LogWarning(WarningType.UsingUnsafeTrainingMode);
+                Logger.LogWarning(WarningType.UsingUnsafeTrainingMode);
             }
 
             trainingConfiguration.MemoryFolder = trainingConfiguration.MemoryFolder == "" ? "Memory" : trainingConfiguration.MemoryFolder;
@@ -90,7 +93,7 @@ namespace NN.Eva
             Process thisProc = Process.GetCurrentProcess();
             thisProc.PriorityClass = processPriorityClass;
 
-            if (_networkTeacher.CheckMemory(trainingConfiguration.MemoryFolder))
+            if (_networkTeacher.CheckMemory(trainingConfiguration.MemoryFolder) && _networkTeacher.CheckDatasets(trainingConfiguration.InputDatasetFilename, trainingConfiguration.OutputDatasetFilename, _networkStructure))
             {
                 _networkTeacher.TrainNet(trainingConfiguration, iterationsToPause, unsafeTrainingMode);
 
@@ -109,7 +112,7 @@ namespace NN.Eva
             else
             {
                 stopWatch.Stop();
-                Console.WriteLine("Training failed! Invalid memory!");
+                Console.WriteLine("Training failed!");
             }
         }
 
@@ -122,8 +125,7 @@ namespace NN.Eva
         {
             if (_networkTeacher == null)
             {
-                Logger localLogger = new Logger();
-                localLogger.LogError(ErrorType.TrainError, "Training failed! Please, create the Network first!");
+                Logger.LogError(ErrorType.TrainError, "Training failed! Please, create the Network first!");
                 return null;
             }
 
@@ -141,8 +143,7 @@ namespace NN.Eva
         {
             if (_networkTeacher == null)
             {
-                Logger localLogger = new Logger();
-                localLogger.LogError(ErrorType.OperationWithNonexistentNetwork, "Calculate statistic failed!");
+                Logger.LogError(ErrorType.OperationWithNonexistentNetwork, "Calculate statistic failed!");
                 return;
             }
 
@@ -160,8 +161,7 @@ namespace NN.Eva
         {
             if (_networkTeacher == null)
             {
-                Logger localLogger = new Logger();
-                localLogger.LogError(ErrorType.OperationWithNonexistentNetwork, "Database memory backuping failed!");
+                Logger.LogError(ErrorType.OperationWithNonexistentNetwork, "Database memory backuping failed!");
                 return false;
             }
 
@@ -193,8 +193,7 @@ namespace NN.Eva
         {
             if (_networkTeacher == null)
             {
-                Logger localLogger = new Logger();
-                localLogger.LogError(ErrorType.OperationWithNonexistentNetwork, "Database memory aborting failed!");
+                Logger.LogError(ErrorType.OperationWithNonexistentNetwork, "Database memory aborting failed!");
                 return false;
             }
 
@@ -221,8 +220,7 @@ namespace NN.Eva
         {
             if (_networkTeacher == null)
             {
-                Logger localLogger = new Logger();
-                localLogger.LogError(ErrorType.OperationWithNonexistentNetwork, "Database memory loading failed!");
+                Logger.LogError(ErrorType.OperationWithNonexistentNetwork, "Database memory loading failed!");
                 return false;
             }
 

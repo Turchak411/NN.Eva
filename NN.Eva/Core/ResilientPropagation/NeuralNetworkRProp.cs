@@ -1,18 +1,15 @@
 ﻿using System;
 using System.Linq;
-using NN.Eva.Core.ResilientPropagation.ActivationFunctions;
-using NN.Eva.Core.ResilientPropagation.Layers;
 using NN.Eva.Models;
 using NN.Eva.Services;
+using NN.Eva.Core.ResilientPropagation.Layers;
+using NN.Eva.Core.ResilientPropagation.ActivationFunctions;
 
 namespace NN.Eva.Core.ResilientPropagation
 {
     public class NeuralNetworkRProp
     {
-        private LayerRProp[] _layers;
-
-        private int _inputsCount;
-        private double[] _output;
+        protected readonly LayerRProp[] Layers;
 
         private const double DeltaMax = 50.0;
         private const double DeltaMin = 1e-6;
@@ -20,79 +17,71 @@ namespace NN.Eva.Core.ResilientPropagation
         private const double EtaMinus = 0.5;
         private const double EtaPlus = 1.2;
         private const double LearningRate = 0.0125;
-       
-
+        
         private double[][] _neuronErrors;
 
         // update values, also known as deltas
-        private double[][][] _weightsUpdates;
-        private double[][] _thresholdsUpdates;
+        protected double[][][] WeightsUpdates;
+        protected double[][] ThresholdsUpdates;
 
         // current and previous gradient values
-        private double[][][] _weightsDerivatives;
-        private double[][] _thresholdsDerivatives;
+        protected double[][][] WeightsDerivatives;
+        protected double[][] ThresholdsDerivatives;
 
-        private double[][][] _weightsPreviousDerivatives;
-        private double[][] _thresholdsPreviousDerivatives;
+        protected double[][][] WeightsPreviousDerivatives;
+        protected double[][] ThresholdsPreviousDerivatives;
 
 
-        public NeuralNetworkRProp(IActivationFunction function,
-                                  NetworkStructure networkStructure) 
-                : this(networkStructure.InputVectorLength,
-                                  networkStructure.NeuronsByLayers.Length)
+        public NeuralNetworkRProp(IActivationFunction function, NetworkStructure networkStructure)
         {
-         
-            for (int i = 0; i < _layers.Length; i++)
+            Layers = new LayerRProp[networkStructure.NeuronsByLayers.Length];
+
+            for (int i = 0; i < Layers.Length; i++)
             {
-                _layers[i] = new ActivationLayerRProp(networkStructure.NeuronsByLayers[i],
+                Layers[i] = new ActivationLayerRProp(networkStructure.NeuronsByLayers[i],
                     i == 0 ? networkStructure.InputVectorLength : networkStructure.NeuronsByLayers[i - 1], function);
-                _layers[i].LoadMemoryLayerRProp(i);
+                Layers[i].LoadMemoryLayerRProp(i);
             }
 
-            InitializationNetwork(_layers.Length);
+            InitializationNetwork(Layers.Length);
         }
 
-        private NeuralNetworkRProp(int inputsCount, int layersCount)
-        {
-            _inputsCount = inputsCount;
-            _layers = new LayerRProp[layersCount];
-        }
 
         private void InitializationNetwork(int layersCount)
         {
             _neuronErrors = new double[layersCount][];
 
-            _weightsDerivatives = new double[layersCount][][];
-            _thresholdsDerivatives = new double[layersCount][];
+            WeightsDerivatives = new double[layersCount][][];
+            ThresholdsDerivatives = new double[layersCount][];
 
-            _weightsPreviousDerivatives = new double[layersCount][][];
-            _thresholdsPreviousDerivatives = new double[layersCount][];
+            WeightsPreviousDerivatives = new double[layersCount][][];
+            ThresholdsPreviousDerivatives = new double[layersCount][];
 
-            _weightsUpdates = new double[layersCount][][];
-            _thresholdsUpdates = new double[layersCount][];
+            WeightsUpdates = new double[layersCount][][];
+            ThresholdsUpdates = new double[layersCount][];
 
             // initialize errors, derivatives and steps
-            for (int i = 0; i < _layers.Length; i++)
+            for (int i = 0; i < Layers.Length; i++)
             {
-                LayerRProp layer = _layers[i];
+                LayerRProp layer = Layers[i];
                 int neuronsCount = layer.Neurons.Length;
 
                 _neuronErrors[i] = new double[neuronsCount];
 
-                _weightsDerivatives[i] = new double[neuronsCount][];
-                _weightsPreviousDerivatives[i] = new double[neuronsCount][];
-                _weightsUpdates[i] = new double[neuronsCount][];
+                WeightsDerivatives[i] = new double[neuronsCount][];
+                WeightsPreviousDerivatives[i] = new double[neuronsCount][];
+                WeightsUpdates[i] = new double[neuronsCount][];
 
-                _thresholdsDerivatives[i] = new double[neuronsCount];
-                _thresholdsPreviousDerivatives[i] = new double[neuronsCount];
-                _thresholdsUpdates[i] = new double[neuronsCount];
+                ThresholdsDerivatives[i] = new double[neuronsCount];
+                ThresholdsPreviousDerivatives[i] = new double[neuronsCount];
+                ThresholdsUpdates[i] = new double[neuronsCount];
 
                 // for each neuron
                 for (int j = 0; j < layer.Neurons.Length; j++)
                 {
-                    _weightsDerivatives[i][j] = new double[layer.InputsCount];
-                    _weightsPreviousDerivatives[i][j] = new double[layer.InputsCount];
-                    _weightsUpdates[i][j] = new double[layer.InputsCount];
+                    WeightsDerivatives[i][j] = new double[layer.InputsCount];
+                    WeightsPreviousDerivatives[i][j] = new double[layer.InputsCount];
+                    WeightsUpdates[i][j] = new double[layer.InputsCount];
                 }
             }
 
@@ -102,7 +91,7 @@ namespace NN.Eva.Core.ResilientPropagation
 
         private void ResetUpdates(double rate)
         {
-            foreach (var weight in _weightsUpdates)
+            foreach (var weight in WeightsUpdates)
             {
                 for (int j = 0; j < weight.Length; j++)
                 {
@@ -113,7 +102,7 @@ namespace NN.Eva.Core.ResilientPropagation
                 }
             }
 
-            foreach (var threshold in _thresholdsUpdates)
+            foreach (var threshold in ThresholdsUpdates)
             {
                 for (int j = 0; j < threshold.Length; j++)
                 {
@@ -122,7 +111,7 @@ namespace NN.Eva.Core.ResilientPropagation
             }
         }
 
-        public double Train(double[][] input, double[][] output)
+        public virtual double Train(double[][] input, double[][] output)
         {
             ResetGradient();
             double error = 0.0;
@@ -132,7 +121,7 @@ namespace NN.Eva.Core.ResilientPropagation
                 Compute(input[i]);
 
                 // calculate network error
-                error += CalculateError(input[i], output[i]);
+                error += CalculateError(output[i]);
 
                 // calculate weights updates
                 CalculateGradient(input[i]);
@@ -143,20 +132,12 @@ namespace NN.Eva.Core.ResilientPropagation
             return error / input.Length;
         }
 
-        private double[] Compute(double[] input)
+        public double[] Compute(double[] input) => 
+            Layers.Aggregate(input, (current, layerRProp) => layerRProp.Compute(current));
+
+        protected virtual void ResetGradient()
         {
-            // local variable to avoid mutlithread conflicts
-            double[] output = _layers.Aggregate(input, (current, layerRProp) => layerRProp.Compute(current));
-
-            // assign output property as well (works correctly for single threaded usage)
-            _output = output;
-
-            return output;
-        }
-
-        private void ResetGradient()
-        {
-            foreach (var weightDerivative in _weightsDerivatives)
+            foreach (var weightDerivative in WeightsDerivatives)
             {
                 foreach (var weight in weightDerivative)
                 {
@@ -164,22 +145,22 @@ namespace NN.Eva.Core.ResilientPropagation
                 }
             }
 
-            foreach (var threshold in _thresholdsDerivatives)
+            foreach (var threshold in ThresholdsDerivatives)
             {
                 Array.Clear(threshold, 0, threshold.Length);
             }
         }
 
-        private double CalculateError(double[] input, double[] desiredOutput)
+        protected virtual double CalculateError(double[] desiredOutput)
         {
             double error = 0;
-            int layersCount = _layers.Length;
+            int layersCount = Layers.Length;
 
             // assume, that all neurons of the network have the same activation function
-            IActivationFunction function = _layers[0].Neurons[0].ActivationFunction;
+            IActivationFunction function = Layers[0].Neurons[0].ActivationFunction;
 
             // calculate error values for the last layer first
-            var layer = _layers[layersCount - 1] as ActivationLayerRProp;
+            var layer = Layers[layersCount - 1] as ActivationLayerRProp;
             double[] layerDerivatives = _neuronErrors[layersCount - 1];
 
             for (int i = 0; i < layer?.Neurons.Length; i++)
@@ -195,10 +176,10 @@ namespace NN.Eva.Core.ResilientPropagation
             // calculate error values for other layers
             for (int j = layersCount - 2; j >= 0; j--)
             {
-                layer = _layers[j] as ActivationLayerRProp;
+                layer = Layers[j] as ActivationLayerRProp;
                 layerDerivatives = _neuronErrors[j];
 
-                var layerNext = _layers[j + 1] as ActivationLayerRProp;
+                var layerNext = Layers[j + 1] as ActivationLayerRProp;
                 double[] nextDerivatives = _neuronErrors[j + 1];
 
                 // for all neurons of the layer
@@ -213,103 +194,102 @@ namespace NN.Eva.Core.ResilientPropagation
             return error/2.0;
         }
 
-        private void UpdateNetwork()
+        protected void UpdateNetwork()
         {
-            double[][] layerWeightsUpdates;
-            double[] layerThresholdUpdates;
-            double[] neuronWeightUpdates;
-
-            double[][] layerWeightsDerivatives;
-            double[] layerThresholdDerivatives;
-            double[] neuronWeightDerivatives;
-
-            double[][] layerPreviousWeightsDerivatives;
-            double[] layerPreviousThresholdDerivatives;
-            double[] neuronPreviousWeightDerivatives;
-
             // for each layer of the network
-            for (int i = 0; i < _layers.Length; i++)
+            for (int i = 0; i < Layers.Length; i++)
             {
-                var layer = _layers[i] as ActivationLayerRProp;
+                var layer = Layers[i] as ActivationLayerRProp;
 
-                layerWeightsUpdates = _weightsUpdates[i];
-                layerThresholdUpdates = _thresholdsUpdates[i];
+                var layerWeightsUpdates = WeightsUpdates[i];
+                var layerThresholdUpdates = ThresholdsUpdates[i];
 
-                layerWeightsDerivatives = _weightsDerivatives[i];
-                layerThresholdDerivatives = _thresholdsDerivatives[i];
+                var layerWeightsDerivatives = WeightsDerivatives[i];
+                var layerThresholdDerivatives = ThresholdsDerivatives[i];
 
-                layerPreviousWeightsDerivatives = _weightsPreviousDerivatives[i];
-                layerPreviousThresholdDerivatives = _thresholdsPreviousDerivatives[i];
+                var layerPreviousWeightsDerivatives = WeightsPreviousDerivatives[i];
+                var layerPreviousThresholdDerivatives = ThresholdsPreviousDerivatives[i];
 
                 // for each neuron of the layer
-                for (int j = 0; j < layer.Neurons.Length; j++)
+                for (int layerNeuronIndex = 0; layerNeuronIndex < layer?.Neurons.Length; layerNeuronIndex++)
                 {
-                    var neuron = layer.Neurons[j];
+                    var neuron = layer.Neurons[layerNeuronIndex];
 
-                    neuronWeightUpdates = layerWeightsUpdates[j];
-                    neuronWeightDerivatives = layerWeightsDerivatives[j];
-                    neuronPreviousWeightDerivatives = layerPreviousWeightsDerivatives[j];
-
-                    double change = 0;
+                    var neuronWeightUpdates = layerWeightsUpdates[layerNeuronIndex];
+                    var neuronWeightDerivatives = layerWeightsDerivatives[layerNeuronIndex];
+                    var neuronPreviousWeightDerivatives = layerPreviousWeightsDerivatives[layerNeuronIndex];
 
                     // for each weight of the neuron
-                    for (int k = 0; k < neuron.InputsCount; k++)
+                    for (int index = 0; index < neuron.InputsCount; index++)
                     {
-                        change = Sign(neuronPreviousWeightDerivatives[k] * neuronWeightDerivatives[k]);
-
-                        if (change > 0)
-                        {
-                            double delta = neuronWeightUpdates[k] * EtaPlus;
-                            delta = Math.Min(delta, DeltaMax);
-                            neuronWeightUpdates[k] = delta;
-                            neuron.Weights[k] -= Sign(neuronWeightDerivatives[k]) * delta;
-                            neuronPreviousWeightDerivatives[k] = neuronWeightDerivatives[k];
-                        }
-                        else if (change < 0)
-                        {
-                            double delta = neuronWeightUpdates[k] * EtaMinus;
-                            delta = Math.Max(delta, DeltaMin);
-                            neuronWeightUpdates[k] = delta;
-                            neuronPreviousWeightDerivatives[k] = 0;
-                        }
-                        else if (change == 0)
-                        {
-                            double delta = neuronWeightUpdates[k];
-                            neuron.Weights[k] -= Sign(neuronWeightDerivatives[k]) * delta;
-                            neuronPreviousWeightDerivatives[k] = neuronWeightDerivatives[k];
-                        }
+                        UpdatedWeightPlus(neuronPreviousWeightDerivatives, neuronWeightDerivatives, 
+                            neuronWeightUpdates, neuron, index);
                     }
 
-                    // update treshold
-                    change = Sign(layerPreviousThresholdDerivatives[j] * layerThresholdDerivatives[j]);
-
-                    if (change > 0)
-                    {
-                        layerThresholdUpdates[j] = Math.Min(layerThresholdUpdates[j] * EtaPlus, DeltaMax);
-                        neuron.Threshold -= Sign(layerThresholdDerivatives[j]) * layerThresholdUpdates[j];
-                        layerPreviousThresholdDerivatives[j] = layerThresholdDerivatives[j];
-                    }
-                    else if (change < 0)
-                    {
-                        layerThresholdUpdates[j] = Math.Max(layerThresholdUpdates[j] * EtaMinus, DeltaMin);
-                        layerThresholdDerivatives[j] = 0;
-                    }
-                    else if (change == 0)
-                    {
-                        neuron.Threshold -= Sign(layerThresholdDerivatives[j]) * layerThresholdUpdates[j];
-                        layerPreviousThresholdDerivatives[j] = layerThresholdDerivatives[j];
-                    }
+                    UpdateThresholdPlus(layerPreviousThresholdDerivatives, layerThresholdDerivatives,
+                        layerThresholdUpdates, neuron, layerNeuronIndex);
                 }
             }
         }
 
-        private void CalculateGradient(double[] input)
+        private void UpdatedWeightPlus(double[] neuronPreviousWeightDerivatives, double[] neuronWeightDerivatives, 
+            double[] neuronWeightUpdates, NeuronRProp neuron, int index)
+        {
+            int change = Sign(neuronPreviousWeightDerivatives[index] * neuronWeightDerivatives[index]);
+
+            if (change > 0)
+            {
+                double delta = neuronWeightUpdates[index] * EtaPlus;
+                delta = Math.Min(delta, DeltaMax);
+                neuronWeightUpdates[index] = delta;
+                neuron.Weights[index] -= Sign(neuronWeightDerivatives[index]) * delta;
+                neuronPreviousWeightDerivatives[index] = neuronWeightDerivatives[index];
+            }
+            else if (change < 0)
+            {
+                double delta = neuronWeightUpdates[index] * EtaMinus;
+                delta = Math.Max(delta, DeltaMin);
+                neuronWeightUpdates[index] = delta;
+                neuronPreviousWeightDerivatives[index] = 0;
+            }
+            else if (change == 0)
+            {
+                double delta = neuronWeightUpdates[index];
+                neuron.Weights[index] -= Sign(neuronWeightDerivatives[index]) * delta;
+                neuronPreviousWeightDerivatives[index] = neuronWeightDerivatives[index];
+            }
+        }
+
+        private void UpdateThresholdPlus(double[] layerPreviousThresholdDerivatives, double[] layerThresholdDerivatives,
+            double[] layerThresholdUpdates, NeuronRProp neuron, int index)
+        {
+            int change = Sign(layerPreviousThresholdDerivatives[index] * layerThresholdDerivatives[index]);
+
+            if (change > 0)
+            {
+                layerThresholdUpdates[index] = Math.Min(layerThresholdUpdates[index] * EtaPlus, DeltaMax);
+                neuron.Threshold -= Sign(layerThresholdDerivatives[index]) * layerThresholdUpdates[index];
+                layerPreviousThresholdDerivatives[index] = layerThresholdDerivatives[index];
+            }
+            else if (change < 0)
+            {
+                layerThresholdUpdates[index] = Math.Max(layerThresholdUpdates[index] * EtaMinus, DeltaMin);
+                layerThresholdDerivatives[index] = 0;
+            }
+            else if (change == 0)
+            {
+                neuron.Threshold -= Sign(layerThresholdDerivatives[index]) * layerThresholdUpdates[index];
+                layerPreviousThresholdDerivatives[index] = layerThresholdDerivatives[index];
+            }
+        }
+
+        protected virtual void CalculateGradient(double[] input)
         {
             // 1. calculate updates for the first layer
-            var layer = _layers[0] as ActivationLayerRProp;
+            var layer = Layers[0] as ActivationLayerRProp;
             double[] weightErrors = _neuronErrors[0];
-            double[][] layerWeightsDerivatives = _weightsDerivatives[0];
-            double[] layerThresholdDerivatives = _thresholdsDerivatives[0];
+            double[][] layerWeightsDerivatives = WeightsDerivatives[0];
+            double[] layerThresholdDerivatives = ThresholdsDerivatives[0];
 
             // So, for each neuron of the first layer:
             for (int i = 0; i < layer?.Neurons.Length; i++)
@@ -326,14 +306,14 @@ namespace NN.Eva.Core.ResilientPropagation
             }
 
             // 2. for all other layers
-            for (int k = 1; k < _layers.Length; k++)
+            for (int k = 1; k < Layers.Length; k++)
             {
-                layer = _layers[k] as ActivationLayerRProp;
+                layer = Layers[k] as ActivationLayerRProp;
                 weightErrors = _neuronErrors[k];
-                layerWeightsDerivatives = _weightsDerivatives[k];
-                layerThresholdDerivatives = _thresholdsDerivatives[k];
+                layerWeightsDerivatives = WeightsDerivatives[k];
+                layerThresholdDerivatives = ThresholdsDerivatives[k];
 
-                var layerPrev = _layers[k - 1] as ActivationLayerRProp;
+                var layerPrev = Layers[k - 1] as ActivationLayerRProp;
 
                 // for each neuron of the layer
                 for (int i = 0; i < layer?.Neurons.Length; i++)
@@ -356,9 +336,9 @@ namespace NN.Eva.Core.ResilientPropagation
             FileManager.PrepareToSaveMemory(path, networkStructure);
 
             // Saving
-            for (int i = 0; i < _layers.Length; i++)
+            for (int i = 0; i < Layers.Length; i++)
             {
-                _layers[i].SaveMemory(i, path);
+                Layers[i].SaveMemory(i, path);
             }
         }
 

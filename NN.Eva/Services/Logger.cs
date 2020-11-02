@@ -1,38 +1,26 @@
 ﻿using NN.Eva.Models;
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Management;
 
 namespace NN.Eva.Services
 {
-    public class Logger
+    public static class Logger
     {
-        private string _trainLogsDirectoryName;
-        private string _errorLogsDirectoryName;
+        private static string TrainLogsDirectoryName { get; set; } = ".logs\\trainingLogs";
 
-        public Logger()
-        {
-            _trainLogsDirectoryName = ".logs/trainLogs";
-            _errorLogsDirectoryName = ".logs/errorLogs";
-        }
+        private static string ErrorLogsDirectoryName { get; set; } = ".logs\\errorLogs";
 
-        public Logger(string trainLogsDirectoryName, string errorLogsDirectoryName)
-        {
-            _trainLogsDirectoryName = trainLogsDirectoryName;
-            _errorLogsDirectoryName = errorLogsDirectoryName;
-        }
-
-        public void LogTrainingResults(int testPassed, int testFailed, TrainingConfiguration trainConfig, string elapsedTime)
+        public static void LogTrainingResults(int testPassed, int testFailed, TrainingConfiguration trainConfig, string elapsedTime)
         {
             // Check for existing this logs-directory:
-            if (!Directory.Exists(_trainLogsDirectoryName))
+            if (!Directory.Exists(TrainLogsDirectoryName))
             {
-                Directory.CreateDirectory(_trainLogsDirectoryName);
+                Directory.CreateDirectory(TrainLogsDirectoryName);
             }
 
             // Save log:
-            using (StreamWriter fileWriter = new StreamWriter(_trainLogsDirectoryName + "/" + trainConfig.EndIteration + ".txt"))
+            using (StreamWriter fileWriter = new StreamWriter(TrainLogsDirectoryName + "/" + trainConfig.EndIteration + ".txt"))
             {
                 fileWriter.WriteLine("Test passed: " + testPassed);
                 fileWriter.WriteLine("Test failed: " + testFailed);
@@ -70,25 +58,25 @@ namespace NN.Eva.Services
                 }
             }
 
-            Console.WriteLine("Learn statistic logs saved in {0}!", _trainLogsDirectoryName);
+            Console.WriteLine("Learn statistic logs saved in {0}!", TrainLogsDirectoryName);
         }
 
-        public void LogWarning(WarningType warningType)
+        public static void LogWarning(WarningType warningType)
         {
             WriteLog(GetWarningTextByType(warningType));
         }
 
-        public void LogError(ErrorType errorType, Exception ex)
+        public static void LogError(ErrorType errorType, Exception ex)
         {
             WriteLog(GetErrorTextByType(errorType), ex.Message);
         }
 
-        public void LogError(ErrorType errorType, string errorText = "")
+        public static void LogError(ErrorType errorType, string errorText = "")
         {
             WriteLog(GetErrorTextByType(errorType), errorText);
         }
 
-        private string GetWarningTextByType(WarningType warningType)
+        private static string GetWarningTextByType(WarningType warningType)
         {
             string warningText;
 
@@ -109,7 +97,7 @@ namespace NN.Eva.Services
             return warningText + "\n";
         }
 
-        private string GetErrorTextByType(ErrorType errorType)
+        private static string GetErrorTextByType(ErrorType errorType)
         {
             string errorText;
 
@@ -161,18 +149,18 @@ namespace NN.Eva.Services
             return errorText + "\n";
         }
 
-        private void WriteLog(string systemErrorText, string additionalErrorText = "")
+        private static void WriteLog(string systemErrorText, string additionalErrorText = "")
         {
             // Check for existing this logs - directory:
-            if (!Directory.Exists(_errorLogsDirectoryName))
+            if (!Directory.Exists(ErrorLogsDirectoryName))
             {
-                Directory.CreateDirectory(_errorLogsDirectoryName);
+                Directory.CreateDirectory(ErrorLogsDirectoryName);
             }
 
             // Save log:
             try
             {
-                using (StreamWriter fileWriter = new StreamWriter(_errorLogsDirectoryName + "/"
+                using (StreamWriter fileWriter = new StreamWriter(ErrorLogsDirectoryName + "/"
                                                                                           + DateTime.Now.Day + "_"
                                                                                           + DateTime.Now.Month + "_"
                                                                                           + DateTime.Now.Year + "_"
@@ -188,7 +176,7 @@ namespace NN.Eva.Services
                     }
                 }
 
-                Console.WriteLine("Error log saved in {0}!", _errorLogsDirectoryName);
+                Console.WriteLine("Error log saved in {0}!", ErrorLogsDirectoryName);
             }
             catch { }
         }

@@ -16,10 +16,9 @@ namespace NN.Eva.Core
         private NetworkStructure _networkStructure;
 
         /// <summary>
-        /// Services
+        /// Local services
         /// </summary>
         private MemoryChecker _memoryChecker;
-        private Logger _logger;
 
         /// <summary>
         /// Global current iterations
@@ -36,11 +35,10 @@ namespace NN.Eva.Core
             _networkStructure = networkStructure;
 
             _memoryChecker = new MemoryChecker();
-            _logger = new Logger();
 
             if (!_memoryChecker.IsValid(FileManager.MemoryFolderPath + "//.clear//memoryClear.txt", networkStructure))
             {
-                _logger.LogError(ErrorType.MemoryInitializeError);
+                Logger.LogError(ErrorType.MemoryInitializeError);
                 return;
             }
                 
@@ -51,7 +49,7 @@ namespace NN.Eva.Core
             }
             catch (Exception ex)
             {
-                _logger.LogError(ErrorType.MemoryInitializeError, ex);
+                Logger.LogError(ErrorType.MemoryInitializeError, ex);
             }
         }
 
@@ -78,7 +76,7 @@ namespace NN.Eva.Core
                 }
                 else
                 {
-                    _logger.LogError(ErrorType.NonEqualsInputLengths, handlingErrorText);
+                    Logger.LogError(ErrorType.NonEqualsInputLengths, handlingErrorText);
                     break;
                 }
             }
@@ -116,6 +114,17 @@ namespace NN.Eva.Core
         {
             Console.WriteLine("Start calculating statistic...");
 
+            // Loading memory:
+            try
+            {
+                _net = new NeuralNetwork(_networkStructure.NeuronsByLayers, "memory.txt");
+            }
+            catch (Exception ex)
+            {
+                Logger.LogError(ErrorType.MemoryInitializeError, ex);
+            }
+
+            // Testing:
             int testPassed = 0;
             int testFailed = 0;
 
@@ -131,7 +140,7 @@ namespace NN.Eva.Core
             }
             catch (Exception ex)
             {
-                _logger.LogError(ErrorType.SetMissing, ex);
+                Logger.LogError(ErrorType.SetMissing, ex);
                 return;
             }
 
@@ -156,7 +165,7 @@ namespace NN.Eva.Core
                 }
                 else
                 {
-                    _logger.LogError(ErrorType.NonEqualsInputLengths, handlingErrorText);
+                    Logger.LogError(ErrorType.NonEqualsInputLengths, handlingErrorText);
                     return;
                 }
             }
@@ -164,7 +173,7 @@ namespace NN.Eva.Core
             // Logging (optional):
             if (withLogging)
             {
-                _logger.LogTrainingResults(testPassed, testFailed, trainingConfig, elapsedTime);
+                Logger.LogTrainingResults(testPassed, testFailed, trainingConfig, elapsedTime);
             }
 
             Console.WriteLine("Test passed: {0}\nTest failed: {1}\nPercent learned: {2:f2}", testPassed,
@@ -230,6 +239,47 @@ namespace NN.Eva.Core
 
         #endregion
 
+        #region Datasets checking
+
+        public bool CheckDatasets(string inputDatasetFilename, string outputDatasetFilename, NetworkStructure networkStructure)
+        {
+            Console.WriteLine("Start datasets cheсking...");
+
+            DatasetChecker datasetChecker = new DatasetChecker();
+
+            return CheckSingleDataset(inputDatasetFilename, datasetChecker, networkStructure, true) &&
+                   CheckSingleDataset(outputDatasetFilename, datasetChecker, networkStructure, false);
+        }
+
+        public bool CheckSingleDataset(string datasetFilename, DatasetChecker datasetChecker, NetworkStructure networkStructure, bool isItInputDataset)
+        {
+            bool isValid = true;
+
+            Console.WriteLine($"Start dataset \"{datasetFilename}\" cheсking...");
+
+            bool isCurrentDatasetValid = isItInputDataset ? 
+                                         datasetChecker.CheckInputDataset(datasetFilename, networkStructure) :
+                                         datasetChecker.CheckOutputDataset(datasetFilename, networkStructure);
+
+            if (isCurrentDatasetValid)
+            {
+                Console.ForegroundColor = ConsoleColor.Green;
+                Console.WriteLine($"\"{datasetFilename}\" is valid.");
+            }
+            else
+            {
+                isValid = false;
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine($"\"{datasetFilename}\" - is invalid!");
+            }
+
+            Console.ForegroundColor = ConsoleColor.Gray;
+
+            return isValid;
+        }
+
+        #endregion
+
         #region Training
 
         /// <summary>
@@ -254,7 +304,7 @@ namespace NN.Eva.Core
             }
             catch (Exception ex)
             {
-                _logger.LogError(ErrorType.SetMissing, ex);
+                Logger.LogError(ErrorType.SetMissing, ex);
                 return;
             }
 
@@ -273,7 +323,6 @@ namespace NN.Eva.Core
                     TrainingConfiguration = trainingConfig,
                     InputDatasets = inputDataSets,
                     OutputDatasets = outputDataSets,
-                    Logger = _logger,
                     SafeTrainingMode = !unsafeTrainingMode
                 };
 
@@ -324,7 +373,7 @@ namespace NN.Eva.Core
             }
             catch (Exception ex)
             {
-                _logger.LogError(ErrorType.TrainError, ex);
+                Logger.LogError(ErrorType.TrainError, ex);
             }
         }
 
@@ -444,11 +493,9 @@ namespace NN.Eva.Core
 
         private void SavingMemoryToDB(DatabaseConfig dbConfig, string networkStructure, Guid userId)
         {
-            Logger logger = new Logger();
-
             try
             {
-                DBInserter dbInserter = new DBInserter(logger, dbConfig);
+                DBInserter dbInserter = new DBInserter(dbConfig);
 
                 // Saving networks info:
                 _net.SaveMemoryToDB(Iteration, networkStructure, userId, dbInserter);
@@ -456,7 +503,7 @@ namespace NN.Eva.Core
             }
             catch (Exception ex)
             {
-                logger.LogError(ErrorType.DBInsertError, "Save memory to database error!\n" + ex);
+                Logger.LogError(ErrorType.DBInsertError, "Save memory to database error!\n" + ex);
                 Console.WriteLine($" {DateTime.Now} Save memory to database error!\n {ex}");
             }
         }
@@ -467,11 +514,9 @@ namespace NN.Eva.Core
         /// <param name="dbConfig"></param>
         public void DBMemoryAbort(DatabaseConfig dbConfig)
         {
-            Logger logger = new Logger();
-
             try
             {
-                DBDeleter dbDeleter = new DBDeleter(logger, dbConfig);
+                DBDeleter dbDeleter = new DBDeleter(dbConfig);
 
                 // Aborting saving network's info:
                 _net.DBMemoryAbort(dbDeleter);
@@ -479,7 +524,7 @@ namespace NN.Eva.Core
             }
             catch (Exception ex)
             {
-                logger.LogError(ErrorType.DBDeleteError, "DB Memory backup aborting error!\n" + ex);
+                Logger.LogError(ErrorType.DBDeleteError, "DB Memory backup aborting error!\n" + ex);
                 Console.WriteLine($" {DateTime.Now } DB Memory backup aborting error!\n {ex}");
             }
         }
@@ -492,11 +537,9 @@ namespace NN.Eva.Core
         /// <param name="destinationMemoryFilePath"></param>
         public void DBMemoryLoad(DatabaseConfig dbConfig, Guid networkID, string destinationMemoryFilePath)
         {
-            Logger logger = new Logger();
-
             try
             {
-                DBSelector dbSelector = new DBSelector(logger, dbConfig);
+                DBSelector dbSelector = new DBSelector(dbConfig);
 
                 // Creating the general string list of memory:
                 List<string> memoryInTextList = new List<string>();
@@ -542,7 +585,7 @@ namespace NN.Eva.Core
             }
             catch (Exception ex)
             {
-                logger.LogError(ErrorType.DBMemoryLoadError, "DB Memory loading error!\n" + ex);
+                Logger.LogError(ErrorType.DBMemoryLoadError, "DB Memory loading error!\n" + ex);
                 Console.WriteLine($" {DateTime.Now } DB Memory loading error!\n {ex}");
             }
         }
@@ -560,7 +603,7 @@ namespace NN.Eva.Core
 
                 if (netResult == null)
                 {
-                    _logger.LogError(ErrorType.NonEqualsInputLengths, handlingErrorText);
+                    Logger.LogError(ErrorType.NonEqualsInputLengths, handlingErrorText);
                     return null;
                 }
                 else

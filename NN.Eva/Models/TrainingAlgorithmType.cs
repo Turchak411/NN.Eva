@@ -5,6 +5,7 @@ namespace NN.Eva.Models
     {
         BProp,
         GeneticAlg,
-        RProp
+        RProp,
+        ParallelRProp
     }
 }
