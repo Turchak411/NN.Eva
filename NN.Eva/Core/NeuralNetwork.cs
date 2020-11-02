@@ -109,30 +109,6 @@ namespace NN.Eva.Core
             }
         }
 
-        public List<double[]> GetNeuronErrors()
-        {
-            List<double[]> errorList = new List<double[]>();
-
-            for (int i = 0; i < _layerList.Length; i++)
-            {
-                errorList.Add(_layerList[i].GetNeuronErrors());
-            }
-
-            return errorList;
-        }
-
-        public List<double[]> GetLastNeuronAnswers()
-        {
-            List<double[]> answersList = new List<double[]>();
-
-            for (int i = 0; i < _layerList.Length; i++)
-            {
-                answersList.Add(_layerList[i].GetLastAnswers());
-            }
-
-            return answersList;
-        }
-
         public void TeachBProp(double[] data, double[] rightAnswersSet, double learnSpeed)
         {
             // Подсчет ошибки (внутреннее изменение):
@@ -158,9 +134,12 @@ namespace NN.Eva.Core
             FileManager.PrepareToSaveMemory(path, networkStructure);
 
             // Saving
-            for (int i = 0; i < _layerList.Length; i++)
+            int index = 0;
+
+            foreach (Layer layer in _layerList)
             {
-                _layerList[i].SaveMemory(i, path);
+                layer.SaveMemory(index, path);
+                index++;
             }
         }
 
