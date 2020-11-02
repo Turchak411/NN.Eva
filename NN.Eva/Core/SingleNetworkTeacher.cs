@@ -217,7 +217,6 @@ namespace NN.Eva.Core
                 if (count >= 500)
                 {
                     count = 0;
-                    Statistic(neuralNetworkRProp, inputSets, outputSets);
                     Console.WriteLine($"Iteration: {iteration}\t Error: {error}");
                 }
 
@@ -225,63 +224,10 @@ namespace NN.Eva.Core
                 iteration++;
             }
 
-            Statistic(neuralNetworkRProp, inputSets, outputSets);
-
             neuralNetworkRProp.SaveMemory(FileManager.MemoryFolderPath + "\\memory.txt", NetworkStructure);
 
             // Запись события об успешном обучении:
             LastTrainingSuccess = true;
-        }
-
-        //TODO Delete method Statistic
-        private void Statistic(MultiThreadNeuralNetworkRProp network, double[][] inputSets, double[][] outputSets)
-        {
-            Console.WriteLine("Start calculating statistic...");
-
-            int testPassed = 0;
-            int testFailed = 0;
-
-            for (int i = 0; i < inputSets.Length; i++)
-            {
-                // Получение ответа:
-                double[] netResult = network.Compute(inputSets[i]);
-
-                if (netResult != null)
-                {
-                    if (IsVectorsRoughlyEquals(outputSets[i], netResult, 0.3))
-                    {
-                        testPassed++;
-                    }
-                    else
-                    {
-                        testFailed++;
-                    }
-                }
-              
-            }
-
-            Console.WriteLine("Test passed: {0}\nTest failed: {1}\nPercent learned: {2:f2}", testPassed,
-                                                                                             testFailed,
-                                                                                             (double)testPassed * 100 / (testPassed + testFailed));
-        }
-
-        private bool IsVectorsRoughlyEquals(double[] sourceVector0, double[] controlVector1, double equalsPercent)
-        {
-            // Возвращение неравенства, если длины векторов не совпадают
-            if (sourceVector0.Length != controlVector1.Length)
-            {
-                return false;
-            }
-
-            for (int i = 0; i < sourceVector0.Length; i++)
-            {
-                if (controlVector1[i] < sourceVector0[i] - equalsPercent || controlVector1[i] > sourceVector0[i] + equalsPercent)
-                {
-                    return false;
-                }
-            }
-
-            return true;
         }
 
         #endregion
