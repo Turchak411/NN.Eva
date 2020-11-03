@@ -134,12 +134,12 @@ namespace NN.Eva.Core
             FileManager.PrepareToSaveMemory(path, networkStructure);
 
             // Saving
-            int index = 0;
+            int foreachIndex = 0;
 
             foreach (Layer layer in _layerList)
             {
-                layer.SaveMemory(index, path);
-                index++;
+                layer.SaveMemory(foreachIndex, path);
+                foreachIndex++;
             }
         }
 
@@ -151,18 +151,21 @@ namespace NN.Eva.Core
             dbInserter.InsertNetwork(Id, userId, iterations, networkStructure);
 
             // Saving layers info:
-            for (int i = 0; i < _layerList.Length; i++)
+            int foreachIndex = 0;
+
+            foreach (Layer layer in _layerList)
             {
-                _layerList[i].SaveMemoryToDB(Id, userId, i, dbInserter);
+                layer.SaveMemoryToDB(Id, userId, foreachIndex, dbInserter);
+                foreachIndex++;
             }
         }
 
         public void DBMemoryAbort(DBDeleter dbDeleter)
         {
             // Aborting saving of layers:
-            for (int i = 0; i < _layerList.Length; i++)
+            foreach (Layer layer in _layerList)
             {
-                _layerList[i].DBMemoryAbort(Id, dbDeleter);
+                layer.DBMemoryAbort(Id, dbDeleter);
             }
 
             // Aborting saving of network:

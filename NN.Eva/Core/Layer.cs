@@ -56,12 +56,12 @@ namespace NN.Eva.Core
         {
             double[] layerResultVector = new double[_neuronList.Length];
 
-            int index = 0;
+            int foreachIndex = 0;
 
             foreach (double layerResult in layerResultVector)
             {
-                layerResultVector[index] = _neuronList[index].Handle(data);
-                index++;
+                layerResultVector[foreachIndex] = _neuronList[foreachIndex].Handle(data);
+                foreachIndex++;
             }
 
             return layerResultVector;
@@ -75,23 +75,23 @@ namespace NN.Eva.Core
 
         public void CalcErrorAsOut(double[] rightAnswersSet)
         {
-            int index = 0;
+            int foreachIndex = 0;
 
             foreach (Neuron neuron in _neuronList)
             {
-                neuron.CalcErrorForOutNeuron(rightAnswersSet[index]);
-                index++;
+                neuron.CalcErrorForOutNeuron(rightAnswersSet[foreachIndex]);
+                foreachIndex++;
             }
         }
 
         public void CalcErrorAsHidden(double[][] nextLayerWeights, double[] nextLayerErrors)
         {
-            int index = 0;
+            int foreachIndex = 0;
 
             foreach (Neuron neuron in _neuronList)
             {
-                neuron.CalcErrorForHiddenNeuron(index, nextLayerWeights, nextLayerErrors);
-                index++;
+                neuron.CalcErrorForHiddenNeuron(foreachIndex, nextLayerWeights, nextLayerErrors);
+                foreachIndex++;
             }
         }
 
@@ -113,12 +113,12 @@ namespace NN.Eva.Core
         {
             double[] lastAnswers = new double[_neuronList.Length];
 
-            int index = 0;
+            int foreachIndex = 0;
 
             foreach (double lastAnswer in lastAnswers)
             {
-                lastAnswers[index] = _neuronList[index].LastAnswer;
-                index++;
+                lastAnswers[foreachIndex] = _neuronList[foreachIndex].LastAnswer;
+                foreachIndex++;
             }
 
             return lastAnswers;
@@ -128,12 +128,12 @@ namespace NN.Eva.Core
         {
             double[][] weights = new double[_neuronList.Length][];
 
-            int index = 0;
+            int foreachIndex = 0;
 
             foreach (Neuron neuron in _neuronList)
             {
-                weights[index] = neuron.Weights;
-                index++;
+                weights[foreachIndex] = neuron.Weights;
+                foreachIndex++;
             }
 
             return weights;
@@ -143,12 +143,12 @@ namespace NN.Eva.Core
         {
             double[] errors = new double[_neuronList.Length];
 
-            int index = 0;
+            int foreachIndex = 0;
 
             foreach (Neuron neuron in _neuronList)
             {
-                errors[index] = neuron.Error;
-                index++;
+                errors[foreachIndex] = neuron.Error;
+                foreachIndex++;
             }
 
             return errors;
@@ -160,9 +160,12 @@ namespace NN.Eva.Core
 
         public void SaveMemory(int layerNumber, string path)
         {
-            for (int i = 0; i < _neuronList.Length; i++)
+            int foreachIndex = 0;
+
+            foreach (Neuron neuron in _neuronList)
             {
-                _neuronList[i].SaveMemory(layerNumber, i, path);
+                neuron.SaveMemory(layerNumber, foreachIndex, path);
+                foreachIndex++;
             }
         }
 
@@ -174,18 +177,21 @@ namespace NN.Eva.Core
             dbInserter.InsertLayer(Id, userId, networkId, number);
 
             // Saving neurons info:
-            for (int i = 0; i < _neuronList.Length; i++)
+            int foreachIndex = 0;
+
+            foreach (Neuron neuron in _neuronList)
             {
-                _neuronList[i].SaveMemoryToDB(Id, userId, i, dbInserter);
+                neuron.SaveMemoryToDB(Id, userId, foreachIndex, dbInserter);
+                foreachIndex++;
             }
         }
 
         public void DBMemoryAbort(Guid networkId, DBDeleter dbDeleter)
         {
             // Aborting saving of neurons:
-            for (int i = 0; i < _neuronList.Length; i++)
+            foreach (Neuron neuron in _neuronList)
             {
-                _neuronList[i].DBMemoryAbort(Id, dbDeleter);
+                neuron.DBMemoryAbort(Id, dbDeleter);
             }
 
             // Aborting saving of layer:

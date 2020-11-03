@@ -118,7 +118,7 @@ namespace NN.Eva.Core
                 // Calculating learn-speed rate:
                 var learningSpeed = 0.01 * Math.Pow(0.1, (double)iteration / 150000);
 
-                int index = 0;
+                int foreachIndex = 0;
 
                 foreach(double[] inputSet in InputDatasets)
                 {
@@ -136,7 +136,7 @@ namespace NN.Eva.Core
                     // Teaching:
                     try
                     {
-                        Network.TeachBProp(inputSet, OutputDatasets[index], learningSpeed);
+                        Network.TeachBProp(inputSet, OutputDatasets[foreachIndex], learningSpeed);
                     }
                     catch (Exception ex)
                     {
@@ -144,7 +144,7 @@ namespace NN.Eva.Core
                         return;
                     }
 
-                    index++;
+                    foreachIndex++;
                 }
             }
 
@@ -159,7 +159,7 @@ namespace NN.Eva.Core
                 // Calculating learn-speed rate:
                 var learningSpeed = 0.01 * Math.Pow(0.1, (double)iteration / 150000);
 
-                int index = 0;
+                int foreachIndex = 0;
 
                 foreach (double[] inputSet in InputDatasets)
                 {
@@ -169,7 +169,7 @@ namespace NN.Eva.Core
                     // Teaching:
                     try
                     {
-                        Network.TeachBProp(inputSet, OutputDatasets[index], learningSpeed);
+                        Network.TeachBProp(inputSet, OutputDatasets[foreachIndex], learningSpeed);
                     }
                     catch (Exception ex)
                     {
@@ -177,7 +177,7 @@ namespace NN.Eva.Core
                         return;
                     }
 
-                    index++;
+                    foreachIndex++;
                 }
             }
 
