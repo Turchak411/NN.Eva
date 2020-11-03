@@ -38,6 +38,11 @@ namespace NN.Eva.NUnitTest
                 CreateDataSets(trainConfig);
             }
 
+            if (!File.Exists(trainConfig.InputDatasetFilename) || !File.Exists(trainConfig.OutputDatasetFilename))
+            {
+                CreateDataSets(trainConfig);
+            }
+
             if (File.Exists(trainConfig.MemoryFolder + "//memory.txt"))
             {
                 File.Delete(trainConfig.MemoryFolder + "//memory.txt");
