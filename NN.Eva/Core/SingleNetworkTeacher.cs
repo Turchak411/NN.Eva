@@ -190,7 +190,7 @@ namespace NN.Eva.Core
 
         private void TrainingRProp()
         {
-            var neuralNetworkRProp = new NeuralNetworkRProp(new ActivationSigmoid(), NetworkStructure);
+            var neuralNetworkRProp = new NeuralNetworkRProp(new ActivationSigmoid {Alpha = 1}, NetworkStructure);
 
             var inputSets = InputDatasets;
             var outputSets = OutputDatasets;
