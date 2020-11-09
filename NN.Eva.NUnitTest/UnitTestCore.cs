@@ -223,7 +223,7 @@ namespace NN.Eva.NUnitTest
                 EndIteration = 200,
                 InputDatasetFilename = "TrainingSetsTest//inputSets.txt",
                 OutputDatasetFilename = "TrainingSetsTest//outputSets.txt",
-                MemoryFolder = "MemoryRProp"
+                MemoryFolder = "MemoryGeneticAlg"
             };
 
             if (!Directory.Exists("TrainingSetsTest"))
