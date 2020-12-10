@@ -14,32 +14,32 @@ namespace NN.Eva.Core
 
         protected NeuralNetwork() { }
 
-        public NeuralNetwork(int[] neuronsNumberByLayers)
+        public NeuralNetwork(int[] neuronsNumberByLayers, double alpha)
         {
             List<Layer> layerList = new List<Layer>();
 
-            Layer firstLayer = new Layer(neuronsNumberByLayers[0], 0);
+            Layer firstLayer = new Layer(neuronsNumberByLayers[0], 0, alpha);
             layerList.Add(firstLayer);
 
             for (int i = 1; i < neuronsNumberByLayers.Length; i++)
             {
-                Layer layer = new Layer(neuronsNumberByLayers[i], i);
+                Layer layer = new Layer(neuronsNumberByLayers[i], i, alpha);
                 layerList.Add(layer);
             }
 
             _layerList = layerList.ToArray();
         }
 
-        public NeuralNetwork(int[] neuronsNumberByLayers, string memoryPath)
+        public NeuralNetwork(int[] neuronsNumberByLayers, string memoryPath, double alpha)
         {
             List<Layer> layerList = new List<Layer>();
 
-            Layer firstLayer = new Layer(neuronsNumberByLayers[0], 0, memoryPath);
+            Layer firstLayer = new Layer(neuronsNumberByLayers[0], 0, memoryPath, alpha);
             layerList.Add(firstLayer);
 
             for (int i = 1; i < neuronsNumberByLayers.Length; i++)
             {
-                Layer layer = new Layer(neuronsNumberByLayers[i], i, memoryPath);
+                Layer layer = new Layer(neuronsNumberByLayers[i], i, memoryPath, alpha);
                 layerList.Add(layer);
             }
 

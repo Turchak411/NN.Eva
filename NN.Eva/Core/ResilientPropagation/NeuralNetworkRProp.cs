@@ -172,7 +172,6 @@ namespace NN.Eva.Core.ResilientPropagation
                 error += e * e;
             }
 
-
             // calculate error values for other layers
             for (int j = layersCount - 2; j >= 0; j--)
             {
