@@ -10,12 +10,14 @@ namespace NN.Eva.Core
     {
         public Guid Id { get; set; } = Guid.NewGuid();
 
-        private List<Neuron> _neuronList = new List<Neuron>();
+        private Neuron[] _neuronList;
 
         private Layer() { }
 
         public Layer(int neuronCount, int layerNumber)
         {
+            List<Neuron> neuronList = new List<Neuron>();
+
             double offsetValue = 0.5;
             double offsetWeight = -1;
 
@@ -24,12 +26,16 @@ namespace NN.Eva.Core
                 double[] weights = FileManager.LoadMemory(layerNumber, i, ref offsetValue, ref offsetWeight);
                 Neuron neuron = new Neuron(weights, offsetValue, offsetWeight, ActivationFunction.Sigmoid);
 
-                _neuronList.Add(neuron);
+                neuronList.Add(neuron);
             }
+
+            _neuronList = neuronList.ToArray();
         }
 
         public Layer(int neuronCount, int layerNumber, string memoryPath)
         {
+            List<Neuron> neuronList = new List<Neuron>();
+
             double offsetValue = 0.5;
             double offsetWeight = -1;
 
@@ -38,19 +44,24 @@ namespace NN.Eva.Core
                 double[] weights = FileManager.LoadMemory(layerNumber, i, memoryPath, ref offsetValue, ref offsetWeight);
                 Neuron neuron = new Neuron(weights, offsetValue, offsetWeight, ActivationFunction.Sigmoid);
 
-                _neuronList.Add(neuron);
+                neuronList.Add(neuron);
             }
+
+            _neuronList = neuronList.ToArray();
         }
 
         #region Handling
 
         public double[] Handle(double[] data)
         {
-            double[] layerResultVector = new double[_neuronList.Count];
+            double[] layerResultVector = new double[_neuronList.Length];
 
-            for (int i = 0; i < layerResultVector.Length; i++)
+            int foreachIndex = 0;
+
+            foreach (double layerResult in layerResultVector)
             {
-                layerResultVector[i] = _neuronList[i].Handle(data);
+                layerResultVector[foreachIndex] = _neuronList[foreachIndex].Handle(data);
+                foreachIndex++;
             }
 
             return layerResultVector;
@@ -64,17 +75,23 @@ namespace NN.Eva.Core
 
         public void CalcErrorAsOut(double[] rightAnswersSet)
         {
-            for (int i = 0; i < _neuronList.Count; i++)
+            int foreachIndex = 0;
+
+            foreach (Neuron neuron in _neuronList)
             {
-                _neuronList[i].CalcErrorForOutNeuron(rightAnswersSet[i]);
+                neuron.CalcErrorForOutNeuron(rightAnswersSet[foreachIndex]);
+                foreachIndex++;
             }
         }
 
         public void CalcErrorAsHidden(double[][] nextLayerWeights, double[] nextLayerErrors)
         {
-            for (int i = 0; i < _neuronList.Count; i++)
+            int foreachIndex = 0;
+
+            foreach (Neuron neuron in _neuronList)
             {
-                _neuronList[i].CalcErrorForHiddenNeuron(i, nextLayerWeights, nextLayerErrors);
+                neuron.CalcErrorForHiddenNeuron(foreachIndex, nextLayerWeights, nextLayerErrors);
+                foreachIndex++;
             }
         }
 
@@ -84,17 +101,9 @@ namespace NN.Eva.Core
 
         public void ChangeWeightsBProp(double learnSpeed, double[] answersFromPrevLayer)
         {
-            for (int i = 0; i < _neuronList.Count; i++)
+            foreach (Neuron neuron in _neuronList)
             {
-                _neuronList[i].ChangeWeightsBProp(learnSpeed, answersFromPrevLayer);
-            }
-        }
-
-        public void ChangeWeightsRProp(double[] updateValues)
-        {
-            for (int i = 0; i < _neuronList.Count; i++)
-            {
-                _neuronList[i].ChangeWeightsRProp(updateValues[i]);
+                neuron.ChangeWeightsBProp(learnSpeed, answersFromPrevLayer);
             }
         }
 
@@ -102,11 +111,14 @@ namespace NN.Eva.Core
 
         public double[] GetLastAnswers()
         {
-            double[] lastAnswers = new double[_neuronList.Count];
+            double[] lastAnswers = new double[_neuronList.Length];
 
-            for (int i = 0; i < _neuronList.Count; i++)
+            int foreachIndex = 0;
+
+            foreach (double lastAnswer in lastAnswers)
             {
-                lastAnswers[i] = _neuronList[i].LastAnswer;
+                lastAnswers[foreachIndex] = _neuronList[foreachIndex].LastAnswer;
+                foreachIndex++;
             }
 
             return lastAnswers;
@@ -114,11 +126,14 @@ namespace NN.Eva.Core
 
         public double[][] GetWeights()
         {
-            double[][] weights = new double[_neuronList.Count][];
+            double[][] weights = new double[_neuronList.Length][];
 
-            for (int i = 0; i < _neuronList.Count; i++)
+            int foreachIndex = 0;
+
+            foreach (Neuron neuron in _neuronList)
             {
-                weights[i] = _neuronList[i].Weights;
+                weights[foreachIndex] = neuron.Weights;
+                foreachIndex++;
             }
 
             return weights;
@@ -126,11 +141,14 @@ namespace NN.Eva.Core
 
         public double[] GetNeuronErrors()
         {
-            double[] errors = new double[_neuronList.Count];
+            double[] errors = new double[_neuronList.Length];
 
-            for (int i = 0; i < _neuronList.Count; i++)
+            int foreachIndex = 0;
+
+            foreach (Neuron neuron in _neuronList)
             {
-                errors[i] = _neuronList[i].Error;
+                errors[foreachIndex] = neuron.Error;
+                foreachIndex++;
             }
 
             return errors;
@@ -142,9 +160,12 @@ namespace NN.Eva.Core
 
         public void SaveMemory(int layerNumber, string path)
         {
-            for (int i = 0; i < _neuronList.Count; i++)
+            int foreachIndex = 0;
+
+            foreach (Neuron neuron in _neuronList)
             {
-                _neuronList[i].SaveMemory(layerNumber, i, path);
+                neuron.SaveMemory(layerNumber, foreachIndex, path);
+                foreachIndex++;
             }
         }
 
@@ -156,18 +177,21 @@ namespace NN.Eva.Core
             dbInserter.InsertLayer(Id, userId, networkId, number);
 
             // Saving neurons info:
-            for (int i = 0; i < _neuronList.Count; i++)
+            int foreachIndex = 0;
+
+            foreach (Neuron neuron in _neuronList)
             {
-                _neuronList[i].SaveMemoryToDB(Id, userId, i, dbInserter);
+                neuron.SaveMemoryToDB(Id, userId, foreachIndex, dbInserter);
+                foreachIndex++;
             }
         }
 
         public void DBMemoryAbort(Guid networkId, DBDeleter dbDeleter)
         {
             // Aborting saving of neurons:
-            for (int i = 0; i < _neuronList.Count; i++)
+            foreach (Neuron neuron in _neuronList)
             {
-                _neuronList[i].DBMemoryAbort(Id, dbDeleter);
+                neuron.DBMemoryAbort(Id, dbDeleter);
             }
 
             // Aborting saving of layer:

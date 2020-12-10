@@ -321,8 +321,8 @@ namespace NN.Eva.Core
                     Network = _net,
                     NetworkStructure = _networkStructure,
                     TrainingConfiguration = trainingConfig,
-                    InputDatasets = inputDataSets,
-                    OutputDatasets = outputDataSets,
+                    InputDatasets = inputDataSets.ToArray(),
+                    OutputDatasets = outputDataSets.ToArray(),
                     SafeTrainingMode = !unsafeTrainingMode
                 };
 

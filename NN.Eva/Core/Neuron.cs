@@ -57,9 +57,12 @@ namespace NN.Eva.Core
         {
             double x = 0;
 
-            for (int i = 0; i < _weights.Length; i++)
+            int foreachIndex = 0;
+
+            foreach (double weight in _weights)
             {
-                x += _weights[i] * data[i];
+                x += weight * data[foreachIndex];
+                foreachIndex++;
             }
 
             return x + _offsetValue * _offsetWeight;
@@ -98,9 +101,12 @@ namespace NN.Eva.Core
             // Суммирование ошибок со следующего слоя:
             double sum = 0;
 
-            for (int i = 0; i < nextLayerWeights.GetLength(0); i++)
+            int foreachIndex = 0;
+
+            foreach (double[] nextLayerWeight in nextLayerWeights)
             {
-                sum += nextLayerWeights[i][neuronIndex] * nextLayerErrors[i];
+                sum += nextLayerWeight[neuronIndex] * nextLayerErrors[foreachIndex];
+                foreachIndex++;
             }
 
             _error = _error * sum;
@@ -114,21 +120,16 @@ namespace NN.Eva.Core
 
         public void ChangeWeightsBProp(double learnSpeed, double[] answersFromPrevLayer)
         {
-            for (int i = 0; i < _weights.Length; i++)
+            int foreachIndex = 0;
+
+            foreach(double weight in _weights)
             {
-                _weights[i] = _weights[i] + learnSpeed * _error * answersFromPrevLayer[i];
+                _weights[foreachIndex] = weight + learnSpeed * _error * answersFromPrevLayer[foreachIndex];
+                foreachIndex++;
             }
 
             // Изменение величины смещения:
             _offsetWeight = _offsetWeight + learnSpeed * _error;
-        }
-
-        public void ChangeWeightsRProp(double updateValue)
-        {
-            for (int i = 0; i < _weights.Length; i++)
-            {
-                _weights[i] = _weights[i] + updateValue;
-            }
         }
 
         #endregion
