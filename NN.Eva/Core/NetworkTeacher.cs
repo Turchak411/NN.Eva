@@ -45,7 +45,7 @@ namespace NN.Eva.Core
             try
             {
                 // Ицициализация сети по одинаковому шаблону:
-                _net = new NeuralNetwork(networkStructure.NeuronsByLayers, "memory.txt");
+                _net = new NeuralNetwork(networkStructure.NeuronsByLayers, "memory.txt", networkStructure.Alpha);
             }
             catch (Exception ex)
             {
@@ -117,7 +117,7 @@ namespace NN.Eva.Core
             // Loading memory:
             try
             {
-                _net = new NeuralNetwork(_networkStructure.NeuronsByLayers, "memory.txt");
+                _net = new NeuralNetwork(_networkStructure.NeuronsByLayers, "memory.txt", _networkStructure.Alpha);
             }
             catch (Exception ex)
             {
@@ -360,7 +360,7 @@ namespace NN.Eva.Core
                     case TrainingAlgorithmType.GeneticAlg:
                     case TrainingAlgorithmType.RProp:
                         // Загрузка только что сохраненной памяти:
-                        _net = new NeuralNetwork(_networkStructure.NeuronsByLayers, "memory.txt");
+                        _net = new NeuralNetwork(_networkStructure.NeuronsByLayers, "memory.txt", _networkStructure.Alpha);
                         break;
                     // В общем случае - получение данных обученной сети от "подучителя":
                     case TrainingAlgorithmType.BProp:

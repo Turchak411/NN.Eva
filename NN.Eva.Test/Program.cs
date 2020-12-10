@@ -13,7 +13,8 @@ namespace NN.Eva.Test
             NetworkStructure netStructure = new NetworkStructure
             {
                 InputVectorLength = 10,
-                NeuronsByLayers = new[] { 230, 150, 120, 1 }
+                NeuronsByLayers = new[] { 180, 160, 80, 1 },
+                Alpha = 5
             };
 
             TrainingConfiguration trainConfig = new TrainingConfiguration
@@ -30,12 +31,12 @@ namespace NN.Eva.Test
 
             if (creatingSucceed)
             {
-                //serviceEvaNN.CalculateStatistic(trainConfig);
-                serviceEvaNN.Train(trainConfig,
-                                   true,
-                                   ProcessPriorityClass.Normal,
-                                   true);
                 serviceEvaNN.CalculateStatistic(trainConfig);
+                //serviceEvaNN.Train(trainConfig,
+                //                   true,
+                //                   ProcessPriorityClass.Normal,
+                //                   true);
+                //serviceEvaNN.CalculateStatistic(trainConfig);
             }
 
             Console.WriteLine("Done!");
