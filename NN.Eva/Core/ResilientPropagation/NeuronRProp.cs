@@ -69,11 +69,12 @@ namespace NN.Eva.Core.ResilientPropagation
                 throw new ArgumentException("Wrong length of the input vector.");
 
             // initial sum value
-            double sum = 0.0; int index = 0;
+            double sum = 0.0;
+            int foreachIndex = 0;
             foreach (var weight in _weights)
             {
-                sum += weight * input[index];
-                index++;
+                sum += weight * input[foreachIndex];
+                foreachIndex++;
             }
 
             // compute weighted sum of inputs

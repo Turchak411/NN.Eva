@@ -10,32 +10,40 @@ namespace NN.Eva.Core
     {
         public Guid Id { get; set; } = Guid.NewGuid();
 
-        protected List<Layer> _layerList = new List<Layer>();
+        protected Layer[] _layerList;
 
         protected NeuralNetwork() { }
 
-        public NeuralNetwork(int[] neuronsNumberByLayers)
+        public NeuralNetwork(int[] neuronsNumberByLayers, double alpha)
         {
-            Layer firstLayer = new Layer(neuronsNumberByLayers[0], 0);
-            _layerList.Add(firstLayer);
+            List<Layer> layerList = new List<Layer>();
+
+            Layer firstLayer = new Layer(neuronsNumberByLayers[0], 0, alpha);
+            layerList.Add(firstLayer);
 
             for (int i = 1; i < neuronsNumberByLayers.Length; i++)
             {
-                Layer layer = new Layer(neuronsNumberByLayers[i], i);
-                _layerList.Add(layer);
+                Layer layer = new Layer(neuronsNumberByLayers[i], i, alpha);
+                layerList.Add(layer);
             }
+
+            _layerList = layerList.ToArray();
         }
 
-        public NeuralNetwork(int[] neuronsNumberByLayers, string memoryPath)
+        public NeuralNetwork(int[] neuronsNumberByLayers, string memoryPath, double alpha)
         {
-            Layer firstLayer = new Layer(neuronsNumberByLayers[0], 0, memoryPath);
-            _layerList.Add(firstLayer);
+            List<Layer> layerList = new List<Layer>();
+
+            Layer firstLayer = new Layer(neuronsNumberByLayers[0], 0, memoryPath, alpha);
+            layerList.Add(firstLayer);
 
             for (int i = 1; i < neuronsNumberByLayers.Length; i++)
             {
-                Layer layer = new Layer(neuronsNumberByLayers[i], i, memoryPath);
-                _layerList.Add(layer);
+                Layer layer = new Layer(neuronsNumberByLayers[i], i, memoryPath, alpha);
+                layerList.Add(layer);
             }
+
+            _layerList = layerList.ToArray();
         }
 
         #region Handling
@@ -57,9 +65,9 @@ namespace NN.Eva.Core
 
             double[] tempData = data;
 
-            for (int i = 0; i < _layerList.Count; i++)
+            foreach(Layer layer in _layerList)
             {
-                tempData = _layerList[i].Handle(tempData);
+                tempData = layer.Handle(tempData);
             }
 
             // There is one double value at the last handle
@@ -75,9 +83,9 @@ namespace NN.Eva.Core
         {
             double[] tempData = data;
 
-            for (int i = 0; i < _layerList.Count; i++)
+            foreach (Layer layer in _layerList)
             {
-                tempData = _layerList[i].Handle(tempData);
+                tempData = layer.Handle(tempData);
             }
 
             // There is one double value at the last handle
@@ -90,39 +98,15 @@ namespace NN.Eva.Core
 
         public void CalculateErrors(double[] rightAnswersSet)
         {
-            _layerList[_layerList.Count - 1].CalcErrorAsOut(rightAnswersSet);
+            _layerList[_layerList.Length - 1].CalcErrorAsOut(rightAnswersSet);
 
-            for (int i = _layerList.Count - 2; i >= 0; i--)
+            for (int i = _layerList.Length - 2; i >= 0; i--)
             {
                 double[][] nextLayerWeights = _layerList[i + 1].GetWeights();
                 double[] nextLayerErrors = _layerList[i + 1].GetNeuronErrors();
 
                 _layerList[i].CalcErrorAsHidden(nextLayerWeights, nextLayerErrors);
             }
-        }
-
-        public List<double[]> GetNeuronErrors()
-        {
-            List<double[]> errorList = new List<double[]>();
-
-            for (int i = 0; i < _layerList.Count; i++)
-            {
-                errorList.Add(_layerList[i].GetNeuronErrors());
-            }
-
-            return errorList;
-        }
-
-        public List<double[]> GetLastNeuronAnswers()
-        {
-            List<double[]> answersList = new List<double[]>();
-
-            for (int i = 0; i < _layerList.Count; i++)
-            {
-                answersList.Add(_layerList[i].GetLastAnswers());
-            }
-
-            return answersList;
         }
 
         public void TeachBProp(double[] data, double[] rightAnswersSet, double learnSpeed)
@@ -133,18 +117,10 @@ namespace NN.Eva.Core
             // Корректировка весов нейронов:
             double[] answersFromPrevLayer = data;
 
-            for (int i = 0; i < _layerList.Count; i++)
+            foreach (Layer layer in _layerList)
             {
-                _layerList[i].ChangeWeightsBProp(learnSpeed, answersFromPrevLayer);
-                answersFromPrevLayer = _layerList[i].GetLastAnswers();
-            }
-        }
-
-        public void TeachRProp(List<double[]> updateValues)
-        {
-            for (int i = 0; i < _layerList.Count; i++)
-            {
-                _layerList[i].ChangeWeightsRProp(updateValues[i]);
+                layer.ChangeWeightsBProp(learnSpeed, answersFromPrevLayer);
+                answersFromPrevLayer = layer.GetLastAnswers();
             }
         }
 
@@ -158,9 +134,12 @@ namespace NN.Eva.Core
             FileManager.PrepareToSaveMemory(path, networkStructure);
 
             // Saving
-            for (int i = 0; i < _layerList.Count; i++)
+            int foreachIndex = 0;
+
+            foreach (Layer layer in _layerList)
             {
-                _layerList[i].SaveMemory(i, path);
+                layer.SaveMemory(foreachIndex, path);
+                foreachIndex++;
             }
         }
 
@@ -172,18 +151,21 @@ namespace NN.Eva.Core
             dbInserter.InsertNetwork(Id, userId, iterations, networkStructure);
 
             // Saving layers info:
-            for (int i = 0; i < _layerList.Count; i++)
+            int foreachIndex = 0;
+
+            foreach (Layer layer in _layerList)
             {
-                _layerList[i].SaveMemoryToDB(Id, userId, i, dbInserter);
+                layer.SaveMemoryToDB(Id, userId, foreachIndex, dbInserter);
+                foreachIndex++;
             }
         }
 
         public void DBMemoryAbort(DBDeleter dbDeleter)
         {
             // Aborting saving of layers:
-            for (int i = 0; i < _layerList.Count; i++)
+            foreach (Layer layer in _layerList)
             {
-                _layerList[i].DBMemoryAbort(Id, dbDeleter);
+                layer.DBMemoryAbort(Id, dbDeleter);
             }
 
             // Aborting saving of network:

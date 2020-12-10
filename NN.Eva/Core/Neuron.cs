@@ -20,6 +20,8 @@ namespace NN.Eva.Core
 
         private ActivationFunction _activationFunctionType;
 
+        private double _alpha;
+
         #region Out properties
 
         public double Error => _error;
@@ -32,7 +34,7 @@ namespace NN.Eva.Core
 
         private Neuron() { }
 
-        public Neuron(double[] weightsValues, double offsetValue, double offsetWeight, ActivationFunction activationFunctionType)
+        public Neuron(double[] weightsValues, double offsetValue, double offsetWeight, ActivationFunction activationFunctionType, double alpha = 1)
         {
             _weights = weightsValues;
             _offsetValue = offsetValue;
@@ -40,6 +42,7 @@ namespace NN.Eva.Core
 
             _error = 1;
             _activationFunctionType = activationFunctionType;
+            _alpha = alpha;
         }
 
         #region Handling
@@ -57,9 +60,12 @@ namespace NN.Eva.Core
         {
             double x = 0;
 
-            for (int i = 0; i < _weights.Length; i++)
+            int foreachIndex = 0;
+
+            foreach (double weight in _weights)
             {
-                x += _weights[i] * data[i];
+                x += weight * data[foreachIndex];
+                foreachIndex++;
             }
 
             return x + _offsetValue * _offsetWeight;
@@ -75,7 +81,7 @@ namespace NN.Eva.Core
                     return Math.Log(1 + Math.Exp(x));
                 case Models.ActivationFunction.Sigmoid:
                 default:
-                    return 1 / (1 + Math.Exp(-x));
+                    return 1 / (1 + Math.Exp(-_alpha * x));
             }
         }
 
@@ -87,20 +93,23 @@ namespace NN.Eva.Core
 
         public void CalcErrorForOutNeuron(double rightAnswer)
         {
-            _error = (rightAnswer - _lastAnswer) * _lastAnswer * (1 - _lastAnswer);
+            _error = (rightAnswer - _lastAnswer) * _alpha * _lastAnswer * (1 - _lastAnswer);
         }
 
         public double CalcErrorForHiddenNeuron(int neuronIndex, double[][] nextLayerWeights, double[] nextLayerErrors)
         {
             // Вычисление производной активационной функции:
-            _error = _lastAnswer * (1 - _lastAnswer);
+            _error = _alpha * _lastAnswer * (1 - _lastAnswer);
 
             // Суммирование ошибок со следующего слоя:
             double sum = 0;
 
-            for (int i = 0; i < nextLayerWeights.GetLength(0); i++)
+            int foreachIndex = 0;
+
+            foreach (double[] nextLayerWeight in nextLayerWeights)
             {
-                sum += nextLayerWeights[i][neuronIndex] * nextLayerErrors[i];
+                sum += nextLayerWeight[neuronIndex] * nextLayerErrors[foreachIndex];
+                foreachIndex++;
             }
 
             _error = _error * sum;
@@ -114,21 +123,16 @@ namespace NN.Eva.Core
 
         public void ChangeWeightsBProp(double learnSpeed, double[] answersFromPrevLayer)
         {
-            for (int i = 0; i < _weights.Length; i++)
+            int foreachIndex = 0;
+
+            foreach(double weight in _weights)
             {
-                _weights[i] = _weights[i] + learnSpeed * _error * answersFromPrevLayer[i];
+                _weights[foreachIndex] = weight + learnSpeed * _error * answersFromPrevLayer[foreachIndex];
+                foreachIndex++;
             }
 
             // Изменение величины смещения:
             _offsetWeight = _offsetWeight + learnSpeed * _error;
-        }
-
-        public void ChangeWeightsRProp(double updateValue)
-        {
-            for (int i = 0; i < _weights.Length; i++)
-            {
-                _weights[i] = _weights[i] + updateValue;
-            }
         }
 
         #endregion

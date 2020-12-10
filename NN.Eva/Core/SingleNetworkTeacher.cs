@@ -1,5 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
+using System.Linq;
 using NN.Eva.Models;
 using NN.Eva.Services;
 using NN.Eva.Core.GeneticAlgorithm;
@@ -16,9 +16,9 @@ namespace NN.Eva.Core
 
         public TrainingConfiguration TrainingConfiguration { get; set; }
 
-        public List<double[]> InputDatasets { get; set; }
+        public double[][] InputDatasets { get; set; }
 
-        public List<double[]> OutputDatasets { get; set; }
+        public double[][] OutputDatasets { get; set; }
 
         public bool LastTrainingSuccess { get; set; } = false;
 
@@ -117,12 +117,14 @@ namespace NN.Eva.Core
                 // Calculating learn-speed rate:
                 var learningSpeed = 0.01 * Math.Pow(0.1, (double)iteration / 150000);
 
-                for (int k = 0; k < InputDatasets.Count; k++)
+                int foreachIndex = 0;
+
+                foreach(double[] inputSet in InputDatasets)
                 {
                     string handlingErrorText = "";
 
                     // Handling:
-                    double[] netResult = Network.Handle(InputDatasets[k], ref handlingErrorText);
+                    double[] netResult = Network.Handle(inputSet, ref handlingErrorText);
 
                     if (netResult == null)
                     {
@@ -133,13 +135,15 @@ namespace NN.Eva.Core
                     // Teaching:
                     try
                     {
-                        Network.TeachBProp(InputDatasets[k], OutputDatasets[k], learningSpeed);
+                        Network.TeachBProp(inputSet, OutputDatasets[foreachIndex], learningSpeed);
                     }
                     catch (Exception ex)
                     {
                         Logger.LogError(ErrorType.TrainError, ex);
                         return;
                     }
+
+                    foreachIndex++;
                 }
             }
 
@@ -154,21 +158,25 @@ namespace NN.Eva.Core
                 // Calculating learn-speed rate:
                 var learningSpeed = 0.01 * Math.Pow(0.1, (double)iteration / 150000);
 
-                for (int k = 0; k < InputDatasets.Count; k++)
+                int foreachIndex = 0;
+
+                foreach (double[] inputSet in InputDatasets)
                 {
                     // Handling:
-                    Network.HandleUnsafe(InputDatasets[k]);
+                    Network.HandleUnsafe(inputSet);
 
                     // Teaching:
                     try
                     {
-                        Network.TeachBProp(InputDatasets[k], OutputDatasets[k], learningSpeed);
+                        Network.TeachBProp(inputSet, OutputDatasets[foreachIndex], learningSpeed);
                     }
                     catch (Exception ex)
                     {
                         Logger.LogError(ErrorType.TrainError, ex);
                         return;
                     }
+
+                    foreachIndex++;
                 }
             }
 
@@ -182,10 +190,10 @@ namespace NN.Eva.Core
 
         private void TrainingRProp()
         {
-            var neuralNetworkRProp = new NeuralNetworkRProp(new ActivationSigmoid(), NetworkStructure);
+            var neuralNetworkRProp = new NeuralNetworkRProp(new ActivationSigmoid {Alpha = 1}, NetworkStructure);
 
-            var inputSets = InputDatasets.ToArray();
-            var outputSets = OutputDatasets.ToArray();
+            var inputSets = InputDatasets;
+            var outputSets = OutputDatasets;
 
             double iteration = 0.0;
             while (iteration < TrainingConfiguration.EndIteration - TrainingConfiguration.StartIteration)
@@ -239,8 +247,8 @@ namespace NN.Eva.Core
             GeneticAlgorithmTeacher geneticAlgTeacher = new GeneticAlgorithmTeacher
             {
                 NetworkStructure = NetworkStructure,
-                InputDatasets = InputDatasets,
-                OutputDatasets = OutputDatasets
+                InputDatasets = InputDatasets.ToList(),
+                OutputDatasets = OutputDatasets.ToList()
             };
 
             geneticAlgTeacher.StartTraining(TrainingConfiguration.EndIteration - TrainingConfiguration.StartIteration,
