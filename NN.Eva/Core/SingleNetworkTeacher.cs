@@ -190,7 +190,7 @@ namespace NN.Eva.Core
 
         private void TrainingRProp()
         {
-            var neuralNetworkRProp = new NeuralNetworkRProp(new ActivationSigmoid {Alpha = 1}, NetworkStructure);
+            var neuralNetworkRProp = new NeuralNetworkRProp(new ActivationSigmoid {Alpha = NetworkStructure.Alpha}, NetworkStructure);
 
             var inputSets = InputDatasets;
             var outputSets = OutputDatasets;
@@ -212,7 +212,7 @@ namespace NN.Eva.Core
 
         private void ParallelTrainingRProp()
         {
-            var neuralNetworkRProp = new MultiThreadNeuralNetworkRProp(new ActivationSigmoid {Alpha = 1}, NetworkStructure);
+            var neuralNetworkRProp = new MultiThreadNeuralNetworkRProp(new ActivationSigmoid {Alpha = NetworkStructure.Alpha}, NetworkStructure);
 
             var inputSets = InputDatasets.ToArray();
             var outputSets = OutputDatasets.ToArray();
