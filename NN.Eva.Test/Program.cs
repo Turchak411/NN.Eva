@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using NN.Eva.Models;
 
 namespace NN.Eva.Test
@@ -31,10 +32,10 @@ namespace NN.Eva.Test
             if (creatingSucceed)
             {
                 serviceEvaNN.CalculateStatistic(trainConfig);
-                //serviceEvaNN.Train(trainConfig,
-                //                   true,
-                //                   ProcessPriorityClass.Normal,
-                //                   true);
+                serviceEvaNN.Train(trainConfig,
+                                   true,
+                                   ProcessPriorityClass.Normal,
+                                   true);
                 //serviceEvaNN.CalculateStatistic(trainConfig);
             }
 
