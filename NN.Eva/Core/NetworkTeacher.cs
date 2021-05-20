@@ -298,6 +298,30 @@ namespace NN.Eva.Core
             return isValid;
         }
 
+        public void CheckDatasetsVectorsSimilarity(string inputDatasetFilename)
+        {
+            Console.WriteLine("Starting dataset's vectors similarity...");
+
+            DatasetChecker datasetChecker = new DatasetChecker();
+
+            try
+            {
+                string reportFilename = "report_dataset_" + DateTime.Now.Ticks + ".png";
+
+                datasetChecker.DoSimilarityGraphicReport(inputDatasetFilename, reportFilename);
+
+                Console.ForegroundColor = ConsoleColor.Green;
+                Console.WriteLine("Report created successfully!\nFilename: " + reportFilename);
+            }
+            catch
+            {
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine("Error in report creating!");
+            }
+
+            Console.ForegroundColor = ConsoleColor.Gray;
+        }
+
         #endregion
 
         #region Training

@@ -32,10 +32,11 @@ namespace NN.Eva.Test
             if (creatingSucceed)
             {
                 serviceEvaNN.CalculateStatistic(trainConfig);
-                serviceEvaNN.Train(trainConfig,
-                                   true,
-                                   ProcessPriorityClass.Normal,
-                                   true);
+                //serviceEvaNN.Train(trainConfig,
+                //                   true,
+                //                   ProcessPriorityClass.Normal,
+                //                   true);
+                serviceEvaNN.CheckDatasetsVectorsSimilarity(trainConfig.InputDatasetFilename);
                 //serviceEvaNN.CalculateStatistic(trainConfig);
             }
 

@@ -1,5 +1,10 @@
 ﻿using NN.Eva.Models;
+using System;
 using System.Collections.Generic;
+using System.Drawing;
+using System.Drawing.Imaging;
+using System.IO;
+using System.Linq;
 
 namespace NN.Eva.Services
 {
@@ -76,6 +81,80 @@ namespace NN.Eva.Services
 
             errorMessage += "no_errors";
             return true;
+        }
+
+        public void DoSimilarityGraphicReport(string inputSetFilepath, string filePath)
+        {
+            // Calculate all distances for input set:
+            List<double[]> inputSet = FileManager.LoadTrainingDataset(inputSetFilepath);
+            List<double> avgDistances = new List<double>();
+
+            for(int i = 0; i < inputSet.Count; i++)
+            {
+                double avgDistance = 5.0;
+
+                for (int k = 0; k < inputSet.Count; k++)
+                {
+                    if (i != k)
+                    {
+                        avgDistance += GetSimilarity(inputSet[i], inputSet[k]);
+                    }
+                }
+
+                avgDistances.Add(avgDistance / (inputSet.Count - 1));
+            }
+
+            // Define bottom line (value) for graphic:
+            double botValue = avgDistances.Max();
+
+            // Drawing result image:
+            DrawReportImage(filePath, avgDistances, botValue, 75);
+        }
+
+        private double GetSimilarity(double[] set0, double[] set1)
+        {
+            double upValue = 0;
+            double downValueLeft = 0;
+            double downValueRight = 0;
+
+            for (int i = 0; i < set0.Length; i++)
+            {
+                upValue += set0[i] * set1[i];
+                downValueLeft += set0[i] * set0[i] + 1e-16;
+                downValueRight += set1[i] * set1[i] + 1e-16;
+            }
+
+            return upValue / (Math.Sqrt(downValueLeft) * Math.Sqrt(downValueRight));
+        }
+
+        private void DrawReportImage(string imgPath, List<double> avgDistances, double botValue, int imgHeight = 75)
+        {
+            // Create empty image:
+            Bitmap bitmapImg = new Bitmap(avgDistances.Count, imgHeight);
+
+            // Setting pixels:
+            for (int x = 0; x < bitmapImg.Width; x++)
+            {
+                double percent = avgDistances[x] / botValue;
+
+                Color columnColor = Color.FromArgb((int)(255 * (1 - percent)), (int)(255 * percent), 0);
+
+                for (int y = 0; y < bitmapImg.Height; y++)
+                {
+                    bitmapImg.SetPixel(x, y, columnColor);
+                }
+            }
+
+            // Saving img:
+            using (MemoryStream memory = new MemoryStream())
+            {
+                using (FileStream fs = new FileStream(imgPath, FileMode.Create, FileAccess.ReadWrite))
+                {
+                    bitmapImg.Save(memory, ImageFormat.Png);
+                    byte[] bytes = memory.ToArray();
+                    fs.Write(bytes, 0, bytes.Length);
+                }
+            }
         }
     }
 }
