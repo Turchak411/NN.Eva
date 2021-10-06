@@ -17,10 +17,15 @@ namespace NN.Eva.RL.Services
 
         private NetworkStructure _networkStructure;
 
-        /// <summary>
-        /// Local services
-        /// </summary>
+        private TrainingConfiguration _trainingConfiguration;
+
+        #region Local services
+
         private MemoryChecker _memoryChecker;
+
+        private DatasetGenerator _datasetGenerator;
+
+        #endregion
 
         /// <summary>
         /// Global current iterations
@@ -42,6 +47,7 @@ namespace NN.Eva.RL.Services
             _networkStructure = networkStructure;
 
             _memoryChecker = new MemoryChecker();
+            _datasetGenerator = new DatasetGenerator();
 
             if (!_memoryChecker.IsValid(FileManager.MemoryFolderPath + "//.clear//memoryClear.txt", networkStructure))
             {
@@ -154,12 +160,28 @@ namespace NN.Eva.RL.Services
 
         private void HandleAgentFailure(RLTrainingModel trainingModel)
         {
-            // TODO:
+            // Updating values for tails:
+            PriceFantomTail(trainingModel.FantomTail);
+            PenaltyMainTail(trainingModel.MainTail);
 
+            // Generate sets for Agent learning:
+            _datasetGenerator.CreateDataset(trainingModel.MainTail, trainingModel.FantomTail);
+
+            // TODO: re-train net
+            RetrainAgent();
 
             _net.SaveMemory(trainingModel.MemoryFullPath, _networkStructure);
 
             Console.WriteLine("Correcting success for Agent's memory!");
+        }
+
+        private void RetraingAgent()
+        {
+            TrainingConfiguration trainingConfiguration = new TrainingConfiguration
+            {
+                StartIteration = 0,
+                EndIteration = 
+            };
         }
 
         #endregion

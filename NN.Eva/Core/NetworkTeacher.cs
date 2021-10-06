@@ -16,7 +16,7 @@ namespace NN.Eva.Core
         private NetworkStructure _networkStructure;
 
         /// <summary>
-        /// Local services
+        /// Local service
         /// </summary>
         private MemoryChecker _memoryChecker;
 
