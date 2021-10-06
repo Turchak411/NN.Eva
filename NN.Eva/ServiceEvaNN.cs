@@ -150,6 +150,17 @@ namespace NN.Eva
             _networkTeacher.PrintLearningStatistic(trainingConfig, true);
         }
 
+        public void CheckDatasetsVectorsSimilarity(string inputDatasetFilename)
+        {
+            if (_networkTeacher == null)
+            {
+                Logger.LogError(ErrorType.OperationWithNonexistentNetwork, "Calculate statistic failed!");
+                return;
+            }
+
+            _networkTeacher.CheckDatasetsVectorsSimilarity(inputDatasetFilename);
+        }
+
         /// <summary>
         /// Backuping network's memory to db OR/AND local folder
         /// </summary>

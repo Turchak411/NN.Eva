@@ -15,6 +15,7 @@
   <ItemGroup>
     <PackageReference Include="Incubis.ProgressBar" Version="0.1.1" />
     <PackageReference Include="MySql.Data" Version="8.0.21" />
+    <PackageReference Include="System.Drawing.Common" Version="5.0.2" />
     <PackageReference Include="System.Management" Version="4.7.0" />
   </ItemGroup>
 
