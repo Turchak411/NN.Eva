@@ -4,6 +4,7 @@ using NN.Eva.Models;
 using NN.Eva.Services;
 using NN.Eva.RL.Services;
 using NN.Eva.RL.Models;
+using NN.Eva.Models.Database;
 
 namespace NN.Eva.RL
 {
@@ -17,7 +18,7 @@ namespace NN.Eva.RL
         /// Create RL-Agent
         /// </summary>
         /// <param name="trainingConfiguration">Only BProp available to agent retraining</param>
-        /// <param name="networkStructure"></param>
+        /// <param name="networkStructure">Network's structure</param>
         /// <returns>Returns success result of Agent creating</returns>
         public bool CreateAgent(TrainingConfiguration trainingConfiguration,
                                 NetworkStructure networkStructure)
@@ -42,6 +43,29 @@ namespace NN.Eva.RL
             else
             {
                 return false;
+            }
+        }
+
+        /// <summary>
+        /// Handling data by Agent
+        /// </summary>
+        /// <param name="environmentInteractionModel">Environment interaction model</param>
+        /// <returns>Vector-classes</returns>
+        public double[] UseAgent(RLWorkingModel environmentInteractionModel)
+        {
+            if (_RLManager == null)
+            {
+                Logger.LogError(ErrorType.TrainError, "Training failed! Please, create the Network first!");
+                return null;
+            }
+
+            try
+            {
+                return _RLManager.UseAgent(environmentInteractionModel);
+            }
+            catch
+            {
+                return null;
             }
         }
 
@@ -86,6 +110,92 @@ namespace NN.Eva.RL
                 stopWatch.Stop();
                 Console.WriteLine("Training tick failed!");
                 throw new Exception("Training tick failed!");
+            }
+        }
+
+        /// <summary>
+        /// Backuping Agent's memory to db OR/AND local folder
+        /// </summary>
+        /// <param name="memoryFolder"></param>
+        /// <param name="dbConfig"></param>
+        /// <param name="networkStructureInfo"></param>
+        /// <returns>State of operation success</returns>
+        public bool BackupMemory(string memoryFolder, DatabaseConfig dbConfig = null, string networkStructureInfo = "no information")
+        {
+            if (_RLManager == null)
+            {
+                Logger.LogError(ErrorType.OperationWithNonexistentNetwork, "Database memory backuping failed!");
+                return false;
+            }
+
+            try
+            {
+                if (_RLManager.CheckMemory())
+                {
+                    _RLManager.BackupMemory(memoryFolder, ".memory_backups", dbConfig, networkStructureInfo);
+                }
+                else
+                {
+                    return false;
+                }
+
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// Aborting agent's memory from database
+        /// </summary>
+        /// <param name="dbConfig"></param>
+        /// <returns>State of operation success</returns>
+        public bool DBMemoryAbort(DatabaseConfig dbConfig)
+        {
+            if (_RLManager == null)
+            {
+                Logger.LogError(ErrorType.OperationWithNonexistentNetwork, "Database memory aborting failed!");
+                return false;
+            }
+
+            try
+            {
+                _RLManager.DBMemoryAbort(dbConfig);
+
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// Loading agent's memory from database
+        /// </summary>
+        /// <param name="dbConfig"></param>
+        /// <param name="networkID"></param>
+        /// <param name="destinationMemoryFilePath"></param>
+        /// <returns></returns>
+        public bool DBMemoryLoad(DatabaseConfig dbConfig, Guid networkID, string destinationMemoryFilePath)
+        {
+            if (_RLManager == null)
+            {
+                Logger.LogError(ErrorType.OperationWithNonexistentNetwork, "Database memory loading failed!");
+                return false;
+            }
+
+            try
+            {
+                _RLManager.DBMemoryLoad(dbConfig, networkID, destinationMemoryFilePath);
+
+                return true;
+            }
+            catch
+            {
+                return false;
             }
         }
     }

@@ -6,6 +6,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\NN.Eva.RL\NN.Eva.RL.csproj" />
     <ProjectReference Include="..\NN.Eva\NN.Eva.csproj" />
   </ItemGroup>
 
