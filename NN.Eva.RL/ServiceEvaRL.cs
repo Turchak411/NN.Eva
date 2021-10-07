@@ -17,15 +17,13 @@ namespace NN.Eva.RL
         /// <summary>
         /// Create RL-Agent
         /// </summary>
-        /// <param name="trainingConfiguration">Only BProp available to agent retraining</param>
+        /// <param name="trainingConfiguration">*Only BProp available to agent retraining</param>
         /// <param name="networkStructure">Network's structure</param>
         /// <returns>Returns success result of Agent creating</returns>
-        public bool CreateAgent(TrainingConfiguration trainingConfiguration,
+        public bool CreateAgent(TrainingConfigurationLite trainingConfiguration,
                                 NetworkStructure networkStructure)
         {
             _networkStructure = networkStructure;
-
-            trainingConfiguration.TrainingAlgorithmType = TrainingAlgorithmType.BProp;
 
             if (FileManager.CheckMemoryIntegrity(networkStructure, trainingConfiguration.MemoryFolder))
             {

@@ -18,7 +18,7 @@ namespace NN.Eva.RL.Services
 
         private NetworkStructure _networkStructure;
 
-        private TrainingConfiguration _trainingConfiguration;
+        private TrainingConfigurationLite _trainingConfiguration;
 
         #region Local services
 
@@ -33,7 +33,7 @@ namespace NN.Eva.RL.Services
         /// </summary>
         public int IterationsDone { get; private set; } = 0;
 
-        public RLManager(NetworkStructure networkStructure, TrainingConfiguration trainingConfiguration)
+        public RLManager(NetworkStructure networkStructure, TrainingConfigurationLite trainingConfiguration)
         {
             _networkStructure = networkStructure;
             _trainingConfiguration = trainingConfiguration;
@@ -186,14 +186,20 @@ namespace NN.Eva.RL.Services
             Console.WriteLine("Re-training start...");
             try
             {
-                List<TrainingConfiguration> trainingConfigs = InitializeTrainingSubConfigs(_trainingConfiguration, iterationsToPause);
+                List<TrainingConfiguration> trainingConfigs = InitializeTrainingSubConfigs(iterationsToPause);
 
                 // Initialize teachers:
                 SingleNetworkTeacher netSubTeacher = new SingleNetworkTeacher
                 {
                     Network = _net,
                     NetworkStructure = _networkStructure,
-                    TrainingConfiguration = _trainingConfiguration,
+                    TrainingConfiguration = new TrainingConfiguration
+                    {
+                        TrainingAlgorithmType = TrainingAlgorithmType.BProp,
+                        StartIteration = _trainingConfiguration.StartIteration,
+                        EndIteration = _trainingConfiguration.EndIteration,
+                        MemoryFolder = _trainingConfiguration.MemoryFolder
+                    },
                     InputDatasets = inputDataSets.ToArray(),
                     OutputDatasets = outputDataSets.ToArray(),
                     SafeTrainingMode = !unsafeTrainingMode
@@ -246,23 +252,21 @@ namespace NN.Eva.RL.Services
             }
         }
 
-        private List<TrainingConfiguration> InitializeTrainingSubConfigs(TrainingConfiguration trainingConfig, int iterationsToPause)
+        private List<TrainingConfiguration> InitializeTrainingSubConfigs(int iterationsToPause)
         {
             List<TrainingConfiguration> trainingConfigs = new List<TrainingConfiguration>();
 
-            int currentIterPosition = trainingConfig.StartIteration;
+            int currentIterPosition = _trainingConfiguration.StartIteration;
             while (true)
             {
-                if (trainingConfig.EndIteration - currentIterPosition - 1 >= iterationsToPause)
+                if (_trainingConfiguration.EndIteration - currentIterPosition - 1 >= iterationsToPause)
                 {
                     var trainingConfigItem = new TrainingConfiguration
                     {
-                        TrainingAlgorithmType = trainingConfig.TrainingAlgorithmType,
+                        TrainingAlgorithmType = TrainingAlgorithmType.BProp,
                         StartIteration = currentIterPosition,
                         EndIteration = currentIterPosition + iterationsToPause,
-                        MemoryFolder = trainingConfig.MemoryFolder,
-                        InputDatasetFilename = trainingConfig.InputDatasetFilename,
-                        OutputDatasetFilename = trainingConfig.OutputDatasetFilename
+                        MemoryFolder = _trainingConfiguration.MemoryFolder
                     };
 
                     trainingConfigs.Add(trainingConfigItem);
@@ -273,12 +277,10 @@ namespace NN.Eva.RL.Services
                 {
                     var trainingConfigItem = new TrainingConfiguration
                     {
-                        TrainingAlgorithmType = trainingConfig.TrainingAlgorithmType,
+                        TrainingAlgorithmType = TrainingAlgorithmType.BProp,
                         StartIteration = currentIterPosition,
-                        EndIteration = trainingConfig.EndIteration,
-                        MemoryFolder = trainingConfig.MemoryFolder,
-                        InputDatasetFilename = trainingConfig.InputDatasetFilename,
-                        OutputDatasetFilename = trainingConfig.OutputDatasetFilename
+                        EndIteration = _trainingConfiguration.EndIteration,
+                        MemoryFolder = _trainingConfiguration.MemoryFolder
                     };
 
                     trainingConfigs.Add(trainingConfigItem);

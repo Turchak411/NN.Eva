@@ -1,6 +1,6 @@
 ﻿using System;
-using NN.Eva.Models;
 using NN.Eva.RL;
+using NN.Eva.Models;
 
 namespace NN.Eva.Test
 {
@@ -64,12 +64,10 @@ namespace NN.Eva.Test
                 Alpha = 5
             };
 
-            TrainingConfiguration trainConfig = new TrainingConfiguration
+            TrainingConfigurationLite trainConfig = new TrainingConfigurationLite
             {
                 StartIteration = 0,
                 EndIteration = 100,
-                InputDatasetFilename = "TrainingSets//inputSets.txt",
-                OutputDatasetFilename = "TrainingSets//outputSets.txt",
                 MemoryFolder = "Memory"
             };
 
@@ -83,7 +81,7 @@ namespace NN.Eva.Test
 
         private static void EnvironmentInteractionProcessStart()
         {
-            // *EnvironmentInteractionProcess here*
+            // *environment interaction process here*
         }
     }
 }
