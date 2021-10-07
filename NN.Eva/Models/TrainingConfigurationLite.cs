@@ -6,7 +6,7 @@ namespace NN.Eva.Models
         /// <summary>
         /// Start iteration
         /// </summary>
-        public int StartIteration { get; set; }
+        public int StartIteration { get; set; } = 0;
 
         /// <summary>
         /// End iteration

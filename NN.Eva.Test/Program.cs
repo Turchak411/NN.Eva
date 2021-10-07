@@ -66,7 +66,6 @@ namespace NN.Eva.Test
 
             TrainingConfigurationLite trainConfig = new TrainingConfigurationLite
             {
-                StartIteration = 0,
                 EndIteration = 100,
                 MemoryFolder = "Memory"
             };
