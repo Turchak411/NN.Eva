@@ -1,7 +1,7 @@
 ﻿using System;
 using NN.Eva.RL;
 using NN.Eva.Models;
-using NN.Eva.RL.Models;
+using NN.Eva.Models.RL;
 using System.Collections.Generic;
 
 namespace NN.Eva.Test
@@ -58,26 +58,27 @@ namespace NN.Eva.Test
         {
             ServiceEvaRL serviceEvaRL = new ServiceEvaRL();
 
-            // Agent = Deep Neural Network
-            NetworkStructure netStructure = new NetworkStructure
+            RLConfigModel configModel = new RLConfigModel
             {
-                InputVectorLength = 1,
-                NeuronsByLayers = new[] { 2, 1 }
+                ActionsCount = 2,
+                PositivePrice = 0.1,
+                NegativePrice = -0.1,
+                MainTailMaxLength = 2,
+                FantomTailMaxLength = 2
+            };
+
+            // Agent = Deep Neural Network
+            int dataVectorLength = 1;
+
+            NetworkStructure netStructure = new NetworkStructure(configModel, dataVectorLength)
+            {
+                NeuronsByLayers = new[] { 3, 3, 1 }
             };
 
             TrainingConfigurationLite trainConfig = new TrainingConfigurationLite
             {
-                EndIteration = 100,
+                EndIteration = 100000,
                 MemoryFolder = "Memory"
-            };
-
-            RLConfigModel configModel = new RLConfigModel
-            {
-                ActionsCount = 2,
-                PositivePrice = 1,
-                NegativePrice = -1,
-                MainTailMaxLength = 2,
-                FantomTailMaxLength = 2
             };
 
             bool creatingSucceed = serviceEvaRL.CreateAgent(trainConfig, configModel, netStructure);
@@ -122,6 +123,16 @@ namespace NN.Eva.Test
             while(true)
             {
                 double[] agentDecision = serviceEvaRL.TrainingTick(workingModel);
+
+                // If Agent currently retrained:
+                if(agentDecision == null)
+                {
+                    // Reset environment for new game:
+                    workingModel.CurrentEnvironment = new double[1] { 0 };
+
+                    // Re-ask Agent:
+                    agentDecision = serviceEvaRL.TrainingTick(workingModel);
+                }
 
                 // 0 - Grab another one
                 // 1 - Stop

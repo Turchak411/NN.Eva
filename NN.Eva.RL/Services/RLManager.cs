@@ -7,8 +7,8 @@ using NN.Eva.Core;
 using NN.Eva.Core.Database;
 using NN.Eva.Models;
 using NN.Eva.Models.Database;
-using NN.Eva.RL.Models;
 using NN.Eva.Services;
+using NN.Eva.Models.RL;
 
 namespace NN.Eva.RL.Services
 {
@@ -65,14 +65,14 @@ namespace NN.Eva.RL.Services
         {
             try 
             {
-                if(workingModel.CurrentEnvironment == workingModel.FailureEnvironment &&
+                if(Enumerable.SequenceEqual(workingModel.CurrentEnvironment, workingModel.FailureEnvironment) &&
                    withTraining)
                 {
                     HandleAgentFailure();
                     return null;
                 }
 
-                return Handle(workingModel);
+                return Handle(workingModel, withTraining);
             }
             catch (Exception ex)
             {
@@ -81,7 +81,7 @@ namespace NN.Eva.RL.Services
             }
         }
 
-        private double[] Handle(RLWorkingModel workingModel)
+        private double[] Handle(RLWorkingModel workingModel, bool withTraining = false)
         {
             string handlingErrorText = "";
             double[] agentQValues = new double[_configModel.ActionsCount];
@@ -100,17 +100,34 @@ namespace NN.Eva.RL.Services
             }
 
             // Writing to history tail:
+            // By-value coping environment array:
+            double[] newEnvironment = new double[workingModel.CurrentEnvironment.Length];
+            Array.Copy(workingModel.CurrentEnvironment, newEnvironment, workingModel.CurrentEnvironment.Length);
+
+            // User greedy strategy feature:
+            if (withTraining)
+            {
+                double chance = 0.1; // 10%
+                agentQValues = UseGreedyStrategy(agentQValues, chance);
+            }
+
             _configModel.MainTail.Add(
                 new RLTail
                 {
-                    Environment = workingModel.CurrentEnvironment,
+                    Environment = newEnvironment,
                     QValues = agentQValues,
                     ActionIndex = GetMaxIndex(agentQValues)
                 });
 
             if(_configModel.MainTail.Count > _configModel.MainTailMaxLength)
             {
-                _configModel.FantomTail.Add(_configModel.MainTail[0]);
+                _configModel.FantomTail.Add(
+                    new RLTail
+                    {
+                        Environment = _configModel.MainTail[0].Environment,
+                        QValues = _configModel.MainTail[0].QValues,
+                        ActionIndex = _configModel.MainTail[0].ActionIndex
+                    });
 
                 _configModel.MainTail.RemoveAt(0);
 
@@ -125,8 +142,7 @@ namespace NN.Eva.RL.Services
 
         private double[] ConcatArrays(double[] baseArray, double[] concatedArray)
         {
-            baseArray.ToList().AddRange(concatedArray);
-            return baseArray;
+            return baseArray.Concat(concatedArray).ToArray();
         }
 
         private int GetMaxIndex(double[] qValues)
@@ -142,6 +158,25 @@ namespace NN.Eva.RL.Services
             }
 
             return qValues.Length - 1;
+        }
+
+        private double[] UseGreedyStrategy(double[] values, double chance)
+        {
+            Random rnd = new Random();
+
+            if(rnd.NextDouble() < chance)
+            {
+                int fakeIndex = rnd.Next(values.Length);
+                int maxIndex = GetMaxIndex(values);
+
+                double temp = values[fakeIndex];
+                values[fakeIndex] = values[maxIndex];
+                values[maxIndex] = temp;
+
+                Console.WriteLine("сработала жадная стратегия");
+            }
+
+            return values;
         }
 
         private double[] GetNormalizedResultVector(double[] qValues)

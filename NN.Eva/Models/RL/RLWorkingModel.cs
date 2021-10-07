@@ -1,5 +1,5 @@
 ﻿
-namespace NN.Eva.RL.Models
+namespace NN.Eva.Models.RL
 {
     public class RLWorkingModel
     {

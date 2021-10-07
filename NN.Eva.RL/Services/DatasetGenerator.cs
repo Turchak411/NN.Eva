@@ -1,5 +1,6 @@
-﻿using NN.Eva.RL.Models;
+﻿using System.Linq;
 using System.Collections.Generic;
+using NN.Eva.Models.RL;
 
 namespace NN.Eva.RL.Services
 {
@@ -14,9 +15,14 @@ namespace NN.Eva.RL.Services
         {
             List<double[]> inputSets = new List<double[]>();
 
-            for(int i = 0; i < tail.Count; i++)
+            for (int i = 0; i < tail.Count; i++)
             {
-                inputSets.Add(tail[i].Environment);
+                for(int k = 0; k < tail[i].QValues.Length; k++)
+                {
+                    double[] actionsVectors = new double[tail[i].QValues.Length];
+                    actionsVectors[k] = 1;
+                    inputSets.Add(ConcatArrays(tail[i].Environment, actionsVectors));
+                }
             }
 
             return inputSets;
@@ -33,10 +39,18 @@ namespace NN.Eva.RL.Services
 
             for (int i = 0; i < tail.Count; i++)
             {
-                outputSets.Add(tail[i].QValues);
+                for (int k = 0; k < tail[i].QValues.Length; k++)
+                {
+                    outputSets.Add(new double[1] { tail[i].QValues[k] });
+                }
             }
 
             return outputSets;
+        }
+
+        private double[] ConcatArrays(double[] baseArray, double[] concatedArray)
+        {
+            return baseArray.Concat(concatedArray).ToArray();
         }
     }
 }

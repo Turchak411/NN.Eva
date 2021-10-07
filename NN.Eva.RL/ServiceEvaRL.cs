@@ -3,7 +3,7 @@ using System.Diagnostics;
 using NN.Eva.Models;
 using NN.Eva.Services;
 using NN.Eva.RL.Services;
-using NN.Eva.RL.Models;
+using NN.Eva.Models.RL;
 using NN.Eva.Models.Database;
 
 namespace NN.Eva.RL
