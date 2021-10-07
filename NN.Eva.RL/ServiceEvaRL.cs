@@ -16,19 +16,21 @@ namespace NN.Eva.RL
         /// <summary>
         /// Create RL-Agent
         /// </summary>
-        /// <param name="memoryFolderName"></param>
+        /// <param name="trainingConfiguration">Only BProp available to agent retraining</param>
         /// <param name="networkStructure"></param>
         /// <returns>Returns success result of Agent creating</returns>
-        public bool CreateAgent(string memoryFolderName,
+        public bool CreateAgent(TrainingConfiguration trainingConfiguration,
                                 NetworkStructure networkStructure)
         {
             _networkStructure = networkStructure;
 
-            if (FileManager.CheckMemoryIntegrity(networkStructure, memoryFolderName))
+            trainingConfiguration.TrainingAlgorithmType = TrainingAlgorithmType.BProp;
+
+            if (FileManager.CheckMemoryIntegrity(networkStructure, trainingConfiguration.MemoryFolder))
             {
                 try
                 {
-                    _RLManager = new RLManager(networkStructure);
+                    _RLManager = new RLManager(networkStructure, trainingConfiguration);
                 }
                 catch
                 {
@@ -46,9 +48,9 @@ namespace NN.Eva.RL
         /// <summary>
         /// Training tick for RL-Agent
         /// </summary>
-        /// <param name="trainingModel"></param>
+        /// <param name="workingModel"></param>
         /// <param name="processPriorityClass"></param>
-        public double[] TrainingTick(RLTrainingModel trainingModel, 
+        public double[] TrainingTick(RLWorkingModel workingModel,
                                      ProcessPriorityClass processPriorityClass = ProcessPriorityClass.Normal)
         {
             // Check for unexistent network:
@@ -66,9 +68,9 @@ namespace NN.Eva.RL
             Process thisProc = Process.GetCurrentProcess();
             thisProc.PriorityClass = processPriorityClass;
 
-            if (_RLManager.CheckMemory(trainingModel.MemoryFolder))
+            if (_RLManager.CheckMemory())
             {
-                double[] agentResult = _RLManager.UseAgent(trainingModel, true);
+                double[] agentResult = _RLManager.UseAgent(workingModel, true);
 
                 // Stopping timer and print spend time in [HH:MM:SS]:
                 stopWatch.Stop();

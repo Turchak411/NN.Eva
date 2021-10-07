@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using NN.Eva.Core;
 using NN.Eva.Core.Database;
 using NN.Eva.Models;
@@ -30,21 +31,12 @@ namespace NN.Eva.RL.Services
         /// <summary>
         /// Global current iterations
         /// </summary>
-        public int Iteration { get; private set; } = 0;
+        public int IterationsDone { get; private set; } = 0;
 
-        /// <summary>
-        /// Positive price for agent
-        /// </summary>
-        public double PositivePrice { get; set; }
-
-        /// <summary>
-        /// Negative price for agent
-        /// </summary>
-        public double NegativePrice { get; set; }
-
-        public RLManager(NetworkStructure networkStructure)
+        public RLManager(NetworkStructure networkStructure, TrainingConfiguration trainingConfiguration)
         {
             _networkStructure = networkStructure;
+            _trainingConfiguration = trainingConfiguration;
 
             _memoryChecker = new MemoryChecker();
             _datasetGenerator = new DatasetGenerator();
@@ -66,9 +58,7 @@ namespace NN.Eva.RL.Services
             }
         }
 
-        #region Training
-
-        public double[] UseAgent(RLTrainingModel trainingModel, bool withTraining = false)
+        public double[] UseAgent(RLWorkingModel trainingModel, bool withTraining = false)
         {
             try 
             {
@@ -88,17 +78,17 @@ namespace NN.Eva.RL.Services
             }
         }
 
-        private double[] Handle(RLTrainingModel trainingModel)
+        private double[] Handle(RLWorkingModel workingModel)
         {
             string handlingErrorText = "";
-            double[] agentQValues = new double[trainingModel.ActionsCount];
+            double[] agentQValues = new double[workingModel.ActionsCount];
 
             for(int i = 0; i < agentQValues.Length; i++)
             {
-                double[] actionsVector = new double[trainingModel.ActionsCount];
+                double[] actionsVector = new double[workingModel.ActionsCount];
                 actionsVector[i] = 1;
 
-                agentQValues[i] = _net.Handle((double[])trainingModel.CurrentEnvironment.Concat(actionsVector), ref handlingErrorText)[0];
+                agentQValues[i] = _net.Handle((double[])workingModel.CurrentEnvironment.Concat(actionsVector), ref handlingErrorText)[0];
             }
 
             if(handlingErrorText != "")
@@ -107,18 +97,18 @@ namespace NN.Eva.RL.Services
             }
 
             // Writing to history tail:
-            trainingModel.MainTail.Add(
+            workingModel.MainTail.Add(
                 new RLTail
                 {
-                    Environment = trainingModel.CurrentEnvironment,
+                    Environment = workingModel.CurrentEnvironment,
                     QValues = agentQValues,
                     ActionIndex = GetMaxIndex(agentQValues)
                 });
 
-            trainingModel.FantomTail.Add(trainingModel.MainTail[0]);
+            workingModel.FantomTail.Add(workingModel.MainTail[0]);
 
-            trainingModel.MainTail.RemoveAt(0);
-            trainingModel.FantomTail.RemoveAt(0);
+            workingModel.MainTail.RemoveAt(0);
+            workingModel.FantomTail.RemoveAt(0);
 
             return GetNormalizedResultVector(agentQValues);
         }
@@ -158,30 +148,148 @@ namespace NN.Eva.RL.Services
             return qValues;
         }
 
-        private void HandleAgentFailure(RLTrainingModel trainingModel)
+        #region Training
+
+        private void HandleAgentFailure(RLWorkingModel workingModel)
         {
             // Updating values for tails:
-            PriceFantomTail(trainingModel.FantomTail);
-            PenaltyMainTail(trainingModel.MainTail);
+            workingModel.FantomTail = UpdateTail(workingModel.FantomTail, workingModel.PositivePrice);
+            workingModel.MainTail = UpdateTail(workingModel.MainTail, workingModel.NegativePrice);
 
-            // Generate sets for Agent learning:
-            _datasetGenerator.CreateDataset(trainingModel.MainTail, trainingModel.FantomTail);
+            // Re-training agent:
+            RetrainAgent(_trainingConfiguration.EndIteration - _trainingConfiguration.StartIteration, workingModel, true);
 
-            // TODO: re-train net
-            RetrainAgent();
-
-            _net.SaveMemory(trainingModel.MemoryFullPath, _networkStructure);
+            // Save memory:
+            _net.SaveMemory(_trainingConfiguration.MemoryFolder + "//memory.txt", _networkStructure);
 
             Console.WriteLine("Correcting success for Agent's memory!");
         }
 
-        private void RetraingAgent()
+        private List<RLTail> UpdateTail(List<RLTail> tail, double changingValue)
         {
-            TrainingConfiguration trainingConfiguration = new TrainingConfiguration
+            for(int i = 0; i < tail.Count; i++)
             {
-                StartIteration = 0,
-                EndIteration = 
-            };
+                tail[i].QValues[tail[i].ActionIndex] += changingValue;
+            }
+
+            return tail;
+        }
+
+        private void RetrainAgent(int iterationsToPause, RLWorkingModel workingModel, bool unsafeTrainingMode = false)
+        {
+            IterationsDone += _trainingConfiguration.EndIteration - _trainingConfiguration.StartIteration;
+
+            // Generate sets for Agent learning:
+            List<double[]> inputDataSets = _datasetGenerator.CreateInputSets(workingModel.FantomTail.Concat(workingModel.MainTail).ToList());
+            List<double[]> outputDataSets = _datasetGenerator.CreateOutputSets(workingModel.FantomTail.Concat(workingModel.MainTail).ToList());
+
+            Console.WriteLine("Re-training start...");
+            try
+            {
+                List<TrainingConfiguration> trainingConfigs = InitializeTrainingSubConfigs(_trainingConfiguration, iterationsToPause);
+
+                // Initialize teachers:
+                SingleNetworkTeacher netSubTeacher = new SingleNetworkTeacher
+                {
+                    Network = _net,
+                    NetworkStructure = _networkStructure,
+                    TrainingConfiguration = _trainingConfiguration,
+                    InputDatasets = inputDataSets.ToArray(),
+                    OutputDatasets = outputDataSets.ToArray(),
+                    SafeTrainingMode = !unsafeTrainingMode
+                };
+
+                // Iteration multithreading train:
+                for (int j = 0; j < trainingConfigs.Count; j++)
+                {
+                    netSubTeacher.TrainingConfiguration = trainingConfigs[j];
+
+                    Thread thread = new Thread(netSubTeacher.Train);
+                    thread.Start();
+                    Wait(thread);
+
+                    if (!netSubTeacher.LastTrainingSuccess)
+                    {
+                        return;
+                    }
+
+                    if (j != trainingConfigs.Count - 1)
+                    {
+                        Console.WriteLine("Iterations already finished: " + iterationsToPause * (j + 1));
+                    }
+                    else
+                    {
+                        Console.WriteLine("Iterations already finished: " + _trainingConfiguration.EndIteration);
+                    }
+                }
+
+                // Проведение завершающих операций после обучения модели:
+                // В общем случае - получение данных обученной сети от "подучителя":
+                _net = netSubTeacher.Network;
+
+                Console.WriteLine("Re-training success!");
+            }
+            catch (Exception ex)
+            {
+                Logger.LogError(ErrorType.TrainError, ex);
+            }
+        }
+
+        private void Wait(Thread thread)
+        {
+            while (true)
+            {
+                if (!thread.IsAlive)
+                {
+                    break;
+                }
+            }
+        }
+
+        private List<TrainingConfiguration> InitializeTrainingSubConfigs(TrainingConfiguration trainingConfig, int iterationsToPause)
+        {
+            List<TrainingConfiguration> trainingConfigs = new List<TrainingConfiguration>();
+
+            int currentIterPosition = trainingConfig.StartIteration;
+            while (true)
+            {
+                if (trainingConfig.EndIteration - currentIterPosition - 1 >= iterationsToPause)
+                {
+                    var trainingConfigItem = new TrainingConfiguration
+                    {
+                        TrainingAlgorithmType = trainingConfig.TrainingAlgorithmType,
+                        StartIteration = currentIterPosition,
+                        EndIteration = currentIterPosition + iterationsToPause,
+                        MemoryFolder = trainingConfig.MemoryFolder,
+                        InputDatasetFilename = trainingConfig.InputDatasetFilename,
+                        OutputDatasetFilename = trainingConfig.OutputDatasetFilename
+                    };
+
+                    trainingConfigs.Add(trainingConfigItem);
+
+                    currentIterPosition += iterationsToPause;
+                }
+                else
+                {
+                    var trainingConfigItem = new TrainingConfiguration
+                    {
+                        TrainingAlgorithmType = trainingConfig.TrainingAlgorithmType,
+                        StartIteration = currentIterPosition,
+                        EndIteration = trainingConfig.EndIteration,
+                        MemoryFolder = trainingConfig.MemoryFolder,
+                        InputDatasetFilename = trainingConfig.InputDatasetFilename,
+                        OutputDatasetFilename = trainingConfig.OutputDatasetFilename
+                    };
+
+                    trainingConfigs.Add(trainingConfigItem);
+
+                    break;
+                }
+            }
+
+            Console.WriteLine("Train sub-configuration objects created!");
+
+            return trainingConfigs;
         }
 
         #endregion
@@ -193,15 +301,15 @@ namespace NN.Eva.RL.Services
         /// </summary>
         /// <param name="memoryFolder"></param>
         /// <returns></returns>
-        public bool CheckMemory(string memoryFolder = "Memory")
+        public bool CheckMemory()
         {
             bool isValid = true;
 
             Console.WriteLine("Start memory cheсking...");
 
             bool isCurrentNetMemoryValid = _networkStructure == null ?
-                _memoryChecker.IsFileNotCorrupted(memoryFolder + "//memory.txt")
-                : _memoryChecker.IsValid(memoryFolder + "//memory.txt", _networkStructure) &&
+                _memoryChecker.IsFileNotCorrupted(_trainingConfiguration.MemoryFolder + "//memory.txt")
+                : _memoryChecker.IsValid(_trainingConfiguration.MemoryFolder + "//memory.txt", _networkStructure) &&
                   FileManager.IsMemoryEqualsDefault("memory.txt");
 
             if (isCurrentNetMemoryValid)
@@ -242,7 +350,7 @@ namespace NN.Eva.RL.Services
             }
 
             // Creating path of backuped memory:
-            string backupedMemoryFoldersPath = $"{memoryFolder}//{backupsDirectoryName}//{DateTime.Now.Day}_{DateTime.Now.Month}_{DateTime.Now.Year}_{DateTime.Now.Ticks}_{Iteration}";
+            string backupedMemoryFoldersPath = $"{memoryFolder}//{backupsDirectoryName}//{DateTime.Now.Day}_{DateTime.Now.Month}_{DateTime.Now.Year}_{DateTime.Now.Ticks}_{IterationsDone}";
 
             // Check for already-existing sub-directory (trainCount-named):
             if (!Directory.Exists(backupedMemoryFoldersPath))
@@ -285,7 +393,7 @@ namespace NN.Eva.RL.Services
                 DBInserter dbInserter = new DBInserter(dbConfig);
 
                 // Saving networks info:
-                _net.SaveMemoryToDB(Iteration, networkStructure, userId, dbInserter);
+                _net.SaveMemoryToDB(IterationsDone, networkStructure, userId, dbInserter);
                 Console.WriteLine("Networks memory backuped to database successfully!");
             }
             catch (Exception ex)

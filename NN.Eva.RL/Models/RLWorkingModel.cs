@@ -2,17 +2,17 @@
 
 namespace NN.Eva.RL.Models
 {
-    public class RLTrainingModel
+    public class RLWorkingModel
     {
         /// <summary>
-        /// Memory folder
+        /// Positive price for agent
         /// </summary>
-        public string MemoryFolder { get; set; }
+        public double PositivePrice { get; set; } = 1;
 
         /// <summary>
-        /// Memory full path
+        /// Negative price for agent
         /// </summary>
-        public string MemoryFullPath { get; set; }
+        public double NegativePrice { get; set; } = -1;
 
         /// <summary>
         /// Current environment
