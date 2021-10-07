@@ -21,6 +21,7 @@ namespace NN.Eva.RL
         /// <param name="networkStructure">Network's structure</param>
         /// <returns>Returns success result of Agent creating</returns>
         public bool CreateAgent(TrainingConfigurationLite trainingConfiguration,
+                                RLConfigModel configModel,
                                 NetworkStructure networkStructure)
         {
             _networkStructure = networkStructure;
@@ -29,7 +30,7 @@ namespace NN.Eva.RL
             {
                 try
                 {
-                    _RLManager = new RLManager(networkStructure, trainingConfiguration);
+                    _RLManager = new RLManager(networkStructure, trainingConfiguration, configModel);
                 }
                 catch
                 {

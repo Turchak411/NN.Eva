@@ -20,6 +20,8 @@ namespace NN.Eva.RL.Services
 
         private TrainingConfigurationLite _trainingConfiguration;
 
+        private RLConfigModel _configModel;
+
         #region Local services
 
         private MemoryChecker _memoryChecker;
@@ -33,10 +35,11 @@ namespace NN.Eva.RL.Services
         /// </summary>
         public int IterationsDone { get; private set; } = 0;
 
-        public RLManager(NetworkStructure networkStructure, TrainingConfigurationLite trainingConfiguration)
+        public RLManager(NetworkStructure networkStructure, TrainingConfigurationLite trainingConfiguration, RLConfigModel configModel)
         {
             _networkStructure = networkStructure;
             _trainingConfiguration = trainingConfiguration;
+            _configModel = configModel;
 
             _memoryChecker = new MemoryChecker();
             _datasetGenerator = new DatasetGenerator();
@@ -58,18 +61,18 @@ namespace NN.Eva.RL.Services
             }
         }
 
-        public double[] UseAgent(RLWorkingModel trainingModel, bool withTraining = false)
+        public double[] UseAgent(RLWorkingModel workingModel, bool withTraining = false)
         {
             try 
             {
-                if(trainingModel.CurrentEnvironment == trainingModel.FailureEnvironment &&
+                if(workingModel.CurrentEnvironment == workingModel.FailureEnvironment &&
                    withTraining)
                 {
-                    HandleAgentFailure(trainingModel);
+                    HandleAgentFailure();
                     return null;
                 }
 
-                return Handle(trainingModel);
+                return Handle(workingModel);
             }
             catch (Exception ex)
             {
@@ -81,11 +84,11 @@ namespace NN.Eva.RL.Services
         private double[] Handle(RLWorkingModel workingModel)
         {
             string handlingErrorText = "";
-            double[] agentQValues = new double[workingModel.ActionsCount];
+            double[] agentQValues = new double[_configModel.ActionsCount];
 
             for(int i = 0; i < agentQValues.Length; i++)
             {
-                double[] actionsVector = new double[workingModel.ActionsCount];
+                double[] actionsVector = new double[_configModel.ActionsCount];
                 actionsVector[i] = 1;
 
                 agentQValues[i] = _net.Handle((double[])workingModel.CurrentEnvironment.Concat(actionsVector), ref handlingErrorText)[0];
@@ -97,7 +100,7 @@ namespace NN.Eva.RL.Services
             }
 
             // Writing to history tail:
-            workingModel.MainTail.Add(
+            _configModel.MainTail.Add(
                 new RLTail
                 {
                     Environment = workingModel.CurrentEnvironment,
@@ -105,10 +108,10 @@ namespace NN.Eva.RL.Services
                     ActionIndex = GetMaxIndex(agentQValues)
                 });
 
-            workingModel.FantomTail.Add(workingModel.MainTail[0]);
+            _configModel.FantomTail.Add(_configModel.MainTail[0]);
 
-            workingModel.MainTail.RemoveAt(0);
-            workingModel.FantomTail.RemoveAt(0);
+            _configModel.MainTail.RemoveAt(0);
+            _configModel.FantomTail.RemoveAt(0);
 
             return GetNormalizedResultVector(agentQValues);
         }
@@ -150,14 +153,14 @@ namespace NN.Eva.RL.Services
 
         #region Training
 
-        private void HandleAgentFailure(RLWorkingModel workingModel)
+        private void HandleAgentFailure()
         {
             // Updating values for tails:
-            workingModel.FantomTail = UpdateTail(workingModel.FantomTail, workingModel.PositivePrice);
-            workingModel.MainTail = UpdateTail(workingModel.MainTail, workingModel.NegativePrice);
+            _configModel.FantomTail = UpdateTail(_configModel.FantomTail, _configModel.PositivePrice);
+            _configModel.MainTail = UpdateTail(_configModel.MainTail, _configModel.NegativePrice);
 
             // Re-training agent:
-            RetrainAgent(_trainingConfiguration.EndIteration - _trainingConfiguration.StartIteration, workingModel, true);
+            RetrainAgent(_trainingConfiguration.EndIteration - _trainingConfiguration.StartIteration, true);
 
             // Save memory:
             _net.SaveMemory(_trainingConfiguration.MemoryFolder + "//memory.txt", _networkStructure);
@@ -175,13 +178,13 @@ namespace NN.Eva.RL.Services
             return tail;
         }
 
-        private void RetrainAgent(int iterationsToPause, RLWorkingModel workingModel, bool unsafeTrainingMode = false)
+        private void RetrainAgent(int iterationsToPause, bool unsafeTrainingMode = false)
         {
             IterationsDone += _trainingConfiguration.EndIteration - _trainingConfiguration.StartIteration;
 
             // Generate sets for Agent learning:
-            List<double[]> inputDataSets = _datasetGenerator.CreateInputSets(workingModel.FantomTail.Concat(workingModel.MainTail).ToList());
-            List<double[]> outputDataSets = _datasetGenerator.CreateOutputSets(workingModel.FantomTail.Concat(workingModel.MainTail).ToList());
+            List<double[]> inputDataSets = _datasetGenerator.CreateInputSets(_configModel.FantomTail.Concat(_configModel.MainTail).ToList());
+            List<double[]> outputDataSets = _datasetGenerator.CreateOutputSets(_configModel.FantomTail.Concat(_configModel.MainTail).ToList());
 
             Console.WriteLine("Re-training start...");
             try

@@ -1,6 +1,8 @@
 ﻿using System;
 using NN.Eva.RL;
 using NN.Eva.Models;
+using NN.Eva.RL.Models;
+using System.Collections.Generic;
 
 namespace NN.Eva.Test
 {
@@ -60,7 +62,7 @@ namespace NN.Eva.Test
             NetworkStructure netStructure = new NetworkStructure
             {
                 InputVectorLength = 10,
-                NeuronsByLayers = new[] { 230, 180, 160, 80, 1 },
+                NeuronsByLayers = new[] { 2, 1 },
                 Alpha = 5
             };
 
@@ -70,17 +72,85 @@ namespace NN.Eva.Test
                 MemoryFolder = "Memory"
             };
 
-            bool creatingSucceed = serviceEvaRL.CreateAgent(trainConfig, netStructure);
+            RLConfigModel configModel = new RLConfigModel
+            {
+                ActionsCount = 2,
+                PositivePrice = 1,
+                NegativePrice = -1,
+            };
+
+            bool creatingSucceed = serviceEvaRL.CreateAgent(trainConfig, configModel, netStructure);
 
             if (creatingSucceed)
             {
-                EnvironmentInteractionProcessStart();
+                EnvironmentInteractionProcessStart(serviceEvaRL);
             }
         }
 
-        private static void EnvironmentInteractionProcessStart()
+        private static void EnvironmentInteractionProcessStart(ServiceEvaRL serviceEvaRL)
         {
-            // *environment interaction process here*
+            // Black Jack example:
+            // In this example failure environment will be single value-sum, not vector of parameters, when Agent "dies"/fails
+            // Agent's decisions will be: Grab another one & Stop
+
+            RLWorkingModel workingModel = new RLWorkingModel
+            {
+                CurrentEnvironment = new double[1] { 0 }, // Values sum
+                FailureEnvironment = new double[1] { 21 } // End game sum
+            };
+
+            List<int> cardValuesPull = new List<int>()
+            {
+                2, 2, 2, 2,
+                3, 3, 3, 3,
+                4, 4, 4, 4,
+                5, 5, 5, 5,
+                6, 6, 6, 6,
+                7, 7, 7, 7,
+                8, 8, 8, 8,
+                9, 9, 9, 9,
+                10, 10, 10, 10,
+                2, 2, 2, 2,
+                3, 3, 3, 3,
+                4, 4, 4, 4,
+                11, 11, 11, 11
+            };
+
+            Random rnd = new Random(DateTime.Now.Millisecond);
+
+            while(true)
+            {
+                double[] agentDecision = serviceEvaRL.TrainingTick(workingModel);
+
+                // 0 - Grab another one
+                // 1 - Stop
+                if(agentDecision[0] > agentDecision[1])
+                {
+                    // Grab another one
+
+                    // Pull out another card:
+                    int cardValue = cardValuesPull[rnd.Next(cardValuesPull.Count)];
+
+                    Console.WriteLine("Agent wants to grab another one card... Card value is " + cardValue + ".");
+
+                    // Updating environment:
+                    workingModel.CurrentEnvironment[0] += cardValue;
+
+                    Console.WriteLine("Current sum is: {0:f1}", workingModel.CurrentEnvironment[0]);
+
+                    // Checking for game ending:
+                    if(workingModel.CurrentEnvironment[0] > workingModel.FailureEnvironment[0])
+                    {
+                        Console.WriteLine("Value overflowed!\nGame end.");
+                    }
+                }
+                else
+                {
+                    // Stop
+                    Console.WriteLine("Agent wants to stop.\nGame end.");
+                    break;
+                }
+            }
         }
     }
 }
