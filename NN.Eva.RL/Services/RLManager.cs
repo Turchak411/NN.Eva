@@ -77,7 +77,7 @@ namespace NN.Eva.RL.Services
             catch (Exception ex)
             {
                 Logger.LogError(ErrorType.TrainError, ex);
-                return new double[_networkStructure.NeuronsByLayers[_networkStructure.NeuronsByLayers.Length - 1]];
+                return new double[_configModel.ActionsCount];
             }
         }
 
@@ -91,7 +91,7 @@ namespace NN.Eva.RL.Services
                 double[] actionsVector = new double[_configModel.ActionsCount];
                 actionsVector[i] = 1;
 
-                agentQValues[i] = _net.Handle((double[])workingModel.CurrentEnvironment.Concat(actionsVector), ref handlingErrorText)[0];
+                agentQValues[i] = _net.Handle(ConcatArrays(workingModel.CurrentEnvironment, actionsVector), ref handlingErrorText)[0];
             }
 
             if(handlingErrorText != "")
@@ -108,12 +108,25 @@ namespace NN.Eva.RL.Services
                     ActionIndex = GetMaxIndex(agentQValues)
                 });
 
-            _configModel.FantomTail.Add(_configModel.MainTail[0]);
+            if(_configModel.MainTail.Count > _configModel.MainTailMaxLength)
+            {
+                _configModel.FantomTail.Add(_configModel.MainTail[0]);
 
-            _configModel.MainTail.RemoveAt(0);
-            _configModel.FantomTail.RemoveAt(0);
+                _configModel.MainTail.RemoveAt(0);
+
+                if(_configModel.FantomTail.Count > _configModel.FantomTailMaxLength)
+                {
+                    _configModel.FantomTail.RemoveAt(0);
+                }
+            }
 
             return GetNormalizedResultVector(agentQValues);
+        }
+
+        private double[] ConcatArrays(double[] baseArray, double[] concatedArray)
+        {
+            baseArray.ToList().AddRange(concatedArray);
+            return baseArray;
         }
 
         private int GetMaxIndex(double[] qValues)
@@ -145,7 +158,7 @@ namespace NN.Eva.RL.Services
 
             for(int i = 0; i < qValues.Length; i++)
             {
-                qValues[i] = (qValues[i] - minValue) / (maxValue - minValue);
+                qValues[i] = (qValues[i] - minValue) / (maxValue - minValue + 1);
             }
 
             return qValues;

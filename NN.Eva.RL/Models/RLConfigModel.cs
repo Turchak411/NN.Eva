@@ -20,9 +20,19 @@ namespace NN.Eva.RL.Models
         public int ActionsCount { get; set; }
 
         /// <summary>
+        /// Main tail's max length
+        /// </summary>
+        public int MainTailMaxLength { get; set; }
+
+        /// <summary>
         /// Main training tail (failed actions)
         /// </summary>
         public List<RLTail> MainTail { get; set; } = new List<RLTail>();
+
+        /// <summary>
+        /// Fantom tail's max length
+        /// </summary>
+        public int FantomTailMaxLength { get; set; }
 
         /// <summary>
         /// Fantom training tail (successed actions)

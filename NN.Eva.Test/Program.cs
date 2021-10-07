@@ -61,9 +61,8 @@ namespace NN.Eva.Test
             // Agent = Deep Neural Network
             NetworkStructure netStructure = new NetworkStructure
             {
-                InputVectorLength = 10,
-                NeuronsByLayers = new[] { 2, 1 },
-                Alpha = 5
+                InputVectorLength = 1,
+                NeuronsByLayers = new[] { 2, 1 }
             };
 
             TrainingConfigurationLite trainConfig = new TrainingConfigurationLite
@@ -77,6 +76,8 @@ namespace NN.Eva.Test
                 ActionsCount = 2,
                 PositivePrice = 1,
                 NegativePrice = -1,
+                MainTailMaxLength = 2,
+                FantomTailMaxLength = 2
             };
 
             bool creatingSucceed = serviceEvaRL.CreateAgent(trainConfig, configModel, netStructure);
@@ -124,7 +125,7 @@ namespace NN.Eva.Test
 
                 // 0 - Grab another one
                 // 1 - Stop
-                if(agentDecision[0] > agentDecision[1])
+                if(agentDecision[0] >= agentDecision[1])
                 {
                     // Grab another one
 
@@ -136,11 +137,19 @@ namespace NN.Eva.Test
                     // Updating environment:
                     workingModel.CurrentEnvironment[0] += cardValue;
 
-                    Console.WriteLine("Current sum is: {0:f1}", workingModel.CurrentEnvironment[0]);
+                    Console.WriteLine("Current sum is: {0:f0}", workingModel.CurrentEnvironment[0]);
 
-                    // Checking for game ending:
-                    if(workingModel.CurrentEnvironment[0] > workingModel.FailureEnvironment[0])
+                    // Check for game ending
+                    if (workingModel.CurrentEnvironment[0] == workingModel.FailureEnvironment[0])
                     {
+                        Console.WriteLine("Agent won!\nGame end.");
+                        break;
+                    }
+
+                    // Checking for value overflowing:
+                    if (workingModel.CurrentEnvironment[0] > workingModel.FailureEnvironment[0])
+                    {
+                        workingModel.CurrentEnvironment[0] = workingModel.FailureEnvironment[0];
                         Console.WriteLine("Value overflowed!\nGame end.");
                     }
                 }
@@ -151,6 +160,8 @@ namespace NN.Eva.Test
                     break;
                 }
             }
+
+
         }
     }
 }
