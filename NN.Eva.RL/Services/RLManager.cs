@@ -21,7 +21,7 @@ namespace NN.Eva.RL.Services
 
         private TrainingConfigurationLite _trainingConfiguration;
 
-        private RLConfigModel _configModel;
+        private RLConfigModelTraining _configModel;
 
         #region Local services
 
@@ -36,11 +36,36 @@ namespace NN.Eva.RL.Services
         /// </summary>
         public int IterationsDone { get; private set; } = 0;
 
-        public RLManager(NetworkStructure networkStructure, TrainingConfigurationLite trainingConfiguration, RLConfigModel configModel)
+        public RLManager(NetworkStructure networkStructure, RLConfigModelTraining configModel, TrainingConfigurationLite trainingConfiguration)
         {
             _networkStructure = networkStructure;
             _trainingConfiguration = trainingConfiguration;
             _configModel = configModel;
+
+            _memoryChecker = new MemoryChecker();
+            _datasetGenerator = new DatasetGenerator();
+
+            if (!_memoryChecker.IsValid(FileManager.MemoryFolderPath + "//.clear//memoryClear.txt", networkStructure))
+            {
+                Logger.LogError(ErrorType.MemoryInitializeError);
+                return;
+            }
+
+            try
+            {
+                // Ицициализация сети по одинаковому шаблону:
+                _net = new NeuralNetwork(networkStructure.NeuronsByLayers, "memory.txt", networkStructure.Alpha);
+            }
+            catch (Exception ex)
+            {
+                Logger.LogError(ErrorType.MemoryInitializeError, ex);
+            }
+        }
+
+        public RLManager(NetworkStructure networkStructure, RLConfigModel RLConfigModel)
+        {
+            _networkStructure = networkStructure;
+            _configModel = new RLConfigModelTraining(RLConfigModel);
 
             _memoryChecker = new MemoryChecker();
             _datasetGenerator = new DatasetGenerator();
@@ -69,7 +94,15 @@ namespace NN.Eva.RL.Services
                 if(Enumerable.SequenceEqual(workingModel.CurrentEnvironment, workingModel.FailureEnvironment) &&
                    withTraining)
                 {
-                    HandleAgentFailure();
+                    try
+                    {
+                        HandleAgentFailure();
+                    }
+                    catch (Exception ex)
+                    {
+                        throw ex;
+                    }
+
                     return null;
                 }
 
@@ -97,22 +130,20 @@ namespace NN.Eva.RL.Services
 
             if(handlingErrorText != "")
             {
-                Logger.LogError(ErrorType.TrainError, handlingErrorText);
+                Logger.LogError(ErrorType.UnknownError, handlingErrorText);
             }
 
-            // Writing to history tail:
-            // By-value coping environment array:
-            double[] newEnvironment = new double[workingModel.CurrentEnvironment.Length];
-            Array.Copy(workingModel.CurrentEnvironment, newEnvironment, workingModel.CurrentEnvironment.Length);
-
-            // User greedy strategy feature:
             if (withTraining)
             {
-                double chance = 0.04; // 4%
-                agentQValues = UseGreedyStrategy(agentQValues, chance);
-            }
+                // By-value coping environment array:
+                double[] newEnvironment = new double[workingModel.CurrentEnvironment.Length];
+                Array.Copy(workingModel.CurrentEnvironment, newEnvironment, workingModel.CurrentEnvironment.Length);
 
-            _configModel.MainTail.Add(
+                // User greedy strategy feature:
+                agentQValues = UseGreedyStrategy(agentQValues);
+
+                // Writing to history tail:
+                _configModel.MainTail.Add(
                 new RLTail
                 {
                     Environment = newEnvironment,
@@ -120,25 +151,26 @@ namespace NN.Eva.RL.Services
                     ActionIndex = GetMaxIndex(agentQValues)
                 });
 
-            if(_configModel.MainTail.Count > _configModel.MainTailMaxLength)
-            {
-                _configModel.FantomTail.Add(
-                    new RLTail
-                    {
-                        Environment = _configModel.MainTail[0].Environment,
-                        QValues = _configModel.MainTail[0].QValues,
-                        ActionIndex = _configModel.MainTail[0].ActionIndex
-                    });
-
-                _configModel.MainTail.RemoveAt(0);
-
-                if(_configModel.FantomTail.Count > _configModel.FantomTailMaxLength)
+                if (_configModel.MainTail.Count > _configModel.MainTailMaxLength)
                 {
-                    _configModel.FantomTail.RemoveAt(0);
+                    _configModel.FantomTail.Add(
+                        new RLTail
+                        {
+                            Environment = _configModel.MainTail[0].Environment,
+                            QValues = _configModel.MainTail[0].QValues,
+                            ActionIndex = _configModel.MainTail[0].ActionIndex
+                        });
+
+                    _configModel.MainTail.RemoveAt(0);
+
+                    if (_configModel.FantomTail.Count > _configModel.FantomTailMaxLength)
+                    {
+                        _configModel.FantomTail.RemoveAt(0);
+                    }
                 }
             }
 
-            return GetNormalizedResultVector(agentQValues);
+            return agentQValues;
         }
 
         private int GetMaxIndex(double[] qValues)
@@ -147,7 +179,7 @@ namespace NN.Eva.RL.Services
 
             for(int i = 0; i < qValues.Length - 1; i++)
             {
-                if(qValues[i] != maxValue)
+                if(qValues[i] == maxValue)
                 {
                     return i;
                 }
@@ -156,11 +188,11 @@ namespace NN.Eva.RL.Services
             return qValues.Length - 1;
         }
 
-        private double[] UseGreedyStrategy(double[] values, double chance)
+        private double[] UseGreedyStrategy(double[] values)
         {
             Random rnd = new Random();
 
-            if(rnd.NextDouble() < chance)
+            if(rnd.NextDouble() < _configModel.GreedyChance)
             {
                 int fakeIndex = rnd.Next(values.Length);
                 int maxIndex = GetMaxIndex(values);
@@ -169,42 +201,32 @@ namespace NN.Eva.RL.Services
                 values[fakeIndex] = values[maxIndex];
                 values[maxIndex] = temp;
 
-                Console.WriteLine("сработала жадная стратегия");
+                Console.WriteLine("Used Greedy Strategy!");
             }
 
             return values;
-        }
-
-        private double[] GetNormalizedResultVector(double[] qValues)
-        {
-            double minValueOrig = qValues.Min();
-
-            for (int i = 0; i < qValues.Length; i++)
-            {
-                qValues[i] -= minValueOrig;
-            }
-
-            double minValue = qValues.Min();
-            double maxValue = qValues.Max();
-
-            for(int i = 0; i < qValues.Length; i++)
-            {
-                qValues[i] = (qValues[i] - minValue) / (maxValue - minValue + 1);
-            }
-
-            return qValues;
         }
 
         #region Training
 
         private void HandleAgentFailure()
         {
+            if(_trainingConfiguration == null)
+            {
+                Logger.LogError(ErrorType.NoTrainingConfiguration);
+                throw new Exception("No training configuration!");
+            }
+
             // Updating values for tails:
             _configModel.FantomTail = UpdateTail(_configModel.FantomTail, _configModel.PositivePrice);
             _configModel.MainTail = UpdateTail(_configModel.MainTail, _configModel.NegativePrice);
 
             // Re-training agent:
             RetrainAgent(_trainingConfiguration.EndIteration - _trainingConfiguration.StartIteration, true);
+
+            // Clear tails:
+            _configModel.MainTail = new List<RLTail>();
+            _configModel.FantomTail = new List<RLTail>();
 
             // Save memory:
             _net.SaveMemory(_trainingConfiguration.MemoryFolder + "//memory.txt", _networkStructure);
@@ -217,6 +239,16 @@ namespace NN.Eva.RL.Services
             for(int i = 0; i < tail.Count; i++)
             {
                 tail[i].QValues[tail[i].ActionIndex] += changingValue;
+
+                if(tail[i].QValues[tail[i].ActionIndex] < 0)
+                {
+                    tail[i].QValues[tail[i].ActionIndex] = 0;
+                }
+
+                if (tail[i].QValues[tail[i].ActionIndex] > 1)
+                {
+                    tail[i].QValues[tail[i].ActionIndex] = 1;
+                }
             }
 
             return tail;

@@ -15,14 +15,14 @@ namespace NN.Eva.RL
         private NetworkStructure _networkStructure = null;
 
         /// <summary>
-        /// Create RL-Agent
+        /// Create RL-Agent for training
         /// </summary>
         /// <param name="trainingConfiguration">*Only BProp available to agent retraining</param>
         /// <param name="networkStructure">Network's structure</param>
         /// <returns>Returns success result of Agent creating</returns>
-        public bool CreateAgent(TrainingConfigurationLite trainingConfiguration,
-                                RLConfigModel configModel,
-                                NetworkStructure networkStructure)
+        public bool CreateAgent(RLConfigModelTraining configModel,
+                                NetworkStructure networkStructure,
+                                TrainingConfigurationLite trainingConfiguration)
         {
             _networkStructure = networkStructure;
 
@@ -30,7 +30,39 @@ namespace NN.Eva.RL
             {
                 try
                 {
-                    _RLManager = new RLManager(networkStructure, trainingConfiguration, configModel);
+                    _RLManager = new RLManager(networkStructure, configModel, trainingConfiguration);
+                }
+                catch
+                {
+                    return false;
+                }
+
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// Create RL-Agent
+        /// </summary>
+        /// <param name="configModel">*</param>
+        /// <param name="networkStructure">Network's structure</param>
+        /// <param name="memoryFolder">Folder with Network's memory</param>
+        /// <returns>Returns success result of Agent creating</returns>
+        public bool CreateAgent(RLConfigModel configModel,
+                                NetworkStructure networkStructure,
+                                string memoryFolder)
+        {
+            _networkStructure = networkStructure;
+
+            if (FileManager.CheckMemoryIntegrity(networkStructure, memoryFolder))
+            {
+                try
+                {
+                    _RLManager = new RLManager(networkStructure, configModel);
                 }
                 catch
                 {
@@ -93,7 +125,16 @@ namespace NN.Eva.RL
 
             if (_RLManager.CheckMemory())
             {
-                double[] agentResult = _RLManager.UseAgent(workingModel, true);
+                double[] agentResult;
+
+                try
+                {
+                    agentResult = _RLManager.UseAgent(workingModel, true);
+                }
+                catch(Exception ex)
+                {
+                    throw ex;
+                }
 
                 // Stopping timer and print spend time in [HH:MM:SS]:
                 stopWatch.Stop();

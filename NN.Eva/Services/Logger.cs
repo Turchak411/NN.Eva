@@ -118,6 +118,9 @@ namespace NN.Eva.Services
                 case ErrorType.TrainError:
                     errorText = "Network training error!";
                     break;
+                case ErrorType.HandleError:
+                    errorText = "Network handling error!";
+                    break;
                 case ErrorType.DBConnectionError:
                     errorText = "Database connection error!";
                     break;
@@ -135,6 +138,9 @@ namespace NN.Eva.Services
                     break;
                 case ErrorType.OperationWithNonexistentNetwork:
                     errorText = "Error in operation with nonexistent network! Please, create the Network first!";
+                    break;
+                case ErrorType.NoTrainingConfiguration:
+                    errorText = "Error: No training configuration!";
                     break;
                 case ErrorType.UnknownError:
                 default:

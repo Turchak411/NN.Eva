@@ -12,9 +12,14 @@ namespace NN.Eva.Models
 
         public NetworkStructure() { }
 
-        public NetworkStructure(RLConfigModel rlConfigModel, int dataVectorLength)
+        public NetworkStructure(RLConfigModel rlConfigModel, int inputDataVectorLength)
         {
-            InputVectorLength = rlConfigModel.ActionsCount + dataVectorLength;
+            InputVectorLength = rlConfigModel.ActionsCount + inputDataVectorLength;
+        }
+
+        public NetworkStructure(RLConfigModelTraining rlConfigModel, int inputDataVectorLength)
+        {
+            InputVectorLength = rlConfigModel.ActionsCount + inputDataVectorLength;
         }
     }
 }
