@@ -108,7 +108,7 @@ namespace NN.Eva.RL.Services
             // User greedy strategy feature:
             if (withTraining)
             {
-                double chance = 0.1; // 10%
+                double chance = 0.04; // 4%
                 agentQValues = UseGreedyStrategy(agentQValues, chance);
             }
 
