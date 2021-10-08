@@ -9,6 +9,7 @@ using NN.Eva.Models;
 using NN.Eva.Models.Database;
 using NN.Eva.Services;
 using NN.Eva.Models.RL;
+using NN.Eva.Extensions;
 
 namespace NN.Eva.RL.Services
 {
@@ -91,7 +92,7 @@ namespace NN.Eva.RL.Services
                 double[] actionsVector = new double[_configModel.ActionsCount];
                 actionsVector[i] = 1;
 
-                agentQValues[i] = _net.Handle(ConcatArrays(workingModel.CurrentEnvironment, actionsVector), ref handlingErrorText)[0];
+                agentQValues[i] = _net.Handle(workingModel.CurrentEnvironment.ConcatArray(actionsVector), ref handlingErrorText)[0];
             }
 
             if(handlingErrorText != "")
@@ -138,11 +139,6 @@ namespace NN.Eva.RL.Services
             }
 
             return GetNormalizedResultVector(agentQValues);
-        }
-
-        private double[] ConcatArrays(double[] baseArray, double[] concatedArray)
-        {
-            return baseArray.Concat(concatedArray).ToArray();
         }
 
         private int GetMaxIndex(double[] qValues)

@@ -1,6 +1,6 @@
-﻿using System.Linq;
+﻿using NN.Eva.Models.RL;
+using NN.Eva.Extensions;
 using System.Collections.Generic;
-using NN.Eva.Models.RL;
 
 namespace NN.Eva.RL.Services
 {
@@ -21,7 +21,7 @@ namespace NN.Eva.RL.Services
                 {
                     double[] actionsVectors = new double[tail[i].QValues.Length];
                     actionsVectors[k] = 1;
-                    inputSets.Add(ConcatArrays(tail[i].Environment, actionsVectors));
+                    inputSets.Add(tail[i].Environment.ConcatArray(actionsVectors));
                 }
             }
 
@@ -46,11 +46,6 @@ namespace NN.Eva.RL.Services
             }
 
             return outputSets;
-        }
-
-        private double[] ConcatArrays(double[] baseArray, double[] concatedArray)
-        {
-            return baseArray.Concat(concatedArray).ToArray();
         }
     }
 }
