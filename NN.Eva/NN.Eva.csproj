@@ -9,7 +9,7 @@
     <PackageProjectUrl>https://github.com/Turchak411/NN.Eva</PackageProjectUrl>
     <PackageTags>AI, Artificial Intelligence, ML, MachineLearning, NN, NeuralNetworks, FeedForwad NeuralNetwork</PackageTags>
     <RepositoryUrl>https://github.com/Turchak411/NN.Eva</RepositoryUrl>
-    <AssemblyVersion>1.0.3.2</AssemblyVersion>
+    <AssemblyVersion>1.0.3.3</AssemblyVersion>
   </PropertyGroup>
 
   <ItemGroup>
