@@ -247,8 +247,25 @@ namespace NN.Eva.Core
 
             DatasetChecker datasetChecker = new DatasetChecker();
 
+            string errorMessage = "";
+            bool isDatasetsRowsCountEquals = datasetChecker.CheckTrainingSetsCounts(ref errorMessage, inputDatasetFilename, outputDatasetFilename);
+
+            if (isDatasetsRowsCountEquals)
+            {
+                Console.ForegroundColor = ConsoleColor.Green;
+                Console.WriteLine("Dataset's rows counts is valid!");
+            }
+            else
+            {
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine($"Dataset's rows counts is invalid!");
+                Console.WriteLine(errorMessage);
+            }
+
+            Console.ForegroundColor = ConsoleColor.Gray;
+
             return CheckSingleDataset(inputDatasetFilename, datasetChecker, networkStructure, true) &&
-                   CheckSingleDataset(outputDatasetFilename, datasetChecker, networkStructure, false);
+                   CheckSingleDataset(outputDatasetFilename, datasetChecker, networkStructure, false) && isDatasetsRowsCountEquals;
         }
 
         public bool CheckSingleDataset(string datasetFilename, DatasetChecker datasetChecker, NetworkStructure networkStructure, bool isItInputDataset)
@@ -257,25 +274,52 @@ namespace NN.Eva.Core
 
             Console.WriteLine($"Start dataset \"{datasetFilename}\" cheсking...");
 
+            string errorMessage = "";
+
             bool isCurrentDatasetValid = isItInputDataset ? 
-                                         datasetChecker.CheckInputDataset(datasetFilename, networkStructure) :
-                                         datasetChecker.CheckOutputDataset(datasetFilename, networkStructure);
+                                         datasetChecker.CheckInputDataset(ref errorMessage, datasetFilename, networkStructure) :
+                                         datasetChecker.CheckOutputDataset(ref errorMessage, datasetFilename, networkStructure);
 
             if (isCurrentDatasetValid)
             {
                 Console.ForegroundColor = ConsoleColor.Green;
-                Console.WriteLine($"\"{datasetFilename}\" is valid.");
+                Console.WriteLine($"\"{datasetFilename}\" is valid for inputed network structure!");
             }
             else
             {
                 isValid = false;
                 Console.ForegroundColor = ConsoleColor.Red;
                 Console.WriteLine($"\"{datasetFilename}\" - is invalid!");
+                Console.WriteLine(errorMessage);
             }
 
             Console.ForegroundColor = ConsoleColor.Gray;
 
             return isValid;
+        }
+
+        public void CheckDatasetsVectorsSimilarity(string inputDatasetFilename)
+        {
+            Console.WriteLine("Starting dataset's vectors similarity...");
+
+            DatasetChecker datasetChecker = new DatasetChecker();
+
+            try
+            {
+                string reportFilename = "report_dataset_" + DateTime.Now.Ticks + ".png";
+
+                datasetChecker.DoSimilarityGraphicReport(inputDatasetFilename, reportFilename);
+
+                Console.ForegroundColor = ConsoleColor.Green;
+                Console.WriteLine("Report created successfully!\nFilename: " + reportFilename);
+            }
+            catch
+            {
+                Console.ForegroundColor = ConsoleColor.Red;
+                Console.WriteLine("Error in report creating!");
+            }
+
+            Console.ForegroundColor = ConsoleColor.Gray;
         }
 
         #endregion

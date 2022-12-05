@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using NN.Eva.Models;
 using NN.Eva.Test.SimulationExamples;
 
@@ -48,7 +49,8 @@ namespace NN.Eva.Test
                 //                   true,
                 //                   ProcessPriorityClass.Normal,
                 //                   true);
-                //serviceEvaNN.CalculateStatistic(trainingConfig);
+                serviceEvaNN.CheckDatasetsVectorsSimilarity(trainConfig.InputDatasetFilename);
+                //serviceEvaNN.CalculateStatistic(trainConfig);
             }
         }
 
