@@ -306,12 +306,12 @@ namespace NN.Eva.Core
 
             try
             {
-                string reportFilename = "report_dataset_" + DateTime.Now.Ticks + ".png";
+                string reportName = "report_dataset_" + DateTime.Now.Ticks;
 
-                datasetChecker.DoSimilarityGraphicReport(inputDatasetFilename, reportFilename);
+                datasetChecker.DoSimilarityGraphicReport(inputDatasetFilename, reportName);
 
                 Console.ForegroundColor = ConsoleColor.Green;
-                Console.WriteLine("Report created successfully!\nFilename: " + reportFilename);
+                Console.WriteLine("Report created successfully!\nFilename: " + reportName + ".zip");
             }
             catch
             {

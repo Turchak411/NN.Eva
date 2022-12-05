@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
+using System.IO.Compression;
 using System.Linq;
 
 namespace NN.Eva.Services
@@ -83,32 +84,32 @@ namespace NN.Eva.Services
             return true;
         }
 
-        public void DoSimilarityGraphicReport(string inputSetFilepath, string filePath)
+        public void DoSimilarityGraphicReport(string inputSetFilepath, string reportFilename)
         {
             // Calculate all distances for input set:
-            List<double[]> inputSet = FileManager.LoadTrainingDataset(inputSetFilepath);
+            List<double[]> inputSets = FileManager.LoadTrainingDataset(inputSetFilepath);
             List<double> avgDistances = new List<double>();
 
-            for(int i = 0; i < inputSet.Count; i++)
+            for(int i = 0; i < inputSets.Count; i++)
             {
                 double avgDistance = 5.0;
 
-                for (int k = 0; k < inputSet.Count; k++)
+                for (int k = 0; k < inputSets.Count; k++)
                 {
                     if (i != k)
                     {
-                        avgDistance += GetSimilarity(inputSet[i], inputSet[k]);
+                        avgDistance += GetSimilarity(inputSets[i], inputSets[k]);
                     }
                 }
 
-                avgDistances.Add(avgDistance / (inputSet.Count - 1));
+                avgDistances.Add(avgDistance / (inputSets.Count - 1));
             }
 
             // Define bottom line (value) for graphic:
             double botValue = avgDistances.Max();
 
-            // Drawing result image:
-            DrawReportImage(filePath, avgDistances, botValue, 75);
+            // Creating the report file:
+            CreateReportFile(reportFilename, inputSets, avgDistances, botValue, 75);
         }
 
         private double GetSimilarity(double[] set0, double[] set1)
@@ -127,15 +128,40 @@ namespace NN.Eva.Services
             return upValue / (Math.Sqrt(downValueLeft) * Math.Sqrt(downValueRight));
         }
 
-        private void DrawReportImage(string imgPath, List<double> avgDistances, double botValue, int imgHeight = 75)
+        private void CreateReportFile(string reportFilename, List<double[]> inputSets, List<double> avgDistances, double botValue, int imgHeight)
+        {
+            if(Directory.Exists(reportFilename))
+            {
+                Directory.Delete(reportFilename);
+            }
+
+            Directory.CreateDirectory(reportFilename);
+
+            // Drawing result image:
+            CreateVisualisationFiles(Path.Combine(reportFilename, reportFilename), inputSets, avgDistances, botValue, 75);
+
+            // Zipping all files:
+            ZipFile.CreateFromDirectory(reportFilename, reportFilename + ".zip");
+            Directory.Delete(reportFilename, true);
+        }
+
+        private void CreateVisualisationFiles(string generalFilePath, List<double[]> inputSets, List<double> avgDistances, double botValue, int imgHeight = 75)
         {
             // Create empty image:
             Bitmap bitmapImg = new Bitmap(avgDistances.Count, imgHeight);
+
+            // For metafile:
+            List<Tuple<double[], int>> dangerCloseStatusSets = new List<Tuple<double[], int>>();
 
             // Setting pixels:
             for (int x = 0; x < bitmapImg.Width; x++)
             {
                 double percent = avgDistances[x] / botValue;
+
+                if (percent < 0.5)
+                {
+                    dangerCloseStatusSets.Add(Tuple.Create(inputSets[x], x));
+                }
 
                 Color columnColor = Color.FromArgb((int)(255 * (1 - percent)), (int)(255 * percent), 0);
 
@@ -148,11 +174,40 @@ namespace NN.Eva.Services
             // Saving img:
             using (MemoryStream memory = new MemoryStream())
             {
-                using (FileStream fs = new FileStream(imgPath, FileMode.Create, FileAccess.ReadWrite))
+                using (FileStream fs = new FileStream(generalFilePath + ".png", FileMode.Create, FileAccess.ReadWrite))
                 {
                     bitmapImg.Save(memory, ImageFormat.Png);
                     byte[] bytes = memory.ToArray();
                     fs.Write(bytes, 0, bytes.Length);
+                }
+            }
+
+            CreateMetafile(generalFilePath, dangerCloseStatusSets);
+        }
+
+        private void CreateMetafile(string generalFilePath, List<Tuple<double[], int>> dangerCloseStatusSets)
+        {
+            string filePath = generalFilePath + ".txt";
+
+            WriteStatusSetToMeta(filePath, "=============\nDangerously sets:\n=============\n", dangerCloseStatusSets);
+        }
+
+        private void WriteStatusSetToMeta(string filePath, string segmentMsg, List<Tuple<double[], int>> statusSets)
+        {
+            using (StreamWriter fileWriter = new StreamWriter(filePath, true))
+            {
+                fileWriter.WriteLine(segmentMsg);
+
+                foreach(Tuple<double[], int> row in statusSets)
+                {
+                    fileWriter.Write($"[Row number: {row.Item2}]\t");
+
+                    foreach (double rowValue in row.Item1)
+                    {
+                        fileWriter.Write(" " + rowValue);
+                    }
+
+                    fileWriter.WriteLine();
                 }
             }
         }
