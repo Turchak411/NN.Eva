@@ -16,9 +16,9 @@ namespace NN.Eva
         /// <summary>
         /// Creating FeedForward - Neural Network
         /// </summary>
-        /// <param name="memoryFolderName"></param>
-        /// <param name="networkStructure"></param>
-        /// <param name="testDatasetPath"></param>
+        /// <param name="memoryFolderName">Folder with Network's memory</param>
+        /// <param name="networkStructure">Network's structure</param>
+        /// <param name="testDatasetPath">Filepath to dataset to test memory</param>
         /// <returns>Returns success result of network creating</returns>
         public bool CreateNetwork(string memoryFolderName,
                                   NetworkStructure networkStructure,
@@ -117,7 +117,7 @@ namespace NN.Eva
         }
 
         /// <summary>
-        /// Handling double-vector data
+        /// Handling vector data
         /// </summary>
         /// <param name="data"></param>
         /// <returns>Vector-classes</returns>

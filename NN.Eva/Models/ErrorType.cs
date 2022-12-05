@@ -9,11 +9,13 @@ namespace NN.Eva.Models
         MemoryGenerateError,
         SetMissing,
         TrainError,
+        HandleError,
         DBConnectionError,
         DBInsertError,
         DBDeleteError,
         DBMemoryLoadError,
         NonEqualsInputLengths,
-        OperationWithNonexistentNetwork
+        OperationWithNonexistentNetwork,
+        NoTrainingConfiguration
     }
 }

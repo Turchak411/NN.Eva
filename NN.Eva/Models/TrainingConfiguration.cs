@@ -1,18 +1,21 @@
 ﻿
 namespace NN.Eva.Models
 {
-    public class TrainingConfiguration
+    public class TrainingConfiguration : TrainingConfigurationLite
     {
+        /// <summary>
+        /// Training algorithm type
+        /// </summary>
         public TrainingAlgorithmType TrainingAlgorithmType { get; set; }
 
-        public int StartIteration { get; set; }
-
-        public int EndIteration { get; set; }
-
+        /// <summary>
+        /// Filepath to input dataset
+        /// </summary>
         public string InputDatasetFilename { get; set; }
 
+        /// <summary>
+        /// Filepath to output dataset
+        /// </summary>
         public string OutputDatasetFilename { get; set; }
-
-        public string MemoryFolder { get; set; }
     }
 }
