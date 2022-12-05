@@ -1,7 +1,6 @@
 ﻿using System;
-using System.Diagnostics;
+using System.Collections.Generic;
 using NN.Eva.Models;
-using NN.Eva.Test.SimulationExamples;
 
 namespace NN.Eva.Test
 {
@@ -9,56 +8,47 @@ namespace NN.Eva.Test
     {
         static void Main(string[] args)
         {
-            // Network testing:
-            //TestServiceNN();
-
-            // RL-Agent testing:
-            TestServiceRL();
-
-            Console.WriteLine("Done!");
-            Console.ReadKey();
-        }
-
-        private static void TestServiceNN()
-        {
             ServiceEvaNN serviceEvaNN = new ServiceEvaNN();
 
             NetworkStructure netStructure = new NetworkStructure
             {
-                InputVectorLength = 10,
-                NeuronsByLayers = new[] { 170, 160, 140, 70, 2 },
-                Alpha = 5
+                InputVectorLength = 2,
+                NeuronsByLayers = new[] { 10, 1 },
+                Alpha = 1
             };
 
-            TrainingConfiguration trainingConfig = new TrainingConfiguration
+            TrainingConfiguration trainConfig = new TrainingConfiguration
             {
-                TrainingAlgorithmType = TrainingAlgorithmType.RProp,
+                TrainingAlgorithmType = TrainingAlgorithmType.BProp,
                 StartIteration = 0,
-                EndIteration = 10,
+                EndIteration = 1_000_000,
                 InputDatasetFilename = "TrainingSets//inputSets.txt",
                 OutputDatasetFilename = "TrainingSets//outputSets.txt",
                 MemoryFolder = "Memory"
             };
 
-            bool creatingSucceed = serviceEvaNN.CreateNetwork(trainingConfig.MemoryFolder, netStructure);
+            bool creatingSucceed = serviceEvaNN.CreateNetwork(trainConfig.MemoryFolder, netStructure);
 
             if (creatingSucceed)
             {
-                serviceEvaNN.CalculateStatistic(trainingConfig);
-                //serviceEvaNN.Train(trainingConfig,
+                //serviceEvaNN.CalculateStatistic(trainConfig);
+                //serviceEvaNN.Train(trainConfig,
                 //                   true,
                 //                   ProcessPriorityClass.Normal,
                 //                   true);
-                serviceEvaNN.CheckDatasetsVectorsSimilarity(trainConfig.InputDatasetFilename);
-                //serviceEvaNN.CalculateStatistic(trainConfig);
+                ////serviceEvaNN.CheckDatasetsVectorsSimilarity(trainConfig.InputDatasetFilename);
             }
-        }
 
-        private static void TestServiceRL()
-        {
-            // Black Jack simulation example:
-            SimulationBlackJack simulationBlackJack = new SimulationBlackJack();
-            simulationBlackJack.StartTraining();
+            List<double> resultList = new List<double>();
+
+            for (int i = 0; i <= 100; i += 10)
+            {
+                double[] testData = new double[2] { -0.96, (double)i / 100 };
+                resultList.Add(Math.Round(serviceEvaNN.Handle(testData)[0], 3));
+            }
+
+            Console.WriteLine("Done!");
+            Console.ReadKey();
         }
     }
 }
