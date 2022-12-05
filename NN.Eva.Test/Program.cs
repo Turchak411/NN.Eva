@@ -1,12 +1,25 @@
 ﻿using System;
 using System.Diagnostics;
 using NN.Eva.Models;
+using NN.Eva.Test.SimulationExamples;
 
 namespace NN.Eva.Test
 {
     class Program
     {
         static void Main(string[] args)
+        {
+            // Network testing:
+            //TestServiceNN();
+
+            // RL-Agent testing:
+            TestServiceRL();
+
+            Console.WriteLine("Done!");
+            Console.ReadKey();
+        }
+
+        private static void TestServiceNN()
         {
             ServiceEvaNN serviceEvaNN = new ServiceEvaNN();
 
@@ -17,7 +30,7 @@ namespace NN.Eva.Test
                 Alpha = 5
             };
 
-            TrainingConfiguration trainConfig = new TrainingConfiguration
+            TrainingConfiguration trainingConfig = new TrainingConfiguration
             {
                 TrainingAlgorithmType = TrainingAlgorithmType.RProp,
                 StartIteration = 0,
@@ -27,21 +40,25 @@ namespace NN.Eva.Test
                 MemoryFolder = "Memory"
             };
 
-            bool creatingSucceed = serviceEvaNN.CreateNetwork(trainConfig.MemoryFolder, netStructure);
+            bool creatingSucceed = serviceEvaNN.CreateNetwork(trainingConfig.MemoryFolder, netStructure);
 
             if (creatingSucceed)
             {
-                //serviceEvaNN.CalculateStatistic(trainConfig);
-                //serviceEvaNN.Train(trainConfig,
+                serviceEvaNN.CalculateStatistic(trainingConfig);
+                //serviceEvaNN.Train(trainingConfig,
                 //                   true,
                 //                   ProcessPriorityClass.Normal,
                 //                   true);
                 serviceEvaNN.CheckDatasetsVectorsSimilarity(trainConfig.InputDatasetFilename);
                 //serviceEvaNN.CalculateStatistic(trainConfig);
             }
+        }
 
-            Console.WriteLine("Done!");
-            Console.ReadKey();
+        private static void TestServiceRL()
+        {
+            // Black Jack simulation example:
+            SimulationBlackJack simulationBlackJack = new SimulationBlackJack();
+            simulationBlackJack.StartTraining();
         }
     }
 }
