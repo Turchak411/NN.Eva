@@ -39,6 +39,14 @@ namespace NN.Eva.Test
                 ////serviceEvaNN.CheckDatasetsVectorsSimilarity(trainConfig.InputDatasetFilename);
             }
 
+            List<double> resultList = new List<double>();
+
+            for (int i = 0; i <= 100; i += 10)
+            {
+                double[] testData = new double[2] { -0.96, (double)i / 100 };
+                resultList.Add(Math.Round(serviceEvaNN.Handle(testData)[0], 3));
+            }
+
             Console.WriteLine("Done!");
             Console.ReadKey();
         }
