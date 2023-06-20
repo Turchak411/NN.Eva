@@ -512,7 +512,7 @@ namespace NN.Eva.Core
 
             // Parsing userID:
             string[] memoryFolderPathArray = memoryFolder.Split('/');
-            Guid userId;
+            Guid userId = Guid.Empty;
 
             for (int i = 0; i < memoryFolderPathArray.Length; i++)
             {
