@@ -1,7 +1,6 @@
 ﻿using System;
 using System.IO;
 using System.Collections.Generic;
-using ConsoleProgressBar;
 using NN.Eva.Models;
 
 namespace NN.Eva.Services.WeightsGenerator
@@ -71,44 +70,40 @@ namespace NN.Eva.Services.WeightsGenerator
             double offsetValue = 0.5;
             double offsetWeight = -1;
 
-            using (var progress = new ProgressBar())
+            int iteration = 0;
+            int iterationsTotal = CalcTotalIterations(netScheme);
+
+            using (StreamWriter fileWriter = new StreamWriter(filePath))
             {
-                int iteration = 0;
-                int iterationsTotal = CalcTotalIterations(netScheme);
+                // Writing metadata of network:
+                fileWriter.Write(inputVectorLength);
 
-                using (StreamWriter fileWriter = new StreamWriter(filePath))
+                for (int i = 0; i < netScheme.Length; i++)
                 {
-                    // Writing metadata of network:
-                    fileWriter.Write(inputVectorLength);
+                    fileWriter.Write(" " + netScheme[i]);
+                }
 
-                    for (int i = 0; i < netScheme.Length; i++)
+                fileWriter.WriteLine();
+
+                // Writing memory:
+                for (int i = 0; i < netScheme.Length; i++)
+                {
+                    for (int k = 0; k < netScheme[i]; k++)
                     {
-                        fileWriter.Write(" " + netScheme[i]);
-                    }
+                        fileWriter.Write("layer_{0} neuron_{1} {2} {3}", i, k,
+                                                                    offsetValue.ToString().Replace('.', ','),
+                                                                    offsetWeight.ToString().Replace('.', ','));
 
-                    fileWriter.WriteLine();
-
-                    // Writing memory:
-                    for (int i = 0; i < netScheme.Length; i++)
-                    {
-                        for (int k = 0; k < netScheme[i]; k++)
+                        if (i == 0)
                         {
-                            fileWriter.Write("layer_{0} neuron_{1} {2} {3}", i, k, 
-                                                                        offsetValue.ToString().Replace('.', ','),
-                                                                        offsetWeight.ToString().Replace('.', ','));
-
-                            if (i == 0)
-                            {
-                                GenerateValueRow(fileWriter, inputVectorLength, rnd);
-                            }
-                            else
-                            {
-                                GenerateValueRow(fileWriter, netScheme[i - 1], rnd);
-                            }
-
-                            iteration++;
-                            progress.Report((double)iteration / iterationsTotal);
+                            GenerateValueRow(fileWriter, inputVectorLength, rnd);
                         }
+                        else
+                        {
+                            GenerateValueRow(fileWriter, netScheme[i - 1], rnd);
+                        }
+
+                        iteration++;
                     }
                 }
             }
