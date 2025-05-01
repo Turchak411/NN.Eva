@@ -33,7 +33,7 @@ namespace NN.Eva.Models
             {
                 if (value < 0 || value > 100)
                 {
-                    throw new ArgumentOutOfRangeException(nameof(value), "Значение должно быть от 0 до 100.");
+                    throw new ArgumentOutOfRangeException(nameof(value), "Value can't be below 0 or above 100!");
                 }
 
                 validationSetSize = value;
