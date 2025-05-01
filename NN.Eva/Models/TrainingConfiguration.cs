@@ -1,4 +1,5 @@
-﻿
+﻿using System;
+
 namespace NN.Eva.Models
 {
     public class TrainingConfiguration : TrainingConfigurationLite
@@ -17,5 +18,28 @@ namespace NN.Eva.Models
         /// Filepath to output dataset
         /// </summary>
         public string OutputDatasetFilename { get; set; }
+
+        /// <summary>
+        /// Training set size percent
+        /// Default - 0%
+        /// </summary>
+        public int ValidationSetSize
+        {
+            get
+            {
+                return validationSetSize;
+            }
+            set
+            {
+                if (value < 0 || value > 100)
+                {
+                    throw new ArgumentOutOfRangeException(nameof(value), "Значение должно быть от 0 до 100.");
+                }
+
+                validationSetSize = value;
+            }
+        }
+
+        private int validationSetSize = 0;
     }
 }

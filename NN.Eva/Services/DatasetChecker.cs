@@ -11,9 +11,12 @@ namespace NN.Eva.Services
 {
     public class DatasetChecker
     {
-        public bool CheckInputDataset(ref string errorMessage, string datasetFilepath, NetworkStructure networkStructure)
+        public bool CheckInputDataset(ref string errorMessage, TrainingConfiguration trainConfig, NetworkStructure networkStructure)
         {
-            List<double[]> dataset = FileManager.LoadTrainingDataset(datasetFilepath);
+            (var inputSets_training, var inputSets_validation, var outputSets_training, var outputSets_validation) = FileManager.LoadTrainingDatasetData(trainConfig.InputDatasetFilename, trainConfig.OutputDatasetFilename, trainConfig.ValidationSetSize);
+
+            // Merge training and validationSets:
+            var dataset = (List<double[]>)inputSets_training.Concat(inputSets_validation).ToList();
 
             if (dataset.Count == 0)
             {
@@ -38,9 +41,12 @@ namespace NN.Eva.Services
             return true;
         }
 
-        public bool CheckOutputDataset(ref string errorMessage, string datasetFilepath, NetworkStructure networkStructure)
+        public bool CheckOutputDataset(ref string errorMessage, TrainingConfiguration trainConfig, NetworkStructure networkStructure)
         {
-            List<double[]> dataset = FileManager.LoadTrainingDataset(datasetFilepath);
+            (var inputSets_training, var inputSets_validation, var outputSets_training, var outputSets_validation) = FileManager.LoadTrainingDatasetData(trainConfig.InputDatasetFilename, trainConfig.OutputDatasetFilename, trainConfig.ValidationSetSize);
+
+            // Merge training and validationSets:
+            var dataset = (List<double[]>)outputSets_training.Concat(outputSets_validation).ToList();
 
             if (dataset.Count == 0)
             {
@@ -65,17 +71,20 @@ namespace NN.Eva.Services
             return true;
         }
 
-        public bool CheckTrainingSetsCounts(ref string errorMessage, string inputSetFilepath, string outputSetFilepath)
+        public bool CheckTrainingSetsCounts(ref string errorMessage, TrainingConfiguration trainConfig)
         {
-            List<double[]> inputSet = FileManager.LoadTrainingDataset(inputSetFilepath);
-            List<double[]> outputSet = FileManager.LoadTrainingDataset(outputSetFilepath);
+            (var inputSets_training, var inputSets_validation, var outputSets_training, var outputSets_validation) = FileManager.LoadTrainingDatasetData(trainConfig.InputDatasetFilename, trainConfig.OutputDatasetFilename, trainConfig.ValidationSetSize);
 
-            if (inputSet.Count != outputSet.Count)
+            // Merge training and validationSets:
+            var inputSets = (List<double[]>)inputSets_training.Concat(inputSets_validation).ToList();
+            var outputSets = (List<double[]>)outputSets_training.Concat(outputSets_validation).ToList();
+
+            if (inputSets.Count != outputSets.Count)
             {
                 errorMessage += $"-----------------------------------------\n" +
                                 $"Training dataset's rows count does not equals!\n" +
-                                $"Output dataset has: { inputSet.Count } rows.\n" +
-                                $"Output dataset has: { outputSet.Count } rows.\n" +
+                                $"Output dataset has: { inputSets.Count } rows.\n" +
+                                $"Output dataset has: { outputSets.Count } rows.\n" +
                                 $"-----------------------------------------\n";
                 return false;
             }
@@ -84,13 +93,17 @@ namespace NN.Eva.Services
             return true;
         }
 
-        public void DoSimilarityGraphicReport(string inputSetFilepath, string reportFilename)
+        public void DoSimilarityGraphicReport(TrainingConfiguration trainConfig, string reportFilename)
         {
             // Calculate all distances for input set:
-            List<double[]> inputSets = FileManager.LoadTrainingDataset(inputSetFilepath);
+            (var inputSets_training, var inputSets_validation, var outputSets_training, var outputSets_validation) = FileManager.LoadTrainingDatasetData(trainConfig.InputDatasetFilename, trainConfig.OutputDatasetFilename, trainConfig.ValidationSetSize);
             List<double> avgDistances = new List<double>();
 
-            for(int i = 0; i < inputSets.Count; i++)
+            // Merge training and validationSets:
+            var inputSets = (List<double[]>)inputSets_training.Concat(inputSets_validation).ToList();
+            var outputSets = (List<double[]>)outputSets_training.Concat(outputSets_validation).ToList();
+
+            for (int i = 0; i < inputSets.Count; i++)
             {
                 double avgDistance = 5.0;
 

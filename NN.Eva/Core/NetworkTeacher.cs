@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Threading;
 using NN.Eva.Core.Database;
 using NN.Eva.Models.Database;
+using System.Diagnostics;
 
 namespace NN.Eva.Core
 {
@@ -41,7 +42,7 @@ namespace NN.Eva.Core
                 Logger.LogError(ErrorType.MemoryInitializeError);
                 return;
             }
-                
+
             try
             {
                 // Ицициализация сети по одинаковому шаблону:
@@ -105,12 +106,7 @@ namespace NN.Eva.Core
             return ConsoleColor.Gray;
         }
 
-        /// <summary>
-        /// Printing network's learning statistic
-        /// </summary>
-        /// <param name="trainingConfig"></param>
-        /// <param name="withLogging"></param>
-        public void PrintLearningStatistic(TrainingConfiguration trainingConfig, bool withLogging = false, string elapsedTime = "")
+        private void PrintLearningStatistic(TrainingConfiguration trainingConfig, List<double[]> inputValidationSets, List<double[]> outputValidationSets, bool withLogging = false, string elapsedTime = "")
         {
             Console.WriteLine("Start calculating statistic...");
 
@@ -128,33 +124,15 @@ namespace NN.Eva.Core
             int testPassed = 0;
             int testFailed = 0;
 
-            #region Load data from file
-
-            List<double[]> inputDataSets;
-            List<double[]> outputDataSets;
-
-            try
-            {
-                inputDataSets = FileManager.LoadTrainingDataset(trainingConfig.InputDatasetFilename);
-                outputDataSets = FileManager.LoadTrainingDataset(trainingConfig.OutputDatasetFilename);
-            }
-            catch (Exception ex)
-            {
-                Logger.LogError(ErrorType.SetMissing, ex);
-                return;
-            }
-
-            #endregion
-
-            for (int i = 0; i < inputDataSets.Count; i++)
+            for (int i = 0; i < inputValidationSets.Count; i++)
             {
                 // Получение ответа:
                 string handlingErrorText = "";
-                double[] netResult = _net.Handle(inputDataSets[i], ref handlingErrorText);
+                double[] netResult = _net.Handle(inputValidationSets[i], ref handlingErrorText);
 
                 if (netResult != null)
                 {
-                    if (IsVectorsRoughlyEquals(outputDataSets[i], netResult, 0.3))
+                    if (IsVectorsRoughlyEquals(outputValidationSets[i], netResult, 0.02))
                     {
                         testPassed++;
                     }
@@ -191,7 +169,9 @@ namespace NN.Eva.Core
 
             for(int i = 0; i < sourceVector0.Length; i++)
             {
-                if (controlVector1[i] < sourceVector0[i] - equalsPercent || controlVector1[i] > sourceVector0[i] + equalsPercent)
+                var vectorsDiv = controlVector1[i] > sourceVector0[i] ? controlVector1[i] / sourceVector0[i] : sourceVector0[i] / controlVector1[i];
+
+                if (vectorsDiv > 1.0 + equalsPercent)
                 {
                     return false;
                 }
@@ -241,14 +221,14 @@ namespace NN.Eva.Core
 
         #region Datasets checking
 
-        public bool CheckDatasets(string inputDatasetFilename, string outputDatasetFilename, NetworkStructure networkStructure)
+        public bool CheckDatasets(TrainingConfiguration trainConfig, NetworkStructure networkStructure)
         {
             Console.WriteLine("Start datasets cheсking...");
 
             DatasetChecker datasetChecker = new DatasetChecker();
 
             string errorMessage = "";
-            bool isDatasetsRowsCountEquals = datasetChecker.CheckTrainingSetsCounts(ref errorMessage, inputDatasetFilename, outputDatasetFilename);
+            bool isDatasetsRowsCountEquals = datasetChecker.CheckTrainingSetsCounts(ref errorMessage, trainConfig);
 
             if (isDatasetsRowsCountEquals)
             {
@@ -264,21 +244,23 @@ namespace NN.Eva.Core
 
             Console.ForegroundColor = ConsoleColor.Gray;
 
-            return CheckSingleDataset(inputDatasetFilename, datasetChecker, networkStructure, true) &&
-                   CheckSingleDataset(outputDatasetFilename, datasetChecker, networkStructure, false) && isDatasetsRowsCountEquals;
+            return CheckSingleDataset(trainConfig, datasetChecker, networkStructure, true) &&
+                   CheckSingleDataset(trainConfig, datasetChecker, networkStructure, false) && isDatasetsRowsCountEquals;
         }
 
-        public bool CheckSingleDataset(string datasetFilename, DatasetChecker datasetChecker, NetworkStructure networkStructure, bool isItInputDataset)
+        public bool CheckSingleDataset(TrainingConfiguration trainConfig, DatasetChecker datasetChecker, NetworkStructure networkStructure, bool isItInputDataset)
         {
             bool isValid = true;
+
+            var datasetFilename = isItInputDataset ? trainConfig.InputDatasetFilename : trainConfig.OutputDatasetFilename;
 
             Console.WriteLine($"Start dataset \"{datasetFilename}\" cheсking...");
 
             string errorMessage = "";
 
             bool isCurrentDatasetValid = isItInputDataset ? 
-                                         datasetChecker.CheckInputDataset(ref errorMessage, datasetFilename, networkStructure) :
-                                         datasetChecker.CheckOutputDataset(ref errorMessage, datasetFilename, networkStructure);
+                                         datasetChecker.CheckInputDataset(ref errorMessage, trainConfig, networkStructure) :
+                                         datasetChecker.CheckOutputDataset(ref errorMessage, trainConfig, networkStructure);
 
             if (isCurrentDatasetValid)
             {
@@ -298,7 +280,7 @@ namespace NN.Eva.Core
             return isValid;
         }
 
-        public void CheckDatasetsVectorsSimilarity(string inputDatasetFilename)
+        public void CheckDatasetsVectorsSimilarity(TrainingConfiguration trainConfig)
         {
             Console.WriteLine("Starting dataset's vectors similarity...");
 
@@ -308,7 +290,7 @@ namespace NN.Eva.Core
             {
                 string reportName = "report_dataset_" + DateTime.Now.Ticks;
 
-                datasetChecker.DoSimilarityGraphicReport(inputDatasetFilename, reportName);
+                datasetChecker.DoSimilarityGraphicReport(trainConfig, reportName);
 
                 Console.ForegroundColor = ConsoleColor.Green;
                 Console.WriteLine("Report created successfully!\nFilename: " + reportName + ".zip");
@@ -327,24 +309,30 @@ namespace NN.Eva.Core
         #region Training
 
         /// <summary>
-        /// Обучение сети
+        /// Training network
         /// </summary>
         /// <param name="trainingConfig"></param>
         /// <param name="iterationsToPause"></param>
+        /// <param name="printLearnStatistic"></param>
         /// <param name="unsafeTrainingMode"></param>
-        public void TrainNet(TrainingConfiguration trainingConfig, int iterationsToPause, bool unsafeTrainingMode = false)
+        public void TrainNet(TrainingConfiguration trainingConfig, int iterationsToPause, bool printLearnStatistic = true, bool unsafeTrainingMode = false)
         {
+            // Start process timer:
+            Stopwatch stopWatch = new Stopwatch();
+            stopWatch.Start();
+
             Iteration = trainingConfig.EndIteration;
 
             #region Load data from file
 
-            List<double[]> inputDataSets;
-            List<double[]> outputDataSets;
+            List<double[]> inputDataSets_training;
+            List<double[]> inputDataSets_validation;
+            List<double[]> outputDataSets_training;
+            List<double[]> outputDataSets_validation;
 
             try
             {
-                inputDataSets = FileManager.LoadTrainingDataset(trainingConfig.InputDatasetFilename);
-                outputDataSets = FileManager.LoadTrainingDataset(trainingConfig.OutputDatasetFilename);
+                (inputDataSets_training, inputDataSets_validation, outputDataSets_training, outputDataSets_validation) = FileManager.LoadTrainingDatasetData(trainingConfig.InputDatasetFilename, trainingConfig.OutputDatasetFilename, trainingConfig.ValidationSetSize);
             }
             catch (Exception ex)
             {
@@ -365,8 +353,8 @@ namespace NN.Eva.Core
                     Network = _net,
                     NetworkStructure = _networkStructure,
                     TrainingConfiguration = trainingConfig,
-                    InputDatasets = inputDataSets.ToArray(),
-                    OutputDatasets = outputDataSets.ToArray(),
+                    InputDatasets = inputDataSets_training.ToArray(),
+                    OutputDatasets = outputDataSets_training.ToArray(),
                     SafeTrainingMode = !unsafeTrainingMode
                 };
 
@@ -414,9 +402,22 @@ namespace NN.Eva.Core
                 }
 
                 Console.WriteLine("Training success!");
+
+                // Stopping timer and print spend time in [HH:MM:SS]:
+                stopWatch.Stop();
+                TimeSpan ts = stopWatch.Elapsed;
+
+                string elapsedTime = String.Format("{0:00}:{1:00}:{2:00}", ts.Hours, ts.Minutes, ts.Seconds);
+                Console.WriteLine("Time spend: " + elapsedTime);
+
+                if(printLearnStatistic)
+                {
+                    PrintLearningStatistic(trainingConfig, inputDataSets_validation, outputDataSets_validation, true, elapsedTime);
+                }
             }
             catch (Exception ex)
             {
+                stopWatch.Stop();
                 Logger.LogError(ErrorType.TrainError, ex);
             }
         }

@@ -58,7 +58,7 @@ namespace NN.Eva
         /// <param name="processPriorityClass"></param>
         /// <param name="unsafeTrainingMode"></param>
         /// <param name="iterationsToPause"></param>
-        public void Train(TrainingConfiguration trainingConfiguration, 
+        public void Train(TrainingConfiguration trainingConfiguration,
                           bool printLearnStatistic = false,
                           ProcessPriorityClass processPriorityClass = ProcessPriorityClass.Normal,
                           bool unsafeTrainingMode = false,
@@ -85,33 +85,16 @@ namespace NN.Eva
 
             trainingConfiguration.MemoryFolder = trainingConfiguration.MemoryFolder == "" ? "Memory" : trainingConfiguration.MemoryFolder;
 
-            // Start process timer:
-            Stopwatch stopWatch = new Stopwatch();
-            stopWatch.Start();
-
             // Set the process priority class:
             Process thisProc = Process.GetCurrentProcess();
             thisProc.PriorityClass = processPriorityClass;
 
-            if (_networkTeacher.CheckMemory(trainingConfiguration.MemoryFolder) && _networkTeacher.CheckDatasets(trainingConfiguration.InputDatasetFilename, trainingConfiguration.OutputDatasetFilename, _networkStructure))
+            if (_networkTeacher.CheckMemory(trainingConfiguration.MemoryFolder) && _networkTeacher.CheckDatasets(trainingConfiguration, _networkStructure))
             {
-                _networkTeacher.TrainNet(trainingConfiguration, iterationsToPause, unsafeTrainingMode);
-
-                // Stopping timer and print spend time in [HH:MM:SS]:
-                stopWatch.Stop();
-                TimeSpan ts = stopWatch.Elapsed;
-
-                string elapsedTime = String.Format("{0:00}:{1:00}:{2:00}", ts.Hours, ts.Minutes, ts.Seconds);
-                Console.WriteLine("Time spend: " + elapsedTime);
-
-                if (printLearnStatistic)
-                {
-                    _networkTeacher.PrintLearningStatistic(trainingConfiguration, true, elapsedTime);
-                }
+                _networkTeacher.TrainNet(trainingConfiguration, iterationsToPause, printLearnStatistic, unsafeTrainingMode);
             }
             else
             {
-                stopWatch.Stop();
                 Console.WriteLine("Training failed!");
             }
         }
@@ -139,7 +122,11 @@ namespace NN.Eva
             }
         }
 
-        public void CalculateStatistic(TrainingConfiguration trainingConfig)
+        /// <summary>
+        /// Checking datasets vector similarity
+        /// </summary>
+        /// <param name="trainConfig"></param>
+        public void CheckDatasetsVectorsSimilarity(TrainingConfiguration trainConfig)
         {
             if (_networkTeacher == null)
             {
@@ -147,18 +134,7 @@ namespace NN.Eva
                 return;
             }
 
-            _networkTeacher.PrintLearningStatistic(trainingConfig, true);
-        }
-
-        public void CheckDatasetsVectorsSimilarity(string inputDatasetFilename)
-        {
-            if (_networkTeacher == null)
-            {
-                Logger.LogError(ErrorType.OperationWithNonexistentNetwork, "Calculate statistic failed!");
-                return;
-            }
-
-            _networkTeacher.CheckDatasetsVectorsSimilarity(inputDatasetFilename);
+            _networkTeacher.CheckDatasetsVectorsSimilarity(trainConfig);
         }
 
         /// <summary>

@@ -3,14 +3,14 @@
   <PropertyGroup>
     <TargetFrameworks>netstandard2.0;net6.0</TargetFrameworks>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <Version>1.0.3.4</Version>
+    <Version>1.0.3.5</Version>
     <Description>Library of FeedForward - Neural Network named Eva.</Description>
     <Authors>Turchak Alexander</Authors>
     <PackageProjectUrl>https://github.com/Turchak411/NN.Eva</PackageProjectUrl>
     <PackageTags>AI, Artificial Intelligence, ML, MachineLearning, NN, NeuralNetworks, FeedForwad NeuralNetwork</PackageTags>
     <RepositoryUrl>https://github.com/Turchak411/NN.Eva</RepositoryUrl>
-    <AssemblyVersion>1.0.3.4</AssemblyVersion>
-    <FileVersion>1.0.3.4</FileVersion>
+    <AssemblyVersion>1.0.3.5</AssemblyVersion>
+    <FileVersion>1.0.3.5</FileVersion>
   </PropertyGroup>
 
   <ItemGroup>

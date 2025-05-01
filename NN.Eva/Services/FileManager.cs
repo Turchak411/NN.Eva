@@ -371,15 +371,27 @@ namespace NN.Eva.Services
         }
 
         /// <summary>
-        /// Loading training dataset
+        /// Loading training dataset data
         /// </summary>
-        /// <param name="path"></param>
+        /// <param name="pathInputSets"></param>
+        /// <param name="pathOutputSets"></param>
+        /// <param name="validationSetSizePercent"></param>
         /// <returns></returns>
-        public static List<double[]> LoadTrainingDataset(string path)
+        public static Tuple<List<double[]>, List<double[]>, List<double[]>, List<double[]>> LoadTrainingDatasetData(string pathInputSets, string pathOutputSets, int validationSetSizePercent)
         {
-            List<double[]> sets = new List<double[]>();
+            // Load all input sets:
+            var inputSetFull = LoadTrainingSets(pathInputSets);
+            var outputSetFull = LoadTrainingSets(pathOutputSets);
 
-            using (StreamReader fileReader = new StreamReader(path))
+            // Getting training sets and validation sets from training sets:
+            return SplitTrainingSets(inputSetFull, outputSetFull, validationSetSizePercent);
+        }
+
+        private static List<double[]> LoadTrainingSets(string path)
+        {
+            var sets = new List<double[]>();
+
+            using (var fileReader = new StreamReader(path))
             {
                 while (!fileReader.EndOfStream)
                 {
@@ -396,6 +408,37 @@ namespace NN.Eva.Services
             }
 
             return sets;
+        }
+
+        private static Tuple<List<double[]>, List<double[]>, List<double[]>, List<double[]>> SplitTrainingSets(List<double[]> inputSets, List<double[]> outputSets, int validationSetSizePercent)
+        {
+            var rndGenerator = new Random((int)DateTime.Now.Ticks);
+            var validationSetsCount = Convert.ToInt32(inputSets.Count / 100.0 * validationSetSizePercent);
+
+            var inputSets_validation = new List<double[]>();
+            var outputSets_validation = new List<double[]>();
+
+            var alreadyPickedIndexes = new List<int>();
+
+            for (int i = 0; i < validationSetsCount; i++)
+            {
+                // Generating not picked yet index:
+                int rndSetIndex = -1;
+
+                while(!alreadyPickedIndexes.Contains(rndSetIndex))
+                {
+                    rndSetIndex = rndGenerator.Next(inputSets.Count);
+                    alreadyPickedIndexes.Add(rndSetIndex);
+                }
+
+                inputSets_validation.Add(inputSets[rndSetIndex]);
+                inputSets.RemoveAt(rndSetIndex);
+                outputSets_validation.Add(outputSets[rndSetIndex]);
+                outputSets.RemoveAt(rndSetIndex);
+            }
+
+            // In input sets - training sets part
+            return Tuple.Create(inputSets, inputSets_validation, outputSets, outputSets_validation);
         }
     }
 }
